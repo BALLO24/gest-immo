@@ -7,10 +7,6 @@ const minioClient = require('../config/minio');
   try {
     const { type, ...habitationData } = req.body;
     const bucketName = process.env.MINIO_BUCKET;
-
-    console.log("body files", req.files);
-    console.log("bucket", bucketName);
-
     // Vérifie que le bucket existe
     const bucketExists = await minioClient.bucketExists(bucketName);
     if (!bucketExists) {
@@ -20,7 +16,7 @@ const minioClient = require('../config/minio');
     // Upload des images dans MinIO
     const imageFileNames = [];
 
-    // ⚠️ Certains middlewares multer renvoient req.files directement comme tableau
+    // Certains middlewares multer renvoient req.files directement comme tableau
     const files = req.files?.images || req.files || [];
 
     for (const file of files) {
@@ -146,7 +142,7 @@ module.exports.getAllHabitations = async (req, res) => {
       if (f.energieSecours && f.energieSecours !== "tous") critere.energieSecours = f.energieSecours;
       if(f.toiletteInterne && f.toiletteInterne !== "tous") critere.toiletteInterne=f.toiletteInterne;
       if (f.documentTerrain && f.documentTerrain !== "tous") critere.documentTerrain = f.documentTerrain;
-
+      if(f.hot) critere.hot = f.hot;
       return critere;
     }
     const villeSelected=filtre.villeSelected
@@ -184,3 +180,58 @@ module.exports.getAllHabitations = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error });
   }
 }
+
+module.exports.deleteHabitation = async (req, res) => {
+  try {
+    const habitationId = req.params.id;
+    const habitation = await Habitation.findById(habitationId);
+    if (!habitation) {
+      return res.status(404).json({ message: "Habitation non trouvée" });
+    }
+    // Supprimer les images de MinIO
+    const bucketName = process.env.MINIO_BUCKET;  
+    for (const fileName of habitation.images) {
+      await minioClient.removeObject(bucketName, fileName);
+    }
+    await Habitation.findByIdAndDelete(habitationId);
+    res.status(200).json({ message: "Habitation supprimée avec succès" });
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l'habitation:", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+}
+
+// Récupérer les habitations d'une agence
+module.exports.getHabitationsByAgence = async (req, res) => {
+  try {
+    const agenceId = req.params.agenceId;
+    const bucketName = process.env.MINIO_BUCKET;
+    const habitations = await Habitation.find({ agence: agenceId }).populate({
+      path:"quartier",
+      populate:{
+        path:"ville",
+      }
+    }).limit(0).lean();
+
+    const habitationsAvecUrls = await Promise.all(
+      habitations.map(async (hab) => {
+        const habObj = hab; 
+        if (habObj.images && habObj.images.length > 0) {
+          habObj.images = await Promise.all(
+            habObj.images.map(async (fileName) => {
+              const url = await minioClient.presignedGetObject(bucketName, fileName, 60 * 60);  
+              return url;
+            })
+          );
+        }
+        return habObj;
+      })
+    );
+    res.status(200).json({ habitations: habitationsAvecUrls });
+  }
+  catch (error) {
+    console.error("Erreur lors de la récupération des habitations par agence:", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+

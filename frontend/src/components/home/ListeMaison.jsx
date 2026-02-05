@@ -24,25 +24,58 @@ export default function ListeMaisons() {
   }, []);
 
   return (
-    <section className="bg-maliSand/30 py-16 px-6 sm:px-12">
-      <h2 className="text-3xl font-bold text-center text-maliGreen mb-10">
+  <>
+<section className="bg-maliSand/20 py-10 px-4 sm:px-8 lg:px-12">
+  <div className="container mx-auto max-w-7xl">
+    {/* Titre avec design centré */}
+    <div className="flex flex-col items-center mb-8 space-y-2">
+      <h2 className="text-4xl sm:text-4xl font-extrabold text-center text-maliGreen tracking-tight">
         Nos <span className="text-maliOrange">meilleures offres</span>
       </h2>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 justify-items-center">
-            {habitations.map((habitation) => {
-              switch (habitation.__t) {
-                case 'maison':
-                  return <MaisonCard key={habitation._id} maison={habitation} />;
-                case 'appartement':
-                  return <AppartementCard key={habitation._id} appartement={habitation} typePaiementAppart="journalier"/>;
-                case 'magasin':
-                  return <MagasinCard key={habitation._id} magasin={habitation}/>
-                default:
-                  return null;
-              }
-            })}
+      <div className="flex gap-1">
+        <span className="w-8 h-1 bg-maliOrange rounded-full"></span>
+        <span className="w-2 h-1 bg-maliGreen rounded-full"></span>
       </div>
-    </section>
-  );
+    </div>
+
+    {/* Grille de cartes parfaitement centrée */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center place-content-center">
+      {habitations.map((habitation) => (
+        <div 
+          key={habitation._id} 
+          className="w-full flex justify-center "
+        >
+          {(() => {
+            switch (habitation.__t) {
+              case 'maison':
+                return <MaisonCard maison={habitation} />;
+              case 'appartement':
+                return (
+                  <AppartementCard 
+                    appartement={habitation} 
+                    typePaiementAppart="journalier" 
+                  />
+                );
+              case 'magasin':
+                return <MagasinCard magasin={habitation} />;
+              default:
+                return null;
+            }
+          })()}
+        </div>
+      ))}
+    </div>
+
+    {/* Optionnel : Bouton "Voir plus" si tu as beaucoup de biens */}
+    {habitations.length > 0 && (
+      <div className="mt-16 text-center">
+        <button className="px-8 py-3 bg-transparent border-2 border-maliGreen text-maliGreen font-bold rounded-full hover:bg-maliGreen hover:text-white transition-all duration-300">
+          Découvrir toutes les offres
+        </button>
+      </div>
+    )}
+  </div>
+</section>
+</>
+);
 }

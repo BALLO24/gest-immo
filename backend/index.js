@@ -1,41 +1,41 @@
-const express=require("express");
-const mongoose =require('./config/db');
-const bodyParser = require("body-parser");
-const dotenv=require("dotenv");
+const express = require("express");
 const path = require('path');
-const cors=require("cors");
-const habitationRoutes=require("./route/habitation.route");
-const villeRoutes=require("./route/ville.route");
-const quartierRoutes=require("./route/quartier.route");
+const dotenv = require("dotenv");
 
-const app=express();
-// Load .env from backend folder explicitly so env vars are available
+// Configuration dotenv AVANT les imports de routes si elles utilisent des variables d'env
 dotenv.config({ path: path.resolve(__dirname, './.env') });
-const PORT=process.env.PORT;
-// const allowedOrigins = ["http://localhost:5173"];
 
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Requete bloqué par CORS"));
-//     }
-//   },
-//   credentials: true,
-// }));
+const mongoose = require('./config/db');
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
+// Imports des routes
+const habitationRoutes = require("./route/habitation.route");
+const agencesRoutes = require("./route/agence.router");
+const villeRoutes = require("./route/ville.route");
+const quartierRoutes = require("./route/quartier.route");
+const authRoutes = require("./route/auth.route");
+const { authenticateToken, authorizeRoles } = require("./middleware/auth");
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// --- MIDDLEWARES DE BASE ---
+app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(cors({
-    origin:true,
-    credentials:true,
-    
-}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
+
+
+
+// Routes Publiques
+app.use("/api/auth", authRoutes); 
+app.use("/api/quartiers", quartierRoutes); // Public ? Sinon ajoute authenticateToken
+
+// Routes Protégées (Ordre : Auth -> Role -> Route)
 app.use("/api/habitations", habitationRoutes);
+app.use("/api/agences", agencesRoutes);
 app.use("/api/villes", villeRoutes);
-app.use("/api/quartiers",quartierRoutes);
 
-app.listen(PORT,"0.0.0.0",()=>console.log(`Le serveur express tourne sur le port : ${PORT}`)
+app.listen(PORT, "0.0.0.0", () => 
+  console.log(`Le serveur tourne sur : http://localhost:${PORT}`)
 );

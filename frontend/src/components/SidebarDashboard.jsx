@@ -4,9 +4,14 @@ import {
   Settings,
   LogOut,
   } from "lucide-react";
-  import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+  
 const SidebarDashboard = () => {
-    function SidebarItem({ icon, text, active,to }) {
+  const navigate = useNavigate();
+  function SidebarItem({ icon, text, active, to }) {
+      
+    
   return (
    <Link to={to}
       className={`flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition ${
@@ -21,8 +26,13 @@ const SidebarDashboard = () => {
 
   );
 }
-
-  return (
+  const logout = () => {        
+            localStorage.removeItem("authToken");
+            ///localStorage.removeItem("user");
+            navigate("/");
+          }
+        return (
+    
       <aside className="w-64 bg-gray-800/90 backdrop-blur-sm p-6 hidden md:flex flex-col justify-between min-h-screen">
         <div>
           <h1 className="text-2xl font-bold mb-8 text-orange-500">
@@ -30,15 +40,17 @@ const SidebarDashboard = () => {
           </h1>
           <nav className="space-y-3">
             <SidebarItem icon={<Home size={18} />} text="Dashboard" to="./" active />
-            <SidebarItem icon={<Home size={18} />} text="Habitations" to="./habitations"/>
+            <SidebarItem icon={<Home size={18} />} text="Habitations" to="./habitations" />
+            <SidebarItem icon={<Home size={18} />} text="Agences" to="./agences" />
             <SidebarItem icon={<Home size={18} />} text="Ville" to="./villes"/>
             <SidebarItem icon={<Home size={18} />} text="Quartier" to="./quartiers"/>
             <SidebarItem icon={<Users size={18} />} text="Utilisateurs" />
             <SidebarItem icon={<Settings size={18} />} text="Paramètres" />
           </nav>
         </div>
-        <button className="flex items-center gap-2 mt-10 text-white/80 hover:text-orange-500 transition">
-          <LogOut size={18} />
+        <button className="flex items-center gap-2 mt-10 text-white/80 hover:text-orange-500 transition"
+                onClick={()=>logout()}>
+          <LogOut size={18}/>
           Déconnexion
         </button>
       </aside>

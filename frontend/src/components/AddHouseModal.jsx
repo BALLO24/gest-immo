@@ -19,9 +19,10 @@ import {
   Flame,
 } from "lucide-react";
 
-export default function AddHouseModal({ isOpen, onClose, onSuccess }) {
+export default function AddHouseModal({ isOpen, onClose, onSuccess,agenceId=null }) {
   const [form, setForm] = useState({
     titre: "",
+    agence: agenceId || "",
     quartier: "",
     aLouer:true,
     prix: "",
@@ -46,11 +47,13 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess }) {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  const [agences, setAgences] = useState([]);
   const [villes, setVilles] = useState([]);
   const [quartiers, setQuartiers] = useState([]);
   const [villeSelected, setVilleSelected] = useState("");
 
   useEffect(() => {
+    fetchAgences();
     fetchVilles();
     fetchQuartiers();
   }, []);
@@ -70,6 +73,16 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess }) {
       setQuartiers(data);
     } catch (err) {
       console.error("Erreur récupération quartiers:", err);
+    }
+  };
+
+  const fetchAgences = async () => {
+    try {
+      const data = await API.getAllAgences();
+      setAgences(data);
+    }
+    catch (err) {
+      console.error("Erreur récupération agences:", err);
     }
   };
 
@@ -102,6 +115,7 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess }) {
     }
 
     const fd = new FormData();
+    fd.append("agence", form.agence);
     fd.append("type", "maison");
     fd.append("titre", form.titre);
     fd.append("quartier", form.quartier);
@@ -129,6 +143,7 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess }) {
       if (response) {
         onSuccess("Maison ajoutée avec succès !");
         setForm({
+          agence: "",
           titre: "",
           quartier: "",
           prix: "",
@@ -178,6 +193,23 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess }) {
           {error && <div className="col-span-2 text-sm bg-red-600/20 text-red-300 px-3 py-2 rounded">{error}</div>}
           {success && <div className="col-span-2 text-sm bg-green-600/20 text-green-300 px-3 py-2 rounded">{success}</div>}
 
+          {/* Agence */}
+          {
+            (agenceId === null) && <div>
+            <label className="block text-dark font-semibold mb-1">Agence</label>
+            <select
+              value={form.agence}
+              className="w-full p-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-maliOrange"
+              onChange={(e) => {
+                handleChange("agence", e.target.value); // reset quartier
+              }}
+            >
+              <option value="" disabled>Choisir une agence</option>
+              {agences.map((agence) => (
+                <option key={agence._id} value={agence._id}>{agence.nom_agence}</option>
+              ))}
+            </select>
+          </div>}
           {/* Titre */}
           <FloatingInput
             label="Titre"
@@ -212,7 +244,8 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess }) {
               value={form.quartier}
               className="w-full p-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-maliOrange"
               onChange={(e) => handleChange("quartier", e.target.value)}
-              disabled={!villeSelected}
+              disabled={villeSelected === null || villeSelected === undefined || villeSelected === ""}
+              cursor={(villeSelected === null || villeSelected === undefined || villeSelected === "") ? "not-allowed" : "pointer"}
             >
               <option value="" disabled>Choisir un quartier</option>
               {quartiers

@@ -19,6 +19,11 @@ const HabitationSchema = new Schema({
 	statut: { type: String, enum: ['disponible', 'loué', 'vendu'], default: 'disponible' },
 
 	datePublication: { type: Date, default: Date.now },
+	agence: {
+		type: Schema.Types.ObjectId,
+		ref: 'Agence',
+		required: true,
+	},
 
 }, { discriminatorKey: '__t', collection: 'habitations' });
 

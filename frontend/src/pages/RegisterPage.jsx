@@ -1,209 +1,215 @@
 import { useState } from "react";
-
-/**
- * RegistrationPage.jsx
- * Page d'inscription stylée et responsive.
- *
- * Remplace la simulation setTimeout par un appel réel à ton API (fetch / axios).
- */
+import { useNavigate } from "react-router-dom"; // Ajout de l'import pour la redirection
+import API from "../api/API";
 
 export default function RegisterPage() {
-  const [fullName, setFullName] = useState("");
-  const [identifier, setIdentifier] = useState(""); // email ou téléphone
+  const navigate = useNavigate(); // Initialisation du hook de navigation
+  const [step, setStep] = useState(1); 
+  const [nom_agence, setNomAgence] = useState("");
+  const [nom_proprietaire, setNomProprietaire] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [email, setEmail] = useState("");
+  const [nomUtilisateur, setNomUtilisateur] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const inputBase =
-    "w-full px-4 py-2 rounded-lg border border-gray-200 bg-white/95 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange";
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
-  const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  const isValidPhone = (v) => /^[+\d]?(?:[\d\s-().]){7,}$/.test(v);
-
-  const passwordStrength = (pwd) => {
-    if (!pwd) return 0;
-    let s = 0;
-    if (pwd.length >= 8) s++;
-    if (/[A-Z]/.test(pwd)) s++;
-    if (/[0-9]/.test(pwd)) s++;
-    if (/[^A-Za-z0-9]/.test(pwd)) s++;
-    return s; // 0..4
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    // On ne cache le toast manuellement que s'il n'y a pas de redirection
+    if (type === "error") {
+      setTimeout(() => setToast({ show: false, message: "", type: "success" }), 4000);
+    }
   };
 
-  function validate() {
+  const inputBase = "w-full px-4 py-2 rounded-xl border border-gray-200 bg-white/95 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange transition-all duration-200 text-sm";
+
+  const canGoNext = () => {
     const e = {};
-    if (!fullName.trim()) e.fullName = "Le nom complet est requis.";
-    if (!identifier.trim()) e.identifier = "Email ou téléphone requis.";
-    else if (!isValidEmail(identifier) && !isValidPhone(identifier))
-      e.identifier = "Entrez un email ou un numéro de téléphone valide.";
-
-    if (!password) e.password = "Mot de passe requis.";
-    else if (password.length < 8) e.password = "Le mot de passe doit contenir au moins 8 caractères.";
-
-    if (confirm !== password) e.confirm = "Les mots de passe ne correspondent pas.";
-
-    if (!acceptedTerms) e.terms = "Vous devez accepter les conditions d'utilisation.";
-
+    if (!nom_agence.trim()) e.nom_agence = "Requis";
+    if (!telephone.trim()) e.telephone = "Requis";
     setErrors(e);
-    return Object.keys(e).length === 0;
-  }
+    if (Object.keys(e).length === 0) setStep(2);
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setNotice(null);
-    if (!validate()) return;
+    const err = {};
+    if (password.length < 8) err.password = "8 caractères min.";
+    if (confirm !== password) err.confirm = "Les mots de passe diffèrent";
+    if (!acceptedTerms) err.terms = "Veuillez accepter les conditions";
+    if (!nomUtilisateur.trim()) err.username = "Requis";
+    
+    setErrors(err);
+    if (Object.keys(err).length > 0) return;
 
     setLoading(true);
-    // TODO: Remplace cette simulation par fetch/axios vers ton API:
-    // fetch("/api/auth/register", { method: "POST", body: JSON.stringify({ fullName, identifier, password }) })
-    setTimeout(() => {
+    const agenceData = {
+      nom_agence: nom_agence.trim(),
+      nom_proprietaire: nom_proprietaire.trim(),
+      numero_telephone: telephone.trim(),
+      email: email.trim(),
+      nomUtilisateur: nomUtilisateur.trim(),
+      password: password,
+    };
+
+    try {
+      const result = await API.register(agenceData);
+      if (result.success) {
+        showToast("Compte créé ! Redirection vers la connexion...", "success");
+        
+        // Redirection après 2 secondes pour laisser le temps de lire le toast
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+
+      } else {
+        showToast(result.error || "Erreur lors de l'enregistrement", "error");
+        setErrors({ submit: result.error });
+        setLoading(false); // On arrête le loading seulement en cas d'erreur
+      }
+    } catch (error) {
+      showToast("Erreur de connexion au serveur", "error");
       setLoading(false);
-      // simulation réussite
-      setNotice({ type: "success", text: "Inscription réussie — vérifie ton email ou connecte-toi." });
-      // reset (optionnel)
-      // setFullName(""); setIdentifier(""); setPassword(""); setConfirm(""); setAcceptedTerms(false);
-    }, 900);
+    }
   }
-
-  function handleSocial(provider) {
-    alert(`Inscription via ${provider} (à implémenter : OAuth)`);
-  }
-
-  const strength = passwordStrength(password);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-maliGreen via-maliSand to-maliOrange px-4 py-12">
-      <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left - branding */}
-        <div className="hidden lg:flex flex-col justify-center gap-6 px-8 py-10 bg-white/10 rounded-2xl backdrop-blur-sm shadow-lg">
+    <div className="flex flex-col sm:items-center sm:justify-center bg-gradient-to-br from-maliGreen via-maliSand to-maliOrange sm:px-4 sm:py-6 relative min-h-screen">
+      
+      {toast.show && (
+        <div className={`fixed top-5 right-5 z-50 flex items-center p-4 rounded-2xl shadow-2xl text-white transition-all transform animate-in fade-in slide-in-from-top-4 ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
+          <span className="mr-3 font-bold">{toast.type === "success" ? "✓" : "✕"}</span>
+          <p className="text-sm font-medium">{toast.message}</p>
+        </div>
+      )}
+
+      <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full sm:h-auto">
+        
+        <div className="hidden lg:flex flex-col justify-center gap-4 px-8 py-8 bg-white/10 rounded-2xl backdrop-blur-sm shadow-lg border border-white/20">
           <div>
             <h1 className="text-3xl font-extrabold text-white leading-tight">
               Rejoins <span className="text-maliOrange">MaliImmo</span>
             </h1>
-            <p className="mt-2 text-white/90 max-w-md">
-              Crée un compte pour publier des annonces, suivre des biens et recevoir des alertes personnalisées.
+            <p className="mt-1 text-sm text-white/90 max-w-md">
+              Crée un compte pour publier des annonces et suivre des biens.
             </p>
           </div>
-
-          <ul className="mt-4 space-y-3 text-white/90">
+          <ul className="mt-2 space-y-2 text-sm text-white/90">
             <li className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 text-white">✓</span>
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/10 text-white text-xs">✓</span>
               <span className="font-medium">Simple & sécurisé</span>
             </li>
             <li className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 text-white">🔒</span>
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/10 text-white text-xs">🔒</span>
               <span className="font-medium">Protection des données</span>
             </li>
-            <li className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 text-white">⚡</span>
-              <span className="font-medium">Expérience rapide</span>
-            </li>
           </ul>
-          <div className="mt-6">
-            <img
-              src="/images/image1.jpg"
-              alt="illustration"
-              className="w-full rounded-lg object-cover h-40 shadow-inner"
-              style={{ objectPosition: "center" }}
-            />
+          <div className="mt-4">
+            <img src="/images/image1.jpg" alt="illustration" className="w-full rounded-lg object-cover h-32 shadow-inner" />
           </div>
         </div>
 
-        {/* Right - form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Créer un compte</h2>
-          <p className="text-sm text-gray-500 mb-6">Utilise ton email ou ton numéro, et choisis un mot de passe sécurisé.</p>
+        <div className="bg-white sm:rounded-2xl shadow-2xl p-6 flex flex-col min-h-screen sm:min-h-0">
+          
+          <div className="lg:hidden flex gap-2 mb-4">
+            <div className={`h-1 flex-1 rounded-full ${step >= 1 ? 'bg-maliGreen' : 'bg-gray-100'}`} />
+            <div className={`h-1 flex-1 rounded-full ${step >= 2 ? 'bg-maliGreen' : 'bg-gray-100'}`} />
+          </div>
 
-          {notice && (
-            <div role="status" className={`mb-4 text-sm px-4 py-3 rounded-md ${notice.type === "success" ? "bg-green-50 text-green-700 border border-green-100" : "bg-red-50 text-red-700 border border-red-100"}`}>
-              {notice.text}
+          <h2 className="text-xl font-bold text-gray-900 mb-0.5">
+            {step === 1 ? "Créer un compte" : "Sécuriser le compte"}
+          </h2>
+          <p className="text-xs text-gray-500 mb-5">
+            {step === 1 ? "Informations de l'agence et contact." : "Identifiants de connexion."}
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-3.5 flex-1">
+            
+            <div className={`${step === 1 ? 'block' : 'hidden'} lg:block space-y-3`}>
+              <label className="block text-sm">
+                <span className="text-gray-700 font-medium">Nom de l'agence <span className="text-red-500">*</span></span>
+                <input className={`${inputBase} mt-1`} value={nom_agence} onChange={(e) => setNomAgence(e.target.value)} placeholder="Ex: Mali-Immo" />
+                {errors.nom_agence && <p className="text-[10px] text-red-600 mt-0.5">{errors.nom_agence}</p>}
+              </label>
+
+              <label className="block text-sm">
+                <span className="text-gray-700 font-medium">Nom complet du chef</span>
+                <input className={`${inputBase} mt-1`} value={nom_proprietaire} onChange={(e) => setNomProprietaire(e.target.value)} placeholder="Ex: Abdoul W." />
+              </label>
+
+              <label className="block text-sm">
+                <span className="text-gray-700 font-medium">Téléphone <span className="text-red-500">*</span></span>
+                <div className="relative mt-1 flex items-center group">
+                  <div className="absolute inset-y-0 left-0 flex items-center px-3 border-r border-gray-300 bg-gray-50/50 text-gray-600 font-bold rounded-l-xl">
+                    <span className="text-[10px]">+223</span>
+                  </div>
+                  <input type="tel" className={`${inputBase} pl-14`} value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="77 00 00 00" />
+                </div>
+                {errors.telephone && <p className="text-[10px] text-red-600 mt-0.5">{errors.telephone}</p>}
+              </label>
+              
+              <label className="block text-sm">
+                <span className="text-gray-700 font-medium">Email</span>
+                <input type="email" className={`${inputBase} mt-1`} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Ex: abdoul@example.com" />
+              </label>
+
+              <button type="button" onClick={canGoNext} className="lg:hidden w-full py-3 bg-maliGreen text-white font-bold rounded-xl mt-4">
+                Suivant
+              </button>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} noValidate>
-            <label className="block mb-3 text-sm">
-              <span className="text-gray-700 font-medium">Nom complet</span>
-              <input className={`${inputBase} mt-2`} value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ex: Abdoul W." />
-              {errors.fullName && <p className="text-sm text-red-600 mt-1">{errors.fullName}</p>}
-            </label>
+            <div className={`${step === 2 ? 'block' : 'hidden'} lg:block space-y-3 animate-in slide-in-from-right-4 duration-300`}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <label className="block text-sm">
+                  <span className="text-gray-700 font-medium">Nom d'utilisateur <span className="text-red-500">*</span></span>
+                  <input className={`${inputBase} mt-1`} value={nomUtilisateur} onChange={(e) => setNomUtilisateur(e.target.value)} placeholder="abdoul24" />
+                  {errors.username && <p className="text-[10px] text-red-600 mt-0.5">{errors.username}</p>}
+                </label>
+                
+                <label className="block text-sm relative">
+                  <span className="text-gray-700 font-medium">Mot de passe <span className="text-red-500">*</span></span>
+                  <div className="mt-1 relative">
+                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className={`${inputBase} pr-12`} placeholder="8+ car." />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-maliGreen uppercase">
+                      {showPassword ? "Cacher" : "Voir"}
+                    </button>
+                  </div>
+                  {errors.password && <p className="text-[10px] text-red-600 mt-0.5">{errors.password}</p>}
+                </label>
 
-            <label className="block mb-3 text-sm">
-              <span className="text-gray-700 font-medium">Email ou téléphone</span>
-              <input className={`${inputBase} mt-2`} value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="ex: abdoul@example.com ou +223 77 00 00 00" />
-              {errors.identifier && <p className="text-sm text-red-600 mt-1">{errors.identifier}</p>}
-            </label>
+                <label className="block text-sm">
+                  <span className="text-gray-700 font-medium">Confirmation <span className="text-red-500">*</span></span>
+                  <input type={showPassword ? "text" : "password"} value={confirm} onChange={(e) => setConfirm(e.target.value)} className={`${inputBase} mt-1`} placeholder="Répéter" />
+                  {errors.confirm && <p className="text-[10px] text-red-600 mt-0.5">{errors.confirm}</p>}
+                </label>
+              </div>
+              
+              <label className="flex items-start gap-3 text-sm pt-1">
+                <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 w-4 h-4 rounded border-gray-300 text-maliOrange" />
+                <span className="text-gray-600 text-[11px] leading-tight">J'accepte les <a href="#" className="text-maliGreen font-medium underline">conditions d'utilisation</a> <span className="text-red-500">*</span></span>
+              </label>
+              {errors.terms && <p className="text-[10px] text-red-600">{errors.terms}</p>}
 
-            <label className="block mb-3 text-sm relative">
-              <span className="text-gray-700 font-medium">Mot de passe</span>
-              <div className="mt-2 relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`${inputBase} pr-12`}
-                  placeholder="Au moins 8 caractères"
-                />
-                <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-2 px-2 py-1 rounded-md text-gray-600 hover:text-gray-800 focus:outline-none">
-                  {showPassword ? "Masquer" : "Voir"}
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setStep(1)} className="lg:hidden flex-1 py-3 border border-gray-200 text-gray-500 font-bold rounded-xl text-sm">
+                  Retour
+                </button>
+                <button type="submit" disabled={loading} className="flex-[2] py-3 bg-maliOrange text-white font-bold rounded-xl shadow-lg hover:bg-maliOcre transition active:scale-95 text-sm disabled:opacity-70">
+                  {loading ? "Traitement..." : "Créer le compte"}
                 </button>
               </div>
-              {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
+            </div>
 
-              {/* strength */}
-              {password && (
-                <div className="mt-2 flex items-center gap-3">
-                  <div className="flex gap-1">
-                    {[0, 1, 2, 3].map((i) => (
-                      <span key={i} className={`w-8 h-1 rounded-full ${passwordStrength(password) > i ? "bg-maliGreen" : "bg-gray-200"}`} />
-                    ))}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {["Très faible", "Faible", "Moyen", "Fort"][Math.max(0, Math.min(3, passwordStrength(password) - 1))] || "Très faible"}
-                  </div>
-                </div>
-              )}
-            </label>
-
-            <label className="block mb-3 text-sm">
-              <span className="text-gray-700 font-medium">Confirme le mot de passe</span>
-              <input className={`${inputBase} mt-2`} value={confirm} onChange={(e) => setConfirm(e.target.value)} type="password" placeholder="Répète le mot de passe" />
-              {errors.confirm && <p className="text-sm text-red-600 mt-1">{errors.confirm}</p>}
-            </label>
-
-            <label className="flex items-center gap-3 text-sm mb-4">
-              <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-maliOrange focus:ring-maliOrange" />
-              <span className="text-gray-600">J'accepte les <a href="#" className="text-maliGreen underline">conditions d'utilisation</a></span>
-              {errors.terms && <p className="text-sm text-red-600 mt-2">{errors.terms}</p>}
-            </label>
-
-            <button type="submit" disabled={loading} className="w-full py-3 rounded-lg bg-maliOrange text-white font-semibold shadow hover:bg-maliOcre transition">
-              {loading ? "Création en cours..." : "Créer un compte"}
-            </button>
           </form>
 
-          <div className="flex items-center gap-3 my-6">
-            <hr className="flex-1 border-gray-200" />
-            <span className="text-sm text-gray-500">ou</span>
-            <hr className="flex-1 border-gray-200" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => handleSocial("Google")} className="flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm transition">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden><path fill="#EA4335" d="M12 11.5v3.9h5.3c-.3 1.6-1.9 4.6-5.3 4.6-3.2 0-5.8-2.7-5.8-6s2.6-6 5.8-6c1.8 0 3 .8 3.7 1.5l2.5-2.5C17.2 4 14.8 3 12 3 6.5 3 2 7.5 2 13s4.5 10 10 10c5 0 9-3.6 9.9-8.3.1-.7.1-1.3.1-1.7H12z" /></svg>
-              Google
-            </button>
-            <button onClick={() => handleSocial("Facebook")} className="flex items-center justify-center gap-2 py-2 rounded-lg border border-blue-600 bg-blue-50 text-blue-700 hover:shadow-sm transition">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden><path fill="#1877F2" d="M22 12.07C22 6.48 17.52 2 11.93 2 6.33 2 2 6.48 2 12.07 2 17.1 5.66 21.25 10.44 22v-7.02H7.9v-2.9h2.54V9.3c0-2.5 1.5-3.87 3.76-3.87 1.09 0 2.22.2 2.22.2v2.45h-1.25c-1.23 0-1.61.76-1.61 1.54v1.86h2.74l-.44 2.9h-2.3V22C18.34 21.25 22 17.1 22 12.07z" /></svg>
-              Facebook
-            </button>
-          </div>
-
-          <p className="mt-6 text-center text-sm text-gray-600">
-            Déjà inscrit ? <a href="/login" className="text-maliGreen font-medium hover:underline">Se connecter</a>
+          <p className="mt-auto pt-6 text-center text-sm text-gray-600">
+            Déjà inscrit ? <a href="/login" className="text-maliGreen font-bold hover:underline">Se connecter</a>
           </p>
         </div>
       </div>

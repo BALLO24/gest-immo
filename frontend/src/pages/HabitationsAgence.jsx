@@ -3,6 +3,10 @@ import AddHouseModal from "../components/AddHouseModal"
 import AddAppartementModal from "../components/AddAppartementModal";
 import ToastSuccess from "../components/ToastSuccess";
 import { useNavigate } from "react-router-dom";
+import MaisonCard from "../components/cards/MaisonCard";
+import AppartementCard from "../components/cards/AppartementCard";
+import AddMagasinModal from "../components/AddMagasinModal";
+import AddTerrainModal from "../components/AddTerrainModal";
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,44 +16,8 @@ import {
 import API from "../api/API";
 
 
-const properties = [
-  {
-    id: 1,
-    title: "Villa moderne à Bamako",
-    price: "150 000 000 XOF",
-    type: "Maison",
-    location: "Bamako - ACI 2000",
-    images: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-      "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800",
-      "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800",
-    ],
-  },
-  {
-    id: 2,
-    title: "Appartement à louer à Hamdallaye",
-    price: "250 000 XOF / mois",
-    type: "Appartement",
-    location: "Bamako - Hamdallaye ACI",
-    images: [
-      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-    ],
-  },
-  {
-    id: 3,
-    title: "Bureau professionnel à louer",
-    price: "350 000 XOF / mois",
-    type: "Bureau",
-    location: "Bamako - Badalabougou",
-    images: [
-      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
-      "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800",
-    ],
-  },
-];
 
-export default function HabitationsDashboard() {
+export default function HabitationsAgence() {
   const [selectedType, setSelectedType] = useState("Tous");
   const [search, setSearch] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -57,13 +25,28 @@ export default function HabitationsDashboard() {
   const [messageToast, setMessageToast] = useState("");
   const [isOpenModalMaison, setIsOpenModalMaison] = useState(false);
   const [isOpenModalAppartement, setIsOpenModalAppartement] = useState(false);
+  const [isOpenModalMagasin,setIsOpenModalMagasin]=useState(false);
+  const [isOpenModalTerrain,setIsOpenModalTerrain]=useState(false);
+  const [habitations, setHabitations] = useState([]);
 
-  const filteredProperties = properties.filter((p) =>
-    selectedType === "Tous"
-      ? p.title.toLowerCase().includes(search.toLowerCase())
-      : p.type === selectedType &&
-        p.title.toLowerCase().includes(search.toLowerCase())
-  );
+    const fetchHabitations = async (idAgence) => {
+      try {
+        const data = await API.getHabitationsByAgence(idAgence);
+        console.log("data data",data);
+        setHabitations(data);
+        console.log("habitations : ", habitations);
+  
+      } catch (error) {
+        console.error('Erreur lors de la récupération des habitations:', error);
+      }
+    };
+      
+    useEffect(() => {
+      //const initialFiltre = {villeSelected,quartier: quartierSelected, type, prixMin, prixMax, position, magasin,nbreSalon,nbreChambres,nombreDouche, parking,coursUnique ,meuble,climatisation,connexionInternet,energieSecours };
+      fetchHabitations();
+      
+    }, []);
+  
   
   const navigate = useNavigate();
 
@@ -80,6 +63,12 @@ export default function HabitationsDashboard() {
       case "Appartement":
         setIsOpenModalAppartement(true);
         break;
+        case "Magasin":
+        setIsOpenModalMagasin(true);
+        break;
+        case "Terrain":
+        setIsOpenModalTerrain(true);
+        break;
       default:
         break;
     }
@@ -88,7 +77,6 @@ export default function HabitationsDashboard() {
   const handleSuccess = async (successMessage) => {
     try {
       handleClose();
-      //navigate(0);
       navigate("/dashboard");
       setMessageToast(successMessage);
       setShowSuccessToast(true);
@@ -113,6 +101,17 @@ export default function HabitationsDashboard() {
       <AddAppartementModal 
         isOpen={isOpenModalAppartement} 
         onClose={() => setIsOpenModalAppartement(false)}
+        onSuccess={(message) => handleSuccess(message)}
+      />
+
+      <AddMagasinModal 
+        isOpen={isOpenModalMagasin} 
+        onClose={() => setIsOpenModalMagasin(false)}
+        onSuccess={(message) => handleSuccess(message)}
+      />
+      <AddTerrainModal 
+        isOpen={isOpenModalTerrain} 
+        onClose={() => setIsOpenModalTerrain(false)}
         onSuccess={(message) => handleSuccess(message)}
       />
 
@@ -185,104 +184,39 @@ export default function HabitationsDashboard() {
           )}
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+    <section className="w-full bg-gradient-to-b from-white via-maliSand/10 to-maliGreen/10 py-10 sm:py-16">
+      <div className="container mx-auto px-4">
+        <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-800 mb-8">
+          Biens disponibles à la location
+        </h2>
 
-        {/* Message si aucun résultat */}
-        {filteredProperties.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-white/60 text-lg">Aucun bien trouvé</p>
+        {habitations.length === 0 ? (
+          <div className="text-center text-gray-600 text-lg py-10">
+            Aucun résultat trouvé 😕  
+            <p className="text-sm text-gray-500">
+              Essayez de modifier vos filtres de recherche.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {habitations.map((habitation) => {
+              switch (habitation.__t) {
+                case 'maison':
+                  return <MaisonCard key={habitation._id} maison={habitation} />;
+                case 'appartement':
+                  return <AppartementCard key={habitation._id} appartement={habitation} />;
+                // case 'magasin':
+                //   return <AddMagasinModal key={habitation._id} appartement={habitation} />
+                default:
+                  return null;
+              }
+            })}
           </div>
         )}
+      </div>
+    </section>
       </main>
     </div>
   );
 }
 
-// function SidebarItem({ icon, text, active }) {
-//   return (
-//     <div
-//       className={`flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition ${
-//         active
-//           ? "bg-orange-500 text-white"
-//           : "text-white/80 hover:bg-gray-700 hover:text-white"
-//       }`}
-//     >
-//       {icon}
-//       <span className="text-sm font-medium">{text}</span>
-//     </div>
-//   );
-// }
-
-function PropertyCard({ property }) {
-  const [currentImage, setCurrentImage] = useState(0);
-
-  const nextImage = () =>
-    setCurrentImage((prev) => (prev + 1) % property.images.length);
-  const prevImage = () =>
-    setCurrentImage((prev) =>
-      prev === 0 ? property.images.length - 1 : prev - 1
-    );
-
-  return (
-    <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-orange-500/30 transition relative">
-      {/* Image Slider */}
-      <div className="relative h-56 overflow-hidden">
-        <img
-          src={property.images[currentImage]}
-          alt={property.title}
-          className="w-full h-full object-cover transition-all duration-500"
-        />
-
-        {/* Indicateurs d'images */}
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
-          {property.images.map((_, index) => (
-            <div
-              key={index}
-              className={`w-2 h-2 rounded-full ${
-                index === currentImage ? 'bg-orange-500' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Flèches */}
-        <button
-          onClick={prevImage}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-900/60 hover:bg-gray-900/80 p-2 rounded-full transition"
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <button
-          onClick={nextImage}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-900/60 hover:bg-gray-900/80 p-2 rounded-full transition"
-        >
-          <ChevronRight size={18} />
-        </button>
-      </div>
-
-      {/* Détails */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{property.title}</h3>
-        <p className="text-orange-500 font-bold mt-1">{property.price}</p>
-        <p className="text-white/70 text-sm mt-1">{property.location}</p>
-        <span className="inline-block px-2 py-1 bg-gray-700 rounded-full text-xs mt-2">
-          {property.type}
-        </span>
-
-        <div className="flex justify-between mt-4">
-          <button className="px-3 py-1 bg-green-600/80 hover:bg-green-700 transition rounded-md text-sm">
-            Éditer
-          </button>
-          <button className="px-3 py-1 bg-red-600/80 hover:bg-red-700 transition rounded-md text-sm">
-            Supprimer
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
