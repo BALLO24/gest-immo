@@ -164,13 +164,13 @@ export default function LoginPage() {
               {errors.password && <p className="text-[10px] text-red-600 mt-0.5">{errors.password}</p>}
             </label>
 
-            <div className="flex items-center justify-between py-1">
+            {/* <div className="flex items-center justify-between py-1">
               <label className="inline-flex items-center gap-2 text-[11px] text-gray-600 cursor-pointer">
                 <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="w-3.5 h-3.5 rounded border-gray-300 text-maliOrange focus:ring-maliOrange" />
                 <span>Rester connecté</span>
               </label>
               <a href="#" className="text-[11px] text-maliGreen font-medium hover:underline">Oublié ?</a>
-            </div>
+            </div> */}
 
             <button type="submit" disabled={loading} className="w-full py-4 bg-maliOrange text-white font-bold rounded-xl shadow-lg hover:bg-maliOcre transition active:scale-95 text-sm disabled:opacity-70">
               {loading ? "Connexion en cours..." : "Se connecter"}

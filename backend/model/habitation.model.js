@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const HabitationSchema = new Schema({
-	titre: { type: String, required: true },
+	//titre: { type: String, required: true },
 	quartier: { type:Schema.Types.ObjectId, 
 				ref:"Quartier",
 				required: true 
@@ -16,7 +16,7 @@ const HabitationSchema = new Schema({
 	//video: { type: String },
 	aLouer: { type: Boolean, default: null },
     hot: { type: Boolean, default: false },
-	statut: { type: String, enum: ['disponible', 'loué', 'vendu'], default: 'disponible' },
+	statut: { type: String, enum: ['disponible', 'nonDisponible'], default: 'disponible' },
 
 	datePublication: { type: Date, default: Date.now },
 	agence: {
@@ -60,7 +60,7 @@ const AppartementSchema = new Schema({
 const MagasinSchema = new Schema({
     compteurEDMSepare: Boolean,
     compteurEauSepare: Boolean,
-	toiletteInterne: Boolean,
+	toiletteInterne: Number,
 });
 
 

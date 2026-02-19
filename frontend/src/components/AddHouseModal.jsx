@@ -1,30 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ImSpinner } from "react-icons/im";
-import API from "../api/API";
-import {
-  Home,
-  MapPin,
-  DollarSign,
-  Users,
-  Bath,
-  Sofa,
-  Coffee,
-  ShoppingBag,
-  Zap,
-  Droplet,
-  Car,
-  ChevronDown,
-  X,
-  Flame,
+import { 
+  Home, MapPin, Banknote, Users, Bath, Sofa, 
+  Coffee, ShoppingBag, Zap, Droplet, Car, X, 
+  Flame, Image as ImageIcon, CheckCircle2, AlertCircle, Loader2,
+  ChevronDown, Briefcase
 } from "lucide-react";
+import API from "../api/API";
 
-export default function AddHouseModal({ isOpen, onClose, onSuccess,agenceId=null }) {
-  const [form, setForm] = useState({
-    titre: "",
+export default function AddHouseModal({ isOpen, onClose, onSuccess, agenceId = null }) {
+  const initialState = {
+    // titre: "",
     agence: agenceId || "",
     quartier: "",
-    aLouer:true,
+    aLouer: true,
     prix: "",
     images: [],
     hot: false,
@@ -40,59 +29,39 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess,agenceId=null
     coursUnique: false,
     motoParking: false,
     description: "",
-  });
+  };
 
+  const [form, setForm] = useState(initialState);
   const [previewImages, setPreviewImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
-
   const [agences, setAgences] = useState([]);
   const [villes, setVilles] = useState([]);
   const [quartiers, setQuartiers] = useState([]);
   const [villeSelected, setVilleSelected] = useState("");
 
   useEffect(() => {
-    fetchAgences();
-    fetchVilles();
-    fetchQuartiers();
-  }, []);
-
-  const fetchVilles = async () => {
-    try {
-      const data = await API.getVilles();
-      setVilles(data);
-    } catch (err) {
-      console.error("Erreur récupération villes:", err);
+    if (isOpen) {
+      const loadData = async () => {
+        try {
+          const [v, q, a] = await Promise.all([
+            API.getVilles(),
+            API.getQuartiers(),
+            API.getAllAgences()
+          ]);
+          setVilles(v); setQuartiers(q); setAgences(a);
+        } catch (err) { console.error("Erreur chargement data:", err); }
+      };
+      loadData();
     }
-  };
+  }, [isOpen]);
 
-  const fetchQuartiers = async () => {
-    try {
-      const data = await API.getQuartiers();
-      setQuartiers(data);
-    } catch (err) {
-      console.error("Erreur récupération quartiers:", err);
-    }
-  };
-
-  const fetchAgences = async () => {
-    try {
-      const data = await API.getAllAgences();
-      setAgences(data);
-    }
-    catch (err) {
-      console.error("Erreur récupération agences:", err);
-    }
-  };
-
-  const handleChange = (field, value) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleImages = (e) => {
     const files = Array.from(e.target.files).slice(0, 3);
-    setForm((prev) => ({ ...prev, images: files }));
-    setPreviewImages(files.map((file) => URL.createObjectURL(file)));
+    setForm(prev => ({ ...prev, images: files }));
+    setPreviewImages(files.map(file => URL.createObjectURL(file)));
   };
 
   const removeImage = (index) => {
@@ -100,24 +69,23 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess,agenceId=null
     const newPreviews = [...previewImages];
     newFiles.splice(index, 1);
     newPreviews.splice(index, 1);
-    setForm((prev) => ({ ...prev, images: newFiles }));
+    setForm(prev => ({ ...prev, images: newFiles }));
     setPreviewImages(newPreviews);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setSuccess(false);
-
-    if (!form.titre || !form.quartier || !form.prix) {
-      setError("Veuillez remplir au minimum le titre, le quartier et le prix.");
+    console.log("Form Data:", form); // Debug : vérifier les données du formulaire
+    if (!form.quartier || !form.prix || !form.agence) {
+      setError("Veuillez remplir au minimum le nom de l'agence, le quartier et le prix.");
       return;
     }
 
     const fd = new FormData();
     fd.append("agence", form.agence);
     fd.append("type", "maison");
-    fd.append("titre", form.titre);
+    //fd.append("titre", form.titre);
     fd.append("quartier", form.quartier);
     fd.append("prix", form.prix);
     fd.append("aLouer", form.aLouer);
@@ -133,7 +101,7 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess,agenceId=null
     fd.append("compteurEauSepare", form.compteurEauSepare);
     fd.append("coursUnique", form.coursUnique);
     fd.append("motoParking", form.motoParking);
-    fd.append("description",form.description);
+    fd.append("description", form.description);
 
     form.images.forEach((file) => fd.append("images", file));
 
@@ -142,222 +110,186 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess,agenceId=null
       const response = await API.addHabitation(fd);
       if (response) {
         onSuccess("Maison ajoutée avec succès !");
-        setForm({
-          agence: "",
-          titre: "",
-          quartier: "",
-          prix: "",
-          aLouer:false,
-          images: [],
-          hot: false,
-          statut: "disponible",
-          position: "",
-          nombreChambres: "",
-          nombreSallesBain: "",
-          nombreSalon: "",
-          cuisine: false,
-          magasin: false,
-          compteurEDMSepare: false,
-          compteurEauSepare: false,
-          coursUnique: false,
-          motoParking: false,
-          description: "",
-        });
+        setForm(initialState);
         setPreviewImages([]);
         setVilleSelected("");
-        setSubmitting(false);
-        setSuccess(true);
+        onClose();
       }
     } catch (err) {
-      setSubmitting(false);
       setError(err.message || "Erreur lors de la création");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-start pt-10 z-50">
-      <div className="bg-gray-900 text-white rounded-2xl w-full max-w-3xl p-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-maliOrange transition text-2xl font-bold"
-        >
-          &times;
-        </button>
-        <h2 className="text-2xl font-bold mb-6 text-maliOrange">
-          Ajouter une maison
-        </h2>
-
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
-          {error && <div className="col-span-2 text-sm bg-red-600/20 text-red-300 px-3 py-2 rounded">{error}</div>}
-          {success && <div className="col-span-2 text-sm bg-green-600/20 text-green-300 px-3 py-2 rounded">{success}</div>}
-
-          {/* Agence */}
-          {
-            (agenceId === null) && <div>
-            <label className="block text-dark font-semibold mb-1">Agence</label>
-            <select
-              value={form.agence}
-              className="w-full p-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-maliOrange"
-              onChange={(e) => {
-                handleChange("agence", e.target.value); // reset quartier
-              }}
-            >
-              <option value="" disabled>Choisir une agence</option>
-              {agences.map((agence) => (
-                <option key={agence._id} value={agence._id}>{agence.nom_agence}</option>
-              ))}
-            </select>
-          </div>}
-          {/* Titre */}
-          <FloatingInput
-            label="Titre"
-            type="text"
-            value={form.titre}
-            onChange={(e) => handleChange("titre", e.target.value)}
-            icon={Home}
-          />
-
-          {/* Ville */}
-          <div>
-            <label className="block text-white font-semibold mb-1">Ville</label>
-            <select
-              value={villeSelected}
-              className="w-full p-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-maliOrange"
-              onChange={(e) => {
-                setVilleSelected(e.target.value);
-                handleChange("quartier", ""); // reset quartier
-              }}
-            >
-              <option value="" disabled>Choisir une ville</option>
-              {villes.map((ville) => (
-                <option key={ville._id} value={ville._id}>{ville.nom}</option>
-              ))}
-            </select>
+    <div className="fixed inset-0  bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+      <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200">
+        
+        {/* HEADER */}
+        <div className="px-8 py-2 border-b-2 border-gray-100 flex justify-between items-center bg-white">
+          <div className="flex items-center gap-4">
+            <div className="bg-orange-100 p-2 rounded-2xl">
+              <Home size={28} className="text-orange-600" />
+            </div>
+            <div>
+              <h2 className="sm:text-2xl font-black text-gray-900 tracking-tight">Ajouter une maison</h2>
+              {/* <p className="text-gray-500 font-bold text-sm">Nouveau référencement immobilier</p> */}
+            </div>
           </div>
+          <button onClick={onClose} className="p-3 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black">
+            <X size={28} strokeWidth={3} />
+          </button>
+        </div>
 
-          {/* Quartier */}
-          <div>
-            <label className="block text-white font-semibold mb-1">Quartier</label>
-            <select
-              value={form.quartier}
-              className="w-full p-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-maliOrange"
-              onChange={(e) => handleChange("quartier", e.target.value)}
-              disabled={villeSelected === null || villeSelected === undefined || villeSelected === ""}
-              cursor={(villeSelected === null || villeSelected === undefined || villeSelected === "") ? "not-allowed" : "pointer"}
-            >
-              <option value="" disabled>Choisir un quartier</option>
-              {quartiers
-                .filter((q) => q.ville && q.ville._id === villeSelected)
-                .map((q) => (
-                  <option key={q._id} value={q._id}>{q.nom}</option>
-                ))}
-            </select>
-          </div>
-          <div>
-              <label className="block text-white font-semibold mb-1">Type de transaction</label>
-              <select 
-                  name="aLouer" 
-                  className="w-full p-2 rounded-lg border border-white/20 bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-maliOrange"
-                  onChange={(e)=>handleChange("aLouer",e.target.value)}
+        <form onSubmit={handleSubmit} className="overflow-y-auto p-8 custom-scrollbar space-y-8">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* COLONNE GAUCHE */}
+            <div className="space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-orange-600 mb-4">01. Informations Globales</h3>
+              {/* <InputBlock label="Titre de l'annonce" icon={Home} value={form.titre} onChange={(v) => handleChange("titre", v)} placeholder="Ex: Villa F4 avec piscine" /> */}
+              <SelectBlock 
+                label="Statut" 
+                value={form.statut} 
+                onChange={(v) => handleChange("statut", v)}
               >
-                <option value={true} className="bg-maliOrange/60" selected>A louer</option>
-                 <option value={false} className="bg-maliOrange/60">A vendre</option>
-              </select>
+                <option value="disponible">✅ Disponible</option>
+                <option value="pas disponible">❌ Pas disponible</option>
+              </SelectBlock>              {/* AJOUT CHAMP AGENCE */}
+              {agenceId === null && <SelectBlock label="Agence" value={form.agence} onChange={(v) => handleChange("agence", v)}>
+                <option value="">Sélectionner une agence</option>
+                {agences.map(a => <option key={a._id} value={a._id}>{a.nom_agence }</option>)}
+              </SelectBlock>}
+
+              <div className="grid grid-cols-2 gap-4">
+                <SelectBlock label="Ville" value={villeSelected} onChange={(v) => { setVilleSelected(v); handleChange("quartier", ""); }}>
+                  <option value="">Sélectionner</option>
+                  {villes.map(v => <option key={v._id} value={v._id}>{v.nom}</option>)}
+                </SelectBlock>
+                
+                <SelectBlock label="Quartier" value={form.quartier} onChange={(v) => handleChange("quartier", v)} disabled={!villeSelected}>
+                  <option value="">Sélectionner</option>
+                  {quartiers.filter(q => q.ville?._id === villeSelected).map(q => (
+                    <option key={q._id} value={q._id}>{q.nom}</option>
+                  ))}
+                </SelectBlock>
+              </div>
+                <SelectBlock label="Position" value={form.position} onChange={(v) => handleChange("position", v)}>
+                  <option value="">Sélectionner</option>
+                  <option value={0}>Rez de chaussée</option>
+                  <option value={1}>1er étage</option>
+                  <option value={2}>2ème étage</option>
+                  <option value={3}>3ème étage</option>
+                  <option value={4}>4ème étage</option>
+                  <option value={5}>5ème étage et plus</option>
+                </SelectBlock>
+
+
+              {/* Champ Prix Revisité */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-black text-gray-900 ml-1">Prix & Transaction</label>
+                <div className="flex items-stretch border-2 border-gray-300 rounded-2xl overflow-hidden focus-within:border-orange-600 transition-all shadow-sm">
+                  <select 
+                    value={form.aLouer} 
+                    onChange={(e) => handleChange("aLouer", e.target.value === "true")}
+                    className="bg-gray-50 border-r-2 border-gray-300 px-4 text-sm font-black text-gray-900 outline-none cursor-pointer"
+                  >
+                    <option value="true">Location</option>
+                    <option value="false">Vente</option>
+                  </select>
+                  <div className="relative flex-1 bg-white flex items-center">
+                    <Banknote className="ml-4 text-gray-400" size={20} />
+                    <input 
+                      type="number"
+                      placeholder="Montant"
+                      className="w-full pl-3 pr-4 py-4 text-lg font-black text-gray-900 outline-none"
+                      value={form.prix}
+                      onChange={(e) => handleChange("prix", e.target.value)}
+                    />
+                    <span className="pr-4 text-xs font-black text-gray-400">FCFA</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-
-          {/* Prix */}
-          <FloatingInput
-            label="Prix (XOF)"
-            type="number"
-            value={form.prix}
-            onChange={(e) => handleChange("prix", e.target.value)}
-            icon={DollarSign}
-          />
-
-          {/* Position */}
-          <FloatingInput
-            label="Position"
-            type="number"
-            value={form.position}
-            onChange={(e) => handleChange("position", e.target.value)}
-            icon={MapPin}
-          />
-
-          {/* Chambres */}
-          <FloatingInput
-            label="Chambres"
-            type="number"
-            value={form.nombreChambres}
-            onChange={(e) => handleChange("nombreChambres", e.target.value)}
-            icon={Users}
-          />
-
-          {/* Salles de bain */}
-          <FloatingInput
-            label="Salles de bain"
-            type="number"
-            value={form.nombreSallesBain}
-            onChange={(e) => handleChange("nombreSallesBain", e.target.value)}
-            icon={Bath}
-          />
-
-          {/* Salons */}
-          <FloatingInput
-            label="Salons"
-            type="number"
-            value={form.nombreSalon}
-            onChange={(e) => handleChange("nombreSalon", e.target.value)}
-            icon={Sofa}
-          />
-
-          {/* Checkboxes */}
-          <div className="col-span-2 grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-            <Checkbox label="Cuisine" checked={form.cuisine} onChange={(v) => handleChange("cuisine", v)} icon={Coffee} />
-            <Checkbox label="Magasin" checked={form.magasin} onChange={(v) => handleChange("magasin", v)} icon={ShoppingBag} />
-            <Checkbox label="Compteur EDM Separé" checked={form.compteurEDMSepare} onChange={(v) => handleChange("compteurEDMSepare", v)} icon={Zap} />
-            <Checkbox label="Compteur Eau Separé" checked={form.compteurEauSepare} onChange={(v) => handleChange("compteurEauSepare", v)} icon={Droplet} />
-            <Checkbox label="Cours unique" checked={form.coursUnique} onChange={(v) => handleChange("coursUnique", v)} icon={Home} />
-            <Checkbox label="Parking moto" checked={form.motoParking} onChange={(v) => handleChange("motoParking", v)} icon={Car} />
-            <Checkbox label="Mettre en avant" checked={form.hot} onChange={(v) => handleChange("hot", v)} icon={Flame} />
-          </div>
-          <FloatingInput
-            label="Description"
-            type="textarea"
-            value={form.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            icon={Sofa}
-          />
-
-
-          {/* Images */}
-          <div className="col-span-2">
-            <label className="block mb-1 text-white/70">Images (max 3)</label>
-            <input type="file" multiple accept="image/*" onChange={handleImages} className="w-full bg-gray-800 p-2 rounded-lg" />
-            {previewImages.length > 0 && (
-              <div className="flex gap-2 mt-2 overflow-x-auto">
-                {previewImages.map((src, i) => (
-                  <div key={i} className="relative w-24 h-24">
-                    <img src={src} alt={`preview-${i}`} className="w-full h-full object-cover rounded-lg shadow" />
-                    <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 bg-red-600 rounded-full p-1 text-white hover:bg-red-700">
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
+            {/* COLONNE DROITE */}
+            <div className="space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-orange-600 mb-4">02. Détails du Bien</h3>
+              
+              <div className="grid grid-cols-3 gap-3">
+                <NumberBox label="Chambres" value={form.nombreChambres} onChange={(v) => handleChange("nombreChambres", v)} />
+                <NumberBox label="Salons" value={form.nombreSalon} onChange={(v) => handleChange("nombreSalon", v)} />
+                <NumberBox label="Douches" value={form.nombreSallesBain} onChange={(v) => handleChange("nombreSallesBain", v)} />
               </div>
-            )}
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-black text-gray-900 ml-1">Description libre</label>
+                <textarea 
+                  placeholder="Détails supplémentaires (état, accès, etc...)"
+                  className="w-full bg-white border-2 border-gray-300 rounded-2xl p-4 text-gray-900 font-bold focus:border-orange-600 outline-none h-[115px] transition-all resize-none shadow-sm"
+                  value={form.description}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className={`${submitting ? "cursor-not-allowed" : ""} col-span-2 mt-4 px-6 py-2 bg-maliOrange hover:bg-maliOrange/90 rounded-xl font-semibold`}
-            disabled={submitting}
-          >
-            {submitting ? <ImSpinner className="animate-spin inline-block w-5 h-5 mr-2" /> : "Ajouter"}
-          </button>
+          {/* OPTIONS, PHOTOS, ERROR, FOOTER ... (le reste du code est identique) */}
+          <div className="pt-6 border-t-2 border-gray-100">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">03. Commodités incluses</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+              <OptionCard label="Cuisine" checked={form.cuisine} icon={Coffee} onChange={(v) => handleChange("cuisine", v)} />
+              <OptionCard label="Magasin" checked={form.magasin} icon={ShoppingBag} onChange={(v) => handleChange("magasin", v)} />
+              <OptionCard label="EDM Sép." checked={form.compteurEDMSepare} icon={Zap} onChange={(v) => handleChange("compteurEDMSepare", v)} />
+              <OptionCard label="Eau Sép." checked={form.compteurEauSepare} icon={Droplet} onChange={(v) => handleChange("compteurEauSepare", v)} />
+              <OptionCard label="Unique" checked={form.coursUnique} icon={Home} onChange={(v) => handleChange("coursUnique", v)} />
+              <OptionCard label="Parking" checked={form.motoParking} icon={Car} onChange={(v) => handleChange("motoParking", v)} />
+              <OptionCard label="🔥 HOT" checked={form.hot} icon={Flame} onChange={(v) => handleChange("hot", v)} isHot />
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-6 rounded-[2rem] border-2 border-gray-100">
+            <h3 className="text-xs font-black text-gray-900 uppercase mb-4">Photos (Max 3)</h3>
+            <div className="flex flex-wrap gap-4">
+              {previewImages.length < 3 && (
+                <label className="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-400 bg-white hover:border-orange-600 transition-all cursor-pointer flex flex-col items-center justify-center group">
+                  <ImageIcon size={32} className="text-gray-300 group-hover:text-orange-600 transition-colors" />
+                  <input type="file" multiple accept="image/*" onChange={handleImages} className="hidden" />
+                </label>
+              )}
+              {previewImages.map((src, i) => (
+                <div key={i} className="relative w-28 h-28 rounded-2xl overflow-hidden shadow-lg border-2 border-white group">
+                  <img src={src} className="w-full h-full object-cover" alt="preview" />
+                  <button type="button" onClick={() => removeImage(i)} className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X size={28} strokeWidth={3} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <div className="p-4 bg-red-600 text-white rounded-2xl flex items-center gap-3 font-black text-sm shadow-lg shadow-red-200">
+              <AlertCircle size={20} strokeWidth={3} /> {error}
+            </div>
+          )}
+
+          <div className="flex items-center gap-4 pt-4 pb-2">
+            <button type="button" onClick={onClose} className="px-8 py-5 text-gray-500 font-black hover:text-black transition-colors">
+              ANNULER
+            </button>
+            <button 
+              type="submit" 
+              disabled={submitting}
+              className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+            >
+              {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
+              {submitting ? "ENREGISTREMENT..." : "PUBLIER L'ANNONCE"}
+            </button>
+          </div>
         </form>
       </div>
     </div>,
@@ -365,24 +297,70 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess,agenceId=null
   );
 }
 
-function FloatingInput({ label, icon: Icon, value, onChange, type }) {
+// (Garder les sous-composants InputBlock, NumberBox, SelectBlock, OptionCard tels quels...)
+function InputBlock({ label, icon: Icon, value, onChange, placeholder }) {
   return (
-    <div className="relative w-full">
-      {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-maliOrange" size={18} />}
-      <input type={type} value={value} onChange={onChange} placeholder=" " className="w-full bg-gray-800 text-white rounded-xl px-10 py-3 focus:outline-none focus:ring-2 focus:ring-maliOrange peer" />
-      <label className={`absolute left-10 transition-all duration-200 pointer-events-none ${value ? "-top-2.5 text-maliOrange text-xs bg-gray-900 px-1" : "top-3 text-white/50 text-sm"} peer-focus:-top-2.5 peer-focus:text-maliOrange peer-focus:text-xs peer-focus:bg-gray-900 peer-focus:px-1`}>
-        {label}
-      </label>
+    <div className="flex flex-col gap-2">
+      <label className="text-sm font-black text-gray-900 ml-1">{label}</label>
+      <div className="relative">
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={22} />
+        <input 
+          type="text" value={value} 
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-white border-2 border-gray-300 rounded-2xl pl-12 pr-4 py-4 text-gray-900 font-bold text-base focus:border-orange-600 outline-none transition-all placeholder:text-gray-300"
+        />
+      </div>
     </div>
   );
 }
 
-function Checkbox({ label, checked, onChange, icon: Icon }) {
+function NumberBox({ label, value, onChange }) {
   return (
-    <label className="flex items-center gap-2 cursor-pointer text-sm md:text-base">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="accent-maliOrange w-4 h-4 md:w-5 md:h-5" />
-      {Icon && <Icon className="text-maliOrange" size={16} />}
-      <span className="text-white">{label}</span>
-    </label>
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] font-black text-gray-500 text-center uppercase tracking-tighter">{label}</label>
+      <input 
+        type="number" value={value} 
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-gray-50 border-2 border-gray-300 rounded-2xl py-4 text-center font-black text-gray-900 text-xl focus:border-orange-600 focus:bg-white outline-none transition-all"
+        placeholder="0"
+      />
+    </div>
+  );
+}
+
+function SelectBlock({ label, value, onChange, children, disabled }) {
+  return (
+    <div className="flex flex-col gap-2 flex-1">
+      <label className="text-sm font-black text-gray-900 ml-1">{label}</label>
+      <div className="relative">
+        <select 
+          value={value} 
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          className="w-full appearance-none bg-white border-2 border-gray-300 rounded-2xl px-5 py-4 text-gray-900 font-bold text-base focus:border-orange-600 outline-none disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer transition-all"
+        >
+          {children}
+        </select>
+        <ChevronDown size={22} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+function OptionCard({ label, checked, onChange, icon: Icon, isHot }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all ${
+        checked 
+          ? (isHot ? "bg-orange-600 border-orange-600 text-white shadow-lg" : "bg-gray-900 border-gray-900 text-white") 
+          : "bg-white border-gray-200 text-gray-400 hover:border-gray-400 hover:text-gray-600"
+      }`}
+    >
+      <Icon size={20} />
+      <span className="text-[10px] font-black uppercase text-center leading-none tracking-tighter">{label}</span>
+    </button>
   );
 }

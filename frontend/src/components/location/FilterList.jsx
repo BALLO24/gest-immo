@@ -32,16 +32,14 @@ export default function FilterList() {
   const [connexionInternet,setConnexionInternet]=useState("tous");
   const [energieSecours,setEnergieSecours]=useState("tous");
   const [typePaiementAppart,setTypePaiementAppart]=useState("mensuel");
-  const [toiletteInterne,setToiletteInterne]=useState("tous");
+  const [toiletteInterne, setToiletteInterne] = useState("tous");
+  const [statut,setStatut]=useState("disponible");
 
 
   const fetchHabitations = async (filtre) => {
     try {
       const data = await API.getHabitations(filtre);
-      console.log("data data",data);
       setHabitations(data);
-      console.log("habitations : ", habitations);
-
     } catch (error) {
       console.error('Erreur lors de la récupération des habitations:', error);
     }
@@ -50,6 +48,7 @@ export default function FilterList() {
   const fetchVilles = async () => {
     try {
       const data = await API.getVilles();
+      //data.unshift({_id:"12345", value:"tous", nom:"Peu importe"});
       setVille(data);
     } catch (error) {
       console.error('Erreur lors de la récupération des villes:', error);
@@ -78,6 +77,7 @@ export default function FilterList() {
       setClimatisation("tous");
       setConnexionInternet("tous");
       setEnergieSecours("tous");
+      setStatut("disponible")
     }
   }
 
@@ -86,7 +86,7 @@ export default function FilterList() {
   };
 
   useEffect(() => {
-    const initialFiltre = {villeSelected,quartier: quartierSelected, aLouer:true, hot:true, limit:0, type, prixMin, prixMax, position, magasin,cuisine,nbreSalon,nbreChambres,nombreDouche, parking,coursUnique ,meuble,climatisation,connexionInternet,energieSecours, toiletteInterne };
+    const initialFiltre = {statut:"disponible",villeSelected,quartier: quartierSelected, aLouer:true, hot:true, limit:0, type, prixMin, prixMax, position, magasin,cuisine,nbreSalon,nbreChambres,nombreDouche, parking,coursUnique ,meuble,climatisation,connexionInternet,energieSecours, toiletteInterne };
     fetchHabitations(initialFiltre);
     fetchVilles();
     fetchQuartiers();
@@ -95,6 +95,7 @@ export default function FilterList() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const filtre = {
+      statut:"disponible",
       villeSelected,
       type,
       quartier: quartierSelected,
@@ -193,6 +194,7 @@ export default function FilterList() {
               <div className="flex flex-col">
                 <label className="text-white/90 text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Ville</label>
                 <div className="relative">
+                  <input name="statut" value="disponible" type="hidden"/>
                   <select 
                     name="villeSelected"
                     className="w-full h-11 px-3 pr-8 rounded-xl border border-white/20 bg-white/10 text-white backdrop-blur-sm focus:bg-white/20 focus:ring-2 focus:ring-maliOrange outline-none transition-all appearance-none cursor-pointer"
@@ -200,7 +202,8 @@ export default function FilterList() {
                       setVilleSelected(e.target.value);
                       setQuartierSelected("tous");
                     }}
-                  >
+                        >
+                    
                     {ville.map(v => (
                       <option className="text-gray-900" key={v._id} value={v._id}>{v.nom}</option>
                     ))}
@@ -412,7 +415,6 @@ export default function FilterList() {
               <div className="space-y-4 pt-4 border-t border-white/20 animate-in fade-in">
                 {(type === "maison" || type === "appartement") && (
                   <>
-                    {/* Ligne 1: Magasin et Cuisine */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex flex-col animate-in fade-in">
                         <label className="text-white/90 text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Magasin</label>
@@ -678,8 +680,9 @@ export default function FilterList() {
               setQuartierSelected("tous");
             }}
           >
+            <option className="text-gray-900" value="">Peu importe</option>
             {ville.map(v => (
-              <option className="text-gray-900" key={v._id} value={v._id}>{v.nom}</option>
+                <option className="text-gray-900" key={v._id} value={v._id}>{v.nom}</option>
             ))}
           </select>
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -835,7 +838,6 @@ export default function FilterList() {
         </div>
       )}
 
-      {/* Position (Toujours affiché selon ta logique) */}
       <div className="flex flex-col">
         <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Position / Étage</label>
         <div className="relative">

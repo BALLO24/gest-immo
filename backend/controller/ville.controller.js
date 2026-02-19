@@ -4,7 +4,9 @@ module.exports.addVille=async(req,res)=>{
         if(!req.body.nom){
             return res.status(400).json({success:false,message:"Le nom de la ville est requis !"});
         }
-        const {nom}=req.body;
+        const { nom } = req.body;
+        console.log("nom",nom);
+        
         const nomCapitalized=nom.trim().charAt(0).toUpperCase() + nom.trim().slice(1).toLowerCase();
         
         const isExist=await Ville.findOne({nom:nomCapitalized});

@@ -26,10 +26,7 @@ export default function FilterList() {
   const fetchHabitations = async (filtre) => {
     try {
       const data = await API.getHabitations(filtre);
-      console.log("data data",data);
       setHabitations(data);
-      console.log("habitations : ", habitations);
-
     } catch (error) {
       console.error('Erreur lors de la récupération des habitations:', error);
     }
@@ -42,7 +39,6 @@ export default function FilterList() {
     try {
       const data = await API.getVilles();
       setVille(data);
-      //console.log("Villes récupérées :", data);
     } catch (error) {
       console.error('Erreur lors de la récupération des villes:', error);
     }
@@ -52,7 +48,6 @@ export default function FilterList() {
     try {
       const data = await API.getQuartiers();
       setQuartiers(data);
-     // console.log("Quartiers récupérés :", data);
     } catch (error) {
       console.error('Erreur lors de la récupération des quartiers:', error);
     }
@@ -67,7 +62,7 @@ export default function FilterList() {
   }
 
   useEffect(() => {
-    const initialFiltre = {villeSelected,quartier: quartierSelected, aLouer:false, type, prixMin, prixMax, magasin,nbreSalon,nbreChambres,nombreDouche, };
+    const initialFiltre = {statut:"disponible", villeSelected,quartier: quartierSelected, aLouer:false, type, prixMin, prixMax, magasin,nbreSalon,nbreChambres,nombreDouche, };
     fetchHabitations(initialFiltre);
     fetchVilles();
     fetchQuartiers();
@@ -78,6 +73,7 @@ export default function FilterList() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const filtre = {
+      statut:"disponible",  
       villeSelected,
       type,
       quartier: quartierSelected,
@@ -102,7 +98,7 @@ export default function FilterList() {
     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
       <div className="space-y-1">
         <h2 className="text-white text-2xl sm:text-4xl font-extrabold tracking-tight drop-shadow-lg">
-          Trouvez la location parfaite <span className="inline-block hover:animate-bounce">🏠</span>
+          Trouvez le bien parfait <span className="inline-block hover:animate-bounce">🏠</span>
         </h2>
         <p className="text-white/80 text-sm sm:text-base font-medium">Explorez nos maisons, magasins et terrains disponibles</p>
       </div>
@@ -132,7 +128,8 @@ export default function FilterList() {
             setVilleSelected(e.target.value);
             setQuartierSelected("tous");
           }}
-        >
+              >
+              <option className="text-gray-900" key={0} selected value="">Peu importe</option>
           {ville.map(v => (
             <option className="text-gray-900" key={v._id} value={v._id}>{v.nom}</option>
           ))}
@@ -147,7 +144,7 @@ export default function FilterList() {
           className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white backdrop-blur-sm focus:bg-white/20 focus:ring-2 focus:ring-maliOrange outline-none transition-all cursor-pointer"
           onChange={(e) => setQuartierSelected(e.target.value)}
         >
-          <option className="text-gray-900" value="tous">Peu importe</option>
+          <option className="text-gray-900" value="">Peu importe</option>
           {Array.isArray(quartiers) && quartiers.length > 0 ? (
             quartiers
               .filter(q => q.ville._id === villeSelected)

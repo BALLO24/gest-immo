@@ -4,7 +4,7 @@ import { MapPin, Map, Locate, Bath, Zap, Droplets, Wallet, MessageCircle,Phone, 
 
 export default function DetailsModalMagasin({ item, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const telephoneProprio = "0022382083814";
+  const telephoneProprio = "+22382083814";
   
   if (!item) return null;
 
@@ -24,7 +24,7 @@ export default function DetailsModalMagasin({ item, onClose }) {
           
           {/* HEADER */}
           <div className="flex justify-between items-center p-2 border-b">
-            <h2 className="text-lg font-bold text-gray-800 truncate">{item.titre}</h2>
+          <h3 className="text-md font-bold text-maliGreen mb-1">N° {item._id ? item._id.slice(-5).toUpperCase() : "N/A"}</h3>
             <button onClick={onClose} className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-lg text-sm transition"><X className="w-4 h-4" />Fermer</button>
           </div>
 

@@ -3,12 +3,12 @@ import AppLayout from "./layouts/AppLayout";
 import HomePage from "./pages/HomePage";
 import LocationPage from "./pages/LocationPage";
 import VentePage from "./pages/VentePage";
-import DetailMaison from "./modal/DetailMaison";
+// import DetailMaison from "./modal/DetailMaison";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ChangePasswordPage from "./components/ChangePassword";
 import Dashboard from "./components/layout/Dashboard";
-import Agence from "./components/layout/Agence";
+// import Agence from "./components/layout/Agence";
 import HomeDashboard from "./pages/HomeDashboard";
 import HabitationsDashboard from "./pages/HabitationsDashboard";
 import HabitationsAgence from "./pages/HabitationsAgence";
@@ -81,9 +81,6 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="location" element={<LocationPage />} />
           <Route path="vente" element={<VentePage />} />
-          {/* <Route path="detail" element={<DetailMaison />} /> */}
-          {/* <Route path="login" element={<LoginPage />} /> */}
-          {/* <Route path="register" element={<RegisterPage />} /> */}
         </Route>
 
         <Route element={<PublicRoute />}>
@@ -103,10 +100,8 @@ function App() {
 
         {/* --- ROUTES RÉSERVÉES AUX AGENCES (ET ADMINS) --- */}
         <Route element={<ProtectedRoute allowedRoles={["admin", "agence"]} />}>
-          <Route path="/agence" element={<Agence />}>
-            <Route index element={<h1>Accueil Page agence</h1>} />
-            <Route path="habitations" element={<HabitationsAgence />} />
-          </Route>
+          <Route path="/agence" element={<HabitationsAgence />}>
+        </Route>
           <Route path="change" element={<ChangePasswordPage />} />
         </Route>
 

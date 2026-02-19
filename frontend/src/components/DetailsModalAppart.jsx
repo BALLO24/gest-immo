@@ -4,7 +4,7 @@ import { MapPin, Map, Locate, Sofa, Bed, Bath, Square, ChefHat, Store, Snowflake
 
 export default function DetailsModalAppart({ item, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const telephoneProprio = "0022382083814";
+  const telephoneProprio = "+22382083814";
   
   if (!item) return null;
 
@@ -30,7 +30,7 @@ export default function DetailsModalAppart({ item, onClose }) {
           
           {/* HEADER */}
           <div className="flex justify-between items-center p-2 border-b">
-            <h2 className="text-lg font-bold text-gray-800 truncate">{item.titre}</h2>
+          <h3 className="text-md font-bold text-maliGreen mb-1">N° {item._id ? item._id.slice(-5).toUpperCase() : "N/A"}</h3>
             <button onClick={onClose} className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-lg text-sm transition"><X className="w-4 h-4" />Fermer</button>
           </div>
 
@@ -67,7 +67,7 @@ export default function DetailsModalAppart({ item, onClose }) {
                     <span className="text-md font-bold text-gray-500">{item.prixParHeure ? item.prixParHeure.toLocaleString() +" XOF /heure" : "Non défini"}</span>
                   </div>
                 </div>
-                <a href={`https://wa.me/${telephoneProprio}?text=Bonjour,%20je%20suis%20intéressé%20par%20le%20bien%20${item.titre}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg text-sm transition">
+                <a href={`https://wa.me/${telephoneProprio}?text=Bonjour,%20je%20suis%20intéressé%20par%20le%20bien%20N°%20:%20${item._id.slice(-5).toUpperCase()}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg text-sm transition">
                   <MessageCircle className="w-4 h-4" />Contacter sur WhatsApp
                 </a>
               </div>

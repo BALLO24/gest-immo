@@ -7,8 +7,8 @@ console.log("token",token);
   require('jsonwebtoken').verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) return res.status(403).json({ message: "Session expirée" });
       req.user = user;
-      console.log("user",user);
-      
+    console.log("user", user);
+    console.log("end authToken");
     next();
   });
 };

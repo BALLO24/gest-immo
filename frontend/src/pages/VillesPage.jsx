@@ -1,322 +1,243 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { 
+  Plus, Search, MoreVertical, Edit2, Trash2, 
+  Eye, ChevronLeft, ChevronRight, Building2, Map 
+} from "lucide-react";
+
+// Components & API
 import ItemsParPageOptions from "../components/ItemsParPage";
-import SearchBar from "../components/SearchBar";
-import { AiFillDelete } from "react-icons/ai";
-import { TbListDetails } from "react-icons/tb";
-import { MdOutlinePublishedWithChanges } from "react-icons/md";
-import NouvelleVille from "../components/NouvelleVille";
+import AddVille from "../components/AddVille";
 import ToastSuccess from "../components/ToastSuccess";
-import ToastError from "../components/ToastError";  
-import { useNavigate } from "react-router-dom";
+import ToastError from "../components/ToastError";
 import ConfirmSuppression from "../components/ConfirmSuppression";
 import API from "../api/API";
 
-
 export default function VillesPage() {
-  // données
-  const [villes, setVilles] = useState([])  
-  useEffect(() => {
-    // Fetch villes from API
-    const fetchVilles = async () => {
-      try {
-        const response=await API.getVilles();
-        setVilles(response);  
-      } 
-      catch (error) {
-        console.error("Erreur lors de la récupération des villes:", error);
-      } };
-    fetchVilles();
-  }, []);
-
-  const [filteredData, setFilteredData] = useState(villes);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemPerPage] = useState(5);
+  const navigate = useNavigate();
+  const [villes, setVilles] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemPerPage] = useState(10);
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const [showErrorToast, setShowErrorToast] = useState(false);
-  const [showModalConfirm, setShowModalConfirm] = useState(false);
-  const [messageToast, setMessageToast] = useState("");
+  
+  // Modals & Toasts
   const [isOpenForm, setOpenForm] = useState(false);
+  const [showModalConfirm, setShowModalConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [idTodDelete,setIdToDelete]=useState(null);
+  const [idToDelete, setIdToDelete] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
-  // --- dropdown actions
-  const toggleDropdown = (id) => {
-    setOpenDropdownId(openDropdownId === id ? null : id);
+  const fetchVilles = async () => {
+    try {
+      const response = await API.getVilles();
+      setVilles(response || []);
+    } catch (error) {
+      console.error("Erreur API:", error);
+    }
   };
 
-  // --- filtrage
-  useEffect(() => {
-    const term = (searchTerm || "").trim().toLowerCase();
+  useEffect(() => { fetchVilles(); }, []);
 
-    if (!term) {
-      setFilteredData(villes);
-      setCurrentPage(1);
-      return;
-    }
-
-    const filtered = villes.filter((item) =>
-      Object.values(item).some((val) =>
-        (val ?? "").toString().toLowerCase().includes(term)
-      )
+  // Filtrage intelligent optimisé
+  const filteredData = useMemo(() => {
+    return villes.filter((v) => 
+      v.nom?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    setFilteredData(filtered);
-    setCurrentPage(1);
   }, [searchTerm, villes]);
 
-  // --- pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  // Pagination
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+  const currentItems = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const totalPages =
-    filteredData.length > 0 ? Math.ceil(filteredData.length / itemsPerPage) : 1;
-
-  const displayStart = filteredData.length === 0 ? 0 : indexOfFirstItem + 1;
-  const displayEnd = Math.min(indexOfLastItem, filteredData.length);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const handleSuccess = async (successMessage) => {
-    try {
-      setOpenForm(false);
-      navigate("./");
-      try {
-        const response=await API.getVilles();
-        setVilles(response);  
-      }
-      catch (error) {
-        console.error("Erreur lors de la récupération des villes:", error);
-      }
-      setMessageToast(successMessage);
-      setShowSuccessToast(true);
-      setTimeout(() => {
-        setShowSuccessToast(false);
-      }, 3000);
-    } catch (error) {
-      console.error(
-        "Erreur lors du rafraîchissement du tableau de bord:",
-        error
-      );
-    }
+  const triggerToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ ...toast, show: false }), 3000);
   };
 
-    const handleError = async (errorMessage) => {
+  const handleConfirmDelete = async () => {
+    if (!idToDelete) return;
     try {
-      setOpenForm(false);
-      navigate("./");
-      setMessageToast(errorMessage);
-      setShowErrorToast(true);
-      setTimeout(() => {
-        setShowErrorToast(false);
-      }, 3000);
-    } catch (error) {
-      console.error(
-        "Erreur lors du rafraîchissement du tableau de bord:",
-        error
-      );
-    }
-  };
-  const handleDelete = (villeId) => {
-    toggleDropdown(villeId)
-    setShowModalConfirm(true);
-    setIdToDelete(villeId);
-    console.log(villeId);
-    
-  }
-
-    const handleConfirmDelete=async()=>{
-     if(!idTodDelete) return ;
-     try {
-      setIsDeleting(true)
-      await new Promise(resolve=>setTimeout(resolve,2000));
-      await API.deleteVille(idTodDelete);
-      const res=await API.getVilles();
+      setIsDeleting(true);
+      await API.deleteVille(idToDelete);
+      await fetchVilles();
       setShowModalConfirm(false);
-      setVilles(res || []);
-      setMessageToast("Ville supprimée avec succès !");
-      setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 4000);
-      setIsDeleting(false)
-  
-     }
-     
-     catch(err){
-      console.log(err);
-        setIsDeleting(false)
-     }
+      triggerToast("Ville supprimée avec succès");
+    } catch (err) {
+      triggerToast("Erreur lors de la suppression", "error");
+    } finally {
+      setIsDeleting(false);
     }
-
-  const navigate = useNavigate();
+  };
 
   return (
-    <>
-      <div className="relative p-4 max-w-full overflow-hidden ">
-    {showSuccessToast && <ToastSuccess message={messageToast || "Operation effectuée avec succes"} />}
-    {showErrorToast && <ToastError message={messageToast || "Une erreur est survenue"} />}
-    <ConfirmSuppression isOpen={showModalConfirm} onClose={()=>setShowModalConfirm(false)} isDeleting={isDeleting} onConfirm={()=>handleConfirmDelete()}/>
-        <NouvelleVille isOpen={isOpenForm} close={() => setOpenForm(false)} onSuccess={(message)=>handleSuccess(message)} onError={(message)=>handleError(message)}/>
-        <ItemsParPageOptions
-          value={itemsPerPage}
-          onChange={(value) => {
-            setItemPerPage(value);
-            setCurrentPage(1);
-          }}
-          options={[5, 10, 20, 50, 100]}
-        />
+    <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
+      {/* Notifications */}
+      {toast.show && (toast.type === "success" ? <ToastSuccess message={toast.message} /> : <ToastError message={toast.message} />)}
+      
+      <ConfirmSuppression 
+        isOpen={showModalConfirm} 
+        onClose={() => setShowModalConfirm(false)} 
+        isDeleting={isDeleting} 
+        onConfirm={handleConfirmDelete} 
+      />
 
-        <SearchBar
-          value={searchTerm}
-          onChange={(value) => {
-            setSearchTerm(value);
-            setCurrentPage(1);
-          }}
-        />
+      <AddVille 
+        isOpen={isOpenForm} 
+        close={() => setOpenForm(false)} 
+        onSuccess={(msg) => { setOpenForm(false); fetchVilles(); triggerToast(msg); }} 
+        onError={(msg) => triggerToast(msg, "error")}
+      />
+
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2">
+            <Building2 className="text-orange-600" /> Gestion des Villes
+          </h1>
+          <p className="text-slate-500 text-sm font-medium italic">Administration des centres urbains</p>
+        </div>
 
         <button
-          className="px-2 py-2 absolute right-10 top-4 font-bold rounded-sm bg-gradient-to-r from-green-400 via-green-500 to-green-700 text-white shadow hover:opacity-90"
           onClick={() => setOpenForm(true)}
+          className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-orange-200 transition-all active:scale-95"
         >
-          + Ajouter
+          <Plus size={20} /> Nouvelle Ville
         </button>
+      </div>
 
-        {/* Desktop-Version */}
-        <div className="hidden md:block overflow-y-auto h-screen">
-          <table className="min-w-full divide-y divide-gray-200 border-collapse">
-            <thead className="bg-gray-200 sticky top-0 z-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  No
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  Ville
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  Action
-                </th>
+      {/* FILTERS & SEARCH */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input
+            type="text"
+            placeholder="Rechercher une ville..."
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-transparent focus:bg-white focus:ring-2 focus:ring-orange-500 rounded-xl transition-all outline-none text-sm"
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+          />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <ItemsParPageOptions
+            value={itemsPerPage}
+            onChange={(val) => { setItemPerPage(val); setCurrentPage(1); }}
+            options={[5, 10, 20, 50]}
+          />
+        </div>
+      </div>
+
+      {/* MAIN TABLE */}
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-100">
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Index</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Nom de la Ville</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
-
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-slate-50">
               {currentItems.map((item, idx) => (
-                <tr key={item._id ?? idx}>
-                  <td className="px-4 py-2 text-sm text-gray-600">
-                    {indexOfFirstItem + idx + 1}
+                <tr key={item._id || idx} className="hover:bg-slate-50/80 transition-colors group">
+                  <td className="px-6 py-4 text-sm font-bold text-slate-400">
+                    #{(currentPage - 1) * itemsPerPage + idx + 1}
                   </td>
-                  <td className="px-4 py-2 text-sm text-gray-600">
-                    {item.nom}
-                  </td>
-                  <td className="px-6 py-2 text-gray-600">
-                    <div className="relative inline-block text-left">
-                      <button
-                        type="button"
-                        onClick={() => toggleDropdown(item._id)}
-                        className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                      >
-                        Actions
-                        <svg
-                          className="-mr-1 ml-2 h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-
-                      {openDropdownId === item._id && (
-                        <div className="absolute mt-1 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                          <div className="py-1">
-                            <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
-                              <TbListDetails className="mr-1 text-xl" />
-                              Détails
-                            </button>
-
-                            <Link
-                              to=""
-                              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                            >
-                              <MdOutlinePublishedWithChanges className="mr-1 text-xl" />
-                              Modifier
-                            </Link>
-
-                            <Link
-                              onClick={()=>handleDelete(item._id)}
-                              to=""
-                              className="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-gray-100 w-full text-left"
-                            >
-                              <AiFillDelete className="mr-1 text-xl" />
-                              Supprimer
-                            </Link>
-                          </div>
-                        </div>
-                      )}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
+                        <Map size={16} />
+                      </div>
+                      <span className="text-sm font-bold text-slate-700 group-hover:text-orange-600 transition-colors">
+                        {item.nom}
+                      </span>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 text-right relative">
+                    <button 
+                      onClick={() => setOpenDropdownId(openDropdownId === item._id ? null : item._id)}
+                      className="p-2 hover:bg-white rounded-lg transition-colors text-slate-400 hover:text-slate-600"
+                    >
+                      <MoreVertical size={18} />
+                    </button>
+
+                    {openDropdownId === item._id && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setOpenDropdownId(null)}></div>
+                        <div className="absolute right-6 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 z-20 py-2 animate-in fade-in zoom-in-95 duration-100">
+                          <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                            <Eye size={16} /> Détails
+                          </button>
+                          <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                            <Edit2 size={16} /> Modifier
+                          </button>
+                          <hr className="my-1 border-slate-50" />
+                          <button 
+                            onClick={() => { setIdToDelete(item._id); setShowModalConfirm(true); setOpenDropdownId(null); }}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 size={16} /> Supprimer
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
+              {currentItems.length === 0 && (
+                <tr>
+                  <td colSpan="3" className="px-6 py-10 text-center text-slate-400 italic">
+                    Aucune ville trouvée...
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
-          {/* Pagination */}
-          <div className="flex justify-between mt-4 mx-4">
-            <div className="text-sm text-gray-700 font-semibold">
-              Affichage de <span>{displayStart}</span> à{" "}
-              <span className="font-medium">{displayEnd}</span> sur{" "}
-              <span className="font-medium">{filteredData.length}</span>{" "}
-              résultats
-            </div>
-          </div>
+        </div>
 
-          <div className="flex space-x-2 m-2">
+        {/* FOOTER / PAGINATION */}
+        <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs font-bold text-slate-500">
+            Affichage <span className="text-slate-900">{currentItems.length}</span> sur <span className="text-slate-900">{filteredData.length}</span> villes
+          </p>
+          
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => paginate(Math.max(1, currentPage - 1))}
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === 1
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+              className="p-2 rounded-lg border border-slate-200 bg-white disabled:opacity-50 text-slate-600 hover:border-orange-500 transition-colors"
             >
-              Précedent
+              <ChevronLeft size={16} />
             </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              (number) => (
+            
+            <div className="flex items-center gap-1">
+              {[...Array(totalPages)].map((_, i) => (
                 <button
-                  key={number}
-                  onClick={() => paginate(number)}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === number
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                    currentPage === i + 1 
+                    ? "bg-orange-600 text-white shadow-md shadow-orange-100" 
+                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-100"
                   }`}
                 >
-                  {number}
+                  {i + 1}
                 </button>
-              )
-            )}
+              ))}
+            </div>
 
             <button
-              onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === totalPages
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+              className="p-2 rounded-lg border border-slate-200 bg-white disabled:opacity-50 text-slate-600 hover:border-orange-500 transition-colors"
             >
-              Suivant
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

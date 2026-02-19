@@ -10,9 +10,10 @@ const { authenticateToken, authorizeRoles } = require("../middleware/auth");
 router.post("/new",upload.fields([
     {name: 'images', maxCount: 3},
     {name:"video", maxCount:1},
-]), authenticateToken,authorizeRoles("admin"),habitationController.addHabitation);
+]), habitationController.addHabitation);
 
 router.post("/", habitationController.getAllHabitations);
-router.get("/agence/:agenceId",authenticateToken, authorizeRoles("admin", "agence"), habitationController.getHabitationsByAgence);
-router.delete("/delete/:id", authenticateToken,authorizeRoles("admin"), habitationController.deleteHabitation);
+router.get("/agence/:agenceId", habitationController.getHabitationsByAgence);
+router.put("/update/:id",habitationController.updateHabitation);
+router.delete("/delete/:id", habitationController.deleteHabitation);
 module.exports = router;

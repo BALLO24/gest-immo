@@ -1,6 +1,7 @@
 const Agence=require('../model/agence.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sendMail = require('../utils/sendMail');
 
 // Enregistrement d'une nouvelle agence
 module.exports.registerAgence=async(req,res)=>{
@@ -27,6 +28,11 @@ module.exports.registerAgence=async(req,res)=>{
             password: hashedPassword
         });
         await newAgence.save();
+        await sendMail(
+            "Bienvenue chez Gest-Immo !",
+            `<p>L'agence ${nom_agence},</p><p>de propriétaire "${nom_proprietaire}" a été enregistrée avec succès !.</p>`,
+            "balloabdoul64@gmail.com"
+        );
         res.status(201).json({ success: true, message: "Agence enregistrée avec succès !" });
     }   catch(err){
         console.error("Erreur lors de l'enregistrement de l'agence :",err);
