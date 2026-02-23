@@ -1,5 +1,6 @@
 // const API_URL = "http://localhost:5000/api";
-const API_URL = "https://ksxn2bt3-5000.euw.devtunnels.ms/api"; // URL de production (devtunnel)
+// const API_URL = "https://ksxn2bt3-5000.euw.devtunnels.ms/api"; // URL de production (devtunnel)
+const API_URL="https://immo-oy2j.onrender.com/api"
 export default {
 
     //API pour l'authentification des agences

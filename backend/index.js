@@ -53,5 +53,5 @@ app.use("/api/villes", villeRoutes);
 
 
 app.listen(PORT, "0.0.0.0", () =>
-  console.log(`Le serveur tourne sur : http://localhost:${PORT}`)
+  console.log(`Le serveur tourne sur le port ${PORT}`)
 );
