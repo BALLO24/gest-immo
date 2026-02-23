@@ -111,16 +111,6 @@ export default function LoginPage() {
     }
   }
 
-  // --- AFFICHAGE DU SPLASH SCREEN ---
-  // if (isVerifying) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-maliGreen to-maliOrange">
-  //       <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-  //       <p className="mt-4 text-white font-bold animate-pulse text-xl tracking-widest">MaliImmo</p>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="min-h-screen flex flex-col sm:items-center sm:justify-center bg-gradient-to-br from-maliGreen via-maliSand to-maliOrange sm:px-4 sm:py-6 relative animate-in fade-in duration-500">
       
@@ -164,13 +154,6 @@ export default function LoginPage() {
               {errors.password && <p className="text-[10px] text-red-600 mt-0.5">{errors.password}</p>}
             </label>
 
-            {/* <div className="flex items-center justify-between py-1">
-              <label className="inline-flex items-center gap-2 text-[11px] text-gray-600 cursor-pointer">
-                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="w-3.5 h-3.5 rounded border-gray-300 text-maliOrange focus:ring-maliOrange" />
-                <span>Rester connecté</span>
-              </label>
-              <a href="#" className="text-[11px] text-maliGreen font-medium hover:underline">Oublié ?</a>
-            </div> */}
 
             <button type="submit" disabled={loading} className="w-full py-4 bg-maliOrange text-white font-bold rounded-xl shadow-lg hover:bg-maliOcre transition active:scale-95 text-sm disabled:opacity-70">
               {loading ? "Connexion en cours..." : "Se connecter"}
@@ -178,7 +161,7 @@ export default function LoginPage() {
           </form>
 
           <p className="mt-auto pt-6 text-center text-sm text-gray-600">
-            Nouveau ici ? <a href="/register" className="text-maliGreen font-bold hover:underline">S'inscrire</a>
+            Nouveau ici ? <Link href="/register" className="text-maliGreen font-bold hover:underline">S'inscrire</Link>
           </p>
         </div>
       </div>
