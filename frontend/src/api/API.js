@@ -1,10 +1,10 @@
-const API_URL = "http://localhost:5000/api";
-// const API_URL = "https://ksxn2bt3-5000.euw.devtunnels.ms/api"; // URL de production (devtunnel)
+// const API_URL = "http://localhost:5000/api";
+const API_URL = "https://ksxn2bt3-5000.euw.devtunnels.ms/api"; // URL de production (devtunnel)
 export default {
 
     //API pour l'authentification des agences
     async login(credentials){
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // await new Promise(resolve => setTimeout(resolve, 800));
         const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {
