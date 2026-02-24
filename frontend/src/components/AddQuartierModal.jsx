@@ -135,7 +135,7 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
               ) : (
                 <PlusCircle size={24} />
               )}
-              {isSubmitting ? "TRAITEMENT..." : "CRÉER LE QUARTIER"}
+              {isSubmitting ? "TRAITEMENT..." : "CRÉER"}
             </button>
           </div>
         </form>

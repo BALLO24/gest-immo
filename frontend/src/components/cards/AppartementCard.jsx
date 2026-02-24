@@ -2,25 +2,24 @@ import { useState } from "react";
 import { 
   MapPin, Bath, ChevronLeft, ChevronRight, House, 
   MapPinHouse, Building2, MoreVertical, CheckCircle, 
-  Trash2, Pencil 
+  Trash2, Pencil, MessageCircle // Ajouté pour WhatsApp
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
 import toast, { Toaster } from "react-hot-toast";
 import DetailsModalAppart from "../DetailsModalAppart";
 import ModifAppartementModal from "../ModifAppartementModal";
-import ConfirmSuppression from "../ConfirmSuppression"; // Import ajouté
-import API from "../../api/API"; // Import ajouté
+import ConfirmSuppression from "../ConfirmSuppression";
+import API from "../../api/API";
 
 export default function AppartementCard({ appartement, onUpdate, typePaiementAppart = "journalier" }) {
   const [currentImage, setCurrentImage] = useState(0);
   const [selectedAppart, setSelectedAppart] = useState(null);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false); // État ajouté
-  const [isDeleting, setIsDeleting] = useState(false); // État ajouté
+  const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Vérification des permissions
   const token = localStorage.getItem("authToken");
   let canEditStatus = false;
   if (token) {
@@ -43,7 +42,6 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
     }
   };
 
-  // LOGIQUE DE SUPPRESSION AJOUTÉE
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true);
@@ -52,7 +50,6 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
       if (result) {
         setIsSuppressionModalOpen(false);
         setShowStatusMenu(false);
-        // On notifie le Dashboard pour retirer l'élément de la liste
         if (onUpdate) {
           onUpdate({ ...appartement, isDeleted: true });
         }
@@ -196,11 +193,24 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
               {typePaiementAppart === "journalier" && `${appartement?.prixParJour?.toLocaleString() || "N/A"} XOF / jour`}
               {typePaiementAppart === "horaire" && `${appartement?.prixParHeure?.toLocaleString() || "N/A"} XOF / heure`}
             </span>
-            <button className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all duration-300"
-              onClick={() => setSelectedAppart(appartement)}
-            >
-              Voir plus
-            </button>
+            
+            <div className="flex gap-2">
+              {/* BOUTON WHATSAPP */}
+              <a 
+                href={`https://wa.me/${import.meta.env.VITE_NUMERO_WHATSAPP}?text=Bonjour, je suis intéressé par l'appartement N° ${appartement._id?.slice(-5).toUpperCase()} à ${appartement.quartier?.nom} (${typePaiementAppart})`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all shadow-md flex items-center justify-center"
+              >
+                <MessageCircle size={20} />
+              </a>
+
+              <button className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all duration-300"
+                onClick={() => setSelectedAppart(appartement)}
+              >
+                Détails
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>

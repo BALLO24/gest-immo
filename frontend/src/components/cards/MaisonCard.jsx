@@ -1,23 +1,24 @@
 import { useState } from "react";
 import { 
   MapPin, BedDouble, Bath, ChevronLeft, ChevronRight, 
-  House, MapPinHouse, Trash2, MoreVertical, Pencil 
+  House, MapPinHouse, Trash2, MoreVertical, Pencil,
+  MessageCircle // Ajouté pour WhatsApp
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
 import toast, { Toaster } from "react-hot-toast";
 import DetailsModalMaison from "../DetailsModalMaison";
 import ModifHouseModal from "../ModifHouseModal";
-import ConfirmSuppression from "../ConfirmSuppression"; // Ajouté
-import API from "../../api/API"; // Ajouté
+import ConfirmSuppression from "../ConfirmSuppression";
+import API from "../../api/API";
 
 export default function MaisonCard({ maison, onUpdate }) {
   const [showDetails, setShowDetails] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
-  const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false); // Ajouté
-  const [isDeleting, setIsDeleting] = useState(false); // Ajouté
+  const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const token = localStorage.getItem("authToken");
   let canEditStatus = false;
@@ -41,7 +42,6 @@ export default function MaisonCard({ maison, onUpdate }) {
     }
   };
 
-  // LOGIQUE DE SUPPRESSION AJOUTÉE
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true);
@@ -50,7 +50,6 @@ export default function MaisonCard({ maison, onUpdate }) {
       if (result) {
         setIsSuppressionModalOpen(false);
         setShowStatusMenu(false);
-        // On notifie le Dashboard pour retirer la carte de la liste
         if (onUpdate) {
           onUpdate({ ...maison, isDeleted: true });
         }
@@ -88,7 +87,7 @@ export default function MaisonCard({ maison, onUpdate }) {
                 onClick={(e) => { e.stopPropagation(); setShowStatusMenu(!showStatusMenu); }}
                 className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md text-gray-700 hover:text-maliOrange transition-colors"
               >
-                <MoreVertical size={20} />
+                < MoreVertical size={20} />
               </button>
               
               {showStatusMenu && (
@@ -137,12 +136,24 @@ export default function MaisonCard({ maison, onUpdate }) {
 
           <div className="flex justify-between items-center">
             <span className="text-lg font-bold text-maliOrange">{maison?.prix?.toLocaleString()} XOF</span>
-            <button 
-              className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all"
-              onClick={() => setShowDetails(true)}
-            >
-              Voir plus
-            </button>
+            <div className="flex gap-2">
+              {/* BOUTON WHATSAPP */}
+              <a 
+                href={`https://wa.me/${import.meta.env.VITE_NUMERO_WHATSAPP}?text=Bonjour, je suis intéressé par la maison N° ${maison._id?.slice(-6).toUpperCase()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all shadow-md"
+              >
+                <MessageCircle size={20} />
+              </a>
+              
+              <button 
+                className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all"
+                onClick={() => setShowDetails(true)}
+              >
+                Détails
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>

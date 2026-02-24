@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
   MapPin, ChevronLeft, ChevronRight, MapPinHouse, MapIcon, 
-  MoreVertical, Pencil, Trash2
+  MoreVertical, Pencil, Trash2, MessageCircle // Ajouté pour WhatsApp
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
@@ -38,7 +38,6 @@ export default function TerrainCard({ terrain, onUpdate }) {
     }
   };
 
-  // CORRECTION ICI : Pas d'argument, on utilise 'terrain' du scope parent
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true);
@@ -47,7 +46,6 @@ export default function TerrainCard({ terrain, onUpdate }) {
       if (result) {
         setIsSuppressionModalOpen(false);
         setShowStatusMenu(false);
-        // On signale au Dashboard de retirer cet élément
         if (onUpdate) {
           onUpdate({ ...terrain, isDeleted: true });
         }
@@ -181,12 +179,24 @@ export default function TerrainCard({ terrain, onUpdate }) {
             <span className="text-xl font-bold text-maliOrange">
               {terrain?.prix?.toLocaleString() || "0"} XOF
             </span>
-            <button 
-              className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all duration-300"
-              onClick={() => setSelectedTerrain(terrain)}
-            >  
-              Voir plus
-            </button>
+            <div className="flex gap-2">
+              {/* BOUTON WHATSAPP */}
+              <a 
+                href={`https://wa.me/${import.meta.env.VITE_NUMERO_WHATSAPP}?text=Bonjour, je suis intéressé par le terrain N° ${terrain._id?.slice(-5).toUpperCase()} situé à ${terrain.quartier?.nom}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all shadow-md"
+              >
+                <MessageCircle size={20} />
+              </a>
+
+              <button 
+                className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all duration-300"
+                onClick={() => setSelectedTerrain(terrain)}
+              >  
+                Détails
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>

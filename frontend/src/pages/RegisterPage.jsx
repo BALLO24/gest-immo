@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Ajout de l'import pour la redirection
+import { useNavigate,Link } from "react-router-dom"; // Ajout de l'import pour la redirection
+// import {Link} from "react-routerd-dom"
 import API from "../api/API";
 
 export default function RegisterPage() {
@@ -204,13 +205,13 @@ export default function RegisterPage() {
                   {loading ? "Traitement..." : "Créer le compte"}
                 </button>
               </div>
+              <p className="mt-auto pt-6 text-center text-sm text-gray-600">
+                Déjà inscrit ? <Link to="/login" className="text-maliGreen font-bold hover:underline">Se connecter</Link>
+              </p>
+
             </div>
 
           </form>
-
-          <p className="mt-auto pt-6 text-center text-sm text-gray-600">
-            Déjà inscrit ? <a href="/login" className="text-maliGreen font-bold hover:underline">Se connecter</a>
-          </p>
         </div>
       </div>
     </div>

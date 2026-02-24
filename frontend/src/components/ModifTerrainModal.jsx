@@ -200,7 +200,7 @@ export default function ModifTerrainModal({ isOpen, onClose, terrain, onSuccess 
               className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg shadow-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
-              {submitting ? "SAUVEGARDE..." : "ENREGISTRER LES MODIFICATIONS"}
+              {submitting ? "SAUVEGARDE..." : "ENREGISTRER"}
             </button>
           </div>
         </form>

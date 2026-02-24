@@ -203,7 +203,7 @@ export default function ModifHouseModal({ isOpen, onClose, onSuccess, maison }) 
               className="flex-1 py-5 bg-gray-900 hover:bg-blue-600 text-white rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-3"
             >
               {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
-              {submitting ? "MODIFICATION..." : "ENREGISTRER LES MODIFICATIONS"}
+              {submitting ? "MODIFICATION..." : "ENREGISTRER"}
             </button>
           </div>
         </form>

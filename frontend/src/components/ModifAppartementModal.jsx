@@ -234,7 +234,7 @@ export default function ModifAppartementModal({ isOpen, onClose, onSuccess, appa
               className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-3"
             >
               {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
-              {submitting ? "Mise à jour..." : "ENREGISTRER LES MODIFICATIONS"}
+              {submitting ? "Mise à jour..." : "ENREGISTRER"}
             </button>
           </div>
         </form>

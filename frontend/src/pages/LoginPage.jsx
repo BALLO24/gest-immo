@@ -158,11 +158,11 @@ export default function LoginPage() {
             <button type="submit" disabled={loading} className="w-full py-4 bg-maliOrange text-white font-bold rounded-xl shadow-lg hover:bg-maliOcre transition active:scale-95 text-sm disabled:opacity-70">
               {loading ? "Connexion en cours..." : "Se connecter"}
             </button>
+          <p className="mt-auto pt-6 text-center text-sm text-gray-600">
+            Nouveau ici ? <Link to="/register" className="text-maliGreen font-bold hover:underline">S'inscrire</Link>
+          </p>
           </form>
 
-          <p className="mt-auto pt-6 text-center text-sm text-gray-600">
-            Nouveau ici ? <Link href="/register" className="text-maliGreen font-bold hover:underline">S'inscrire</Link>
-          </p>
         </div>
       </div>
     </div>

@@ -103,7 +103,7 @@ const AddVille = ({ isOpen, close, onSuccess, onError }) => {
               ) : (
                 <PlusCircle size={24} />
               )}
-              {isSubmitting ? "ENREGISTREMENT..." : "CONFIRMER L'AJOUT"}
+              {isSubmitting ? "ENREGISTREMENT..." : "CONFIRMER"}
             </button>
           </div>
         </form>

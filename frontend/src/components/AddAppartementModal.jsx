@@ -304,7 +304,7 @@ export default function AddAppartementModal({ isOpen, onClose, onSuccess, agence
               className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
             >
               {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
-              {submitting ? "ENREGISTREMENT..." : "PUBLIER L'APPARTEMENT"}
+              {submitting ? "ENREGISTREMENT..." : "PUBLIER"}
             </button>
           </div>
         </form>

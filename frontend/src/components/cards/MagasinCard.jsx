@@ -1,25 +1,25 @@
 import { useState } from "react";
 import { 
   MapPin, ChevronLeft, ChevronRight, MapPinHouse, Store, 
-  MoreVertical, CheckCircle, Trash2, Pencil 
+  MoreVertical, CheckCircle, Trash2, Pencil,
+  MessageCircle // Ajouté pour WhatsApp
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import DetailsModalMagasin from "../DetailsModalMagasin";
 import ModifMagasinModal from "../ModifMagasinModal";
-import ConfirmSuppression from "../ConfirmSuppression"; // Ajouté
-import API from "../../api/API"; // Ajouté
+import ConfirmSuppression from "../ConfirmSuppression";
+import API from "../../api/API";
 
 export default function MagasinCard({ magasin, onUpdate }) {
   const [currentImage, setCurrentImage] = useState(0);
   const [selectedMagasin, setSelectedMagasin] = useState(null);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false); // Ajouté
-  const [isDeleting, setIsDeleting] = useState(false); // Ajouté
+  const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Vérification des permissions
   const token = localStorage.getItem("authToken");
   let canEditStatus = false;
   if (token) {
@@ -40,7 +40,6 @@ export default function MagasinCard({ magasin, onUpdate }) {
     }
   };
 
-  // LOGIQUE DE SUPPRESSION AJOUTÉE
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true);
@@ -49,7 +48,6 @@ export default function MagasinCard({ magasin, onUpdate }) {
       if (result) {
         setIsSuppressionModalOpen(false);
         setShowStatusMenu(false);
-        // On notifie le Dashboard pour retirer la carte de la liste
         if (onUpdate) {
           onUpdate({ ...magasin, isDeleted: true });
         }
@@ -83,14 +81,12 @@ export default function MagasinCard({ magasin, onUpdate }) {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out w-full max-w-[400px] mx-auto"
       >
-        {/* Image */}
         <div className="relative w-full h-56 overflow-hidden">
           <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-bold text-maliOrange border border-maliOrange/30 shadow-sm z-10 flex items-center gap-1">
             <Store className="w-3.5 h-3.5" />
             Magasin
           </div>
 
-          {/* Menu Statut (Dropdown) */}
           {canEditStatus && (
             <div className="absolute top-3 right-3 z-20">
               <button 
@@ -133,7 +129,6 @@ export default function MagasinCard({ magasin, onUpdate }) {
             className="w-full h-full object-cover transition-all duration-700 ease-in-out"
           />
 
-          {/* Flèches */}
           {magasin.images.length > 1 && (
             <>
               <button
@@ -151,7 +146,6 @@ export default function MagasinCard({ magasin, onUpdate }) {
             </>
           )}
 
-          {/* Indicateurs */}
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
             {magasin.images.map((_, i) => (
               <button
@@ -165,7 +159,6 @@ export default function MagasinCard({ magasin, onUpdate }) {
           </div>
         </div>
 
-        {/* Contenu */}
         <div className="p-4">
           <h3 className="text-md font-bold text-maliGreen mb-1">N° {magasin._id ? magasin._id.slice(-5).toUpperCase() : "N/A"}</h3>
           <div className="flex items-center text-gray-600 text-sm mb-3 font-medium">
@@ -186,17 +179,29 @@ export default function MagasinCard({ magasin, onUpdate }) {
             <span className="text-xl font-bold text-maliOrange">
               {magasin?.prix?.toLocaleString() || "0"} XOF / mois
             </span>
-            <button 
-              className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all duration-300"
-              onClick={() => setSelectedMagasin(magasin)}
-            >
-              Voir plus
-            </button>
+            
+            <div className="flex gap-2">
+              {/* BOUTON WHATSAPP */}
+              <a 
+                href={`https://wa.me/${import.meta.env.VITE_NUMERO_WHATSAPP}?text=Bonjour, je souhaite avoir des informations sur le magasin N° ${magasin._id?.slice(-5).toUpperCase()} situé à ${magasin.quartier?.nom}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all shadow-md flex items-center justify-center"
+              >
+                <MessageCircle size={20} />
+              </a>
+
+              <button 
+                className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all duration-300"
+                onClick={() => setSelectedMagasin(magasin)}
+              >
+                Voir plus
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Modals */}
       <DetailsModalMagasin item={selectedMagasin} onClose={() => setSelectedMagasin(null)} />
       
       <ModifMagasinModal 
