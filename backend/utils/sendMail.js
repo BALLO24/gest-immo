@@ -13,8 +13,8 @@ async function sendMail(objet, message, destinataire) {
         user: USER_EMAIL,
         pass: APP_PASSWORD, 
       },
-      port: 587,
-      secure: false,
+      port: 465,
+      secure: true,
     });
 
     const info = await transporter.sendMail({
