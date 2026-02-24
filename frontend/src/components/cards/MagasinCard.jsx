@@ -195,7 +195,7 @@ export default function MagasinCard({ magasin, onUpdate }) {
                 className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all duration-300"
                 onClick={() => setSelectedMagasin(magasin)}
               >
-                Voir plus
+                Détails
               </button>
             </div>
           </div>
