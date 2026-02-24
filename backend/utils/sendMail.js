@@ -1,20 +1,24 @@
 require('dotenv').config();
 const nodemailer = require("nodemailer");
 
-// Récupération des variables d'environnement
-const USER_EMAIL = process.env.EMAIL_USER;
-const APP_PASSWORD = process.env.EMAIL_APP_PASSWORD; // Le code de 16 caractères
 
 async function sendMail(objet, message, destinataire) {
+  // Récupération des variables d'environnement
+const USER_EMAIL = process.env.EMAIL_USER;
+const APP_PASSWORD = process.env.EMAIL_APP_PASSWORD; 
+
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
       auth: {
         user: USER_EMAIL,
         pass: APP_PASSWORD, 
       },
       port: 465,
       secure: true,
+      family: 4,
+      connectionTimeout: 10000, 
+
     });
 
     const info = await transporter.sendMail({
