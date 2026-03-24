@@ -34,7 +34,7 @@ module.exports.registerAgence=async(req,res)=>{
         await sendMail(
             "Bienvenue chez Gest-Immo !",
             `<p>L'agence ${nom_agence},</p><p>de propriétaire "${nom_proprietaire}" de numéro de téléphone ${numero_telephone} a été enregistrée avec succès !.</p>`,
-            "balloabdoul64@gmail.com"
+            "b2techno.manager@gmail.com"
         );
         res.status(201).json({ success: true, message: "Agence enregistrée avec succès !" });
     }   catch(err){
