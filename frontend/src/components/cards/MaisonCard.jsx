@@ -135,7 +135,7 @@ export default function MaisonCard({ maison, onUpdate }) {
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-lg font-bold text-maliOrange">{maison?.prix?.toLocaleString()} XOF</span>
+            <span className="text-lg font-bold text-maliOrange">{maison?.prix?.toLocaleString()} XOF / mois</span>
             <div className="flex gap-2">
               {/* BOUTON WHATSAPP */}
               <a 

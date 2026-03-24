@@ -4,8 +4,8 @@ import { ShieldCheck, Zap, Globe2, Home, Smile } from "lucide-react";
 const qualites = [
   {
     icon: <ShieldCheck className="w-10 h-10 text-maliGreen" />,
-    title: "Sécurité garantie",
-    text: "Vos transactions et données sont protégées avec des standards de sécurité modernes.",
+    title: "Equipe d'experts",
+    text: "Pour faire vos documents immobiliers(titre foncier ...) et vous assister dans vos litiges fonciers et constructions.",
   },
   {
     icon: <Zap className="w-10 h-10 text-maliOrange" />,
@@ -15,7 +15,7 @@ const qualites = [
   {
     icon: <Globe2 className="w-10 h-10 text-maliGreen" />,
     title: "Accessible partout",
-    text: "MaliLogement est disponible sur ordinateur, tablette et téléphone.",
+    text: "ImmoMali est disponible sur ordinateur, tablette et téléphone.",
   },
   {
     icon: <Home className="w-10 h-10 text-maliOrange" />,
@@ -34,10 +34,10 @@ export default function QualitesSection() {
     <section className="bg-gradient-to-b from-maliSand via-white to-maliSand/70 py-16 px-6 sm:px-12">
       <div className="text-center mb-12">
         <h2 className="text-3xl sm:text-4xl font-bold text-maliGreen mb-2">
-          Pourquoi choisir <span className="text-maliOrange">MaliLogement</span> ?
+          Pourquoi choisir <span className="text-maliOrange">ImmoMali</span> ?
         </h2>
         <p className="text-gray-600 text-base sm:text-lg">
-          Découvrez les avantages qui font de MaliLogement la référence immobilière au Mali.
+          Découvrez les avantages qui font de ImmoMali la référence immobilière au Mali.
         </p>
       </div>
 

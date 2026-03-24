@@ -187,7 +187,7 @@ export default function ModifHouseModal({ isOpen, onClose, onSuccess, maison }) 
             <div className="flex flex-wrap gap-4">
               {form.images?.map((src, i) => (
                 <div key={i} className="relative w-28 h-28 rounded-2xl overflow-hidden shadow-sm border-2 border-white">
-                  <img src={src} className="w-full h-full object-cover grayscale-[0.3] cursor-not-allowed" alt="habitation" />
+                  <img src={src} className="w-full h-full object-cover grayscale-[0.3] cursor-not-allowed" alt="maison" />
                 </div>
               ))}
             </div>

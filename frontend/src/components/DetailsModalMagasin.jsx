@@ -7,11 +7,20 @@ export default function DetailsModalMagasin({ item, onClose }) {
   const telephoneProprio = "+22382083814";
   
   if (!item) return null;
-
+const getPositionLabel = (pos) => {
+  switch (String(pos)) {
+    case "0": return "Rez-de-chaussée";
+    case "1": return "Premier étage";
+    case "2": return "Deuxième étage";
+    case "3": return "Troisième étage";
+    case "4": return "Quatrième étage";
+    default: return "N/A";
+  }
+};
   const infos = [
     { Icon: MapPin, label: "Ville", value: item.quartier?.ville.nom },
     { Icon: Map, label: "Quartier", value: item.quartier?.nom },
-    { Icon: Locate, label: "Position", value: item.position },
+    { Icon: Locate, label: "Position", value: getPositionLabel(item.position) },
     { Icon: Bath, label: "Toilette interne", value: item.toiletteInterne, status: item.toiletteInterne },
     { Icon: Zap, label: "Compteurs EDM Separés", value: item.compteurEDMSepare, status: item.compteurEDMSepare },
     { Icon: Droplets, label: "Compteurs eau Separés", value: item.compteurEauSepare, status: item.compteurEauSepare},
@@ -32,10 +41,10 @@ export default function DetailsModalMagasin({ item, onClose }) {
           <div className="overflow-y-auto flex-1">
             {/* SLIDER */}
             <div className="relative">
-              <img src={item.images[currentIndex]} className="w-full h-72 object-cover" />
+              <img src={item.images[currentIndex]} className="w-full h-72 object-cover" alt="slide image"/>
               <div className="flex gap-2 justify-center p-2 bg-white/80">
                 {item.images.map((img, index) => (
-                  <img key={index} src={img} onClick={() => setCurrentIndex(index)} className={`h-10 w-16 rounded object-cover cursor-pointer border-2 transition ${currentIndex === index ? "border-black scale-105" : "border-gray-300"}`} />
+                  <img key={index} src={img} alt={`slide ${index + 1}`}  onClick={() => setCurrentIndex(index)} className={`h-10 w-16 rounded object-cover cursor-pointer border-2 transition ${currentIndex === index ? "border-black scale-105" : "border-gray-300"}`} />
                 ))}
               </div>
             </div>

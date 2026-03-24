@@ -3,17 +3,17 @@ import {Link} from "react-router-dom";
 
 const slides = [
   {
-    image: "/images/image1.jpg",
+    image: "/images/image1.webp",
     title: "Trouvez la maison de vos rêves",
     text: "Découvrez les plus belles villas et appartements à Bamako et partout au Mali.",
   },
   {
-    image: "/images/image2.jpg",
+    image: "/images/image2.webp",
     title: "Investissez dans un avenir sûr",
     text: "Des terrains bien situés, prêts pour vos projets immobiliers.",
   },
   {
-    image: "/images/image3.jpg",
+    image: "/images/image3.webp",
     title: "Louez en toute sérénité",
     text: "Appartements modernes et confortables pour un quotidien paisible.",
   },

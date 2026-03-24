@@ -135,7 +135,7 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess, agenceId = n
               <Home size={28} className="text-orange-600" />
             </div>
             <div>
-              <h2 className="sm:text-2xl font-black text-gray-900 tracking-tight">Ajouter une maison</h2>
+              <h2 className="sm:text-md font-black text-gray-900 tracking-tight">Ajouter une maison</h2>
               {/* <p className="text-gray-500 font-bold text-sm">Nouveau référencement immobilier</p> */}
             </div>
           </div>
@@ -278,13 +278,13 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess, agenceId = n
           )}
 
           <div className="flex items-center gap-4 pt-4 pb-2">
-            <button type="button" onClick={onClose} className="px-8 py-5 text-gray-500 font-black hover:text-black transition-colors">
+            <button type="button" onClick={onClose} className="px-8 py-4 text-gray-500 font-black hover:text-black transition-colors">
               ANNULER
             </button>
             <button 
               type="submit" 
               disabled={submitting}
-              className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+              className="flex-1 py-4 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-sm sm:text-lg shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
             >
               {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
               {submitting ? "ENREGISTREMENT..." : "PUBLIER"}

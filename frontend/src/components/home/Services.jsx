@@ -13,7 +13,7 @@ export default function Services() {
             transition={{ duration: 0.5 }}
             className="text-3xl sm:text-4xl font-bold mb-6 text-maliGreen drop-shadow-md"
           >
-            À propos de MaliLogement
+            À propos de ImmoMali
           </motion.h2>
 
           <motion.p
@@ -87,7 +87,7 @@ export default function Services() {
               {
                 icon: "💬",
                 title: "Assistance & conseils",
-                text: "Un accompagnement personnalisé tout au long de vos démarches.",
+                text: "Un accompagnement personnalisé tout au long de vos démarches administratives immobilières.",
                 color: "text-maliOrange",
               },
             ].map((service, i) => (
@@ -131,7 +131,7 @@ export default function Services() {
               },
               {
                 q: "Quels sont les frais d’utilisation ?",
-                a: "L’utilisation est gratuite pour les visiteurs. Les options premium sont disponibles pour les vendeurs.",
+                a: "Les annonces sont publiées gratuitement sans frais d'utilisation.",
               },
             ].map((faq, i) => (
               <motion.details

@@ -15,14 +15,17 @@ const AgenceSchema = new Schema({
     numero_telephone: {
         type: String,
         required: true,
+        unique: true,
     },
-    nomUtilisateur:{
-        type:String,
-        required:true,
-        unique:true,
-    },
+    // nomUtilisateur:{
+    //     type:String,
+    //     required:true,
+    //     unique:true,
+    // },
     email: {
         type: String,
+        unique: true,
+        default: null,
     },
     password: {
         type: String,

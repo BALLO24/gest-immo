@@ -77,7 +77,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await API.login({ nomUtilisateur, password });
+      const response = await API.login({ nomUtilisateur: nomUtilisateur.trim().replace(/\s+/g, ""), password });
       setLoading(false);
 
       if (response.success) {
@@ -127,11 +127,11 @@ export default function LoginPage() {
         <div className="hidden lg:flex flex-col justify-center gap-4 px-8 py-8 bg-white/10 rounded-2xl backdrop-blur-sm shadow-lg border border-white/20">
           <div>
             <h1 className="text-3xl font-extrabold text-white leading-tight">
-              Bienvenue sur <span className="text-maliOrange">MaliImmo</span>
+              Bienvenue sur <span className="text-maliOrange">ImmoMali</span>
             </h1>
             <p className="mt-1 text-sm text-white/90 max-w-md">Gère tes annonces et contacte les propriétaires en toute simplicité.</p>
           </div>
-          <div className="mt-4"><img src="/images/image1.jpg" alt="illustration" className="w-full rounded-lg object-cover h-32 shadow-inner" /></div>
+          <div className="mt-4"><img src="/images/image1.webp" alt="illustration" className="w-full rounded-lg object-cover h-32 shadow-inner" /></div>
         </div>
 
         <div className="bg-white sm:rounded-2xl shadow-2xl p-6 flex flex-col min-h-screen sm:min-h-0">
@@ -141,7 +141,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-3.5 flex-1">
             <label className="block text-sm">
               <span className="text-gray-700 font-medium">Nom d'utilisateur <span className="text-red-500">*</span></span>
-              <input type="text" value={nomUtilisateur} onChange={(e) => setNomUtilisateur(e.target.value)} className={`${inputBase} mt-1`} placeholder="Ex: abdoul24" />
+              <input type="text" value={nomUtilisateur} onChange={(e) => setNomUtilisateur(e.target.value)} className={`${inputBase} mt-1`} placeholder="Numéro de téléphone ou email" />
               {errors.nomUtilisateur && <p className="text-[10px] text-red-600 mt-0.5">{errors.nomUtilisateur}</p>}
             </label>
 

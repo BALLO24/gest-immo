@@ -3,6 +3,7 @@ import MaisonCard from "../cards/MaisonCard";
 import AppartementCard from "../cards/AppartementCard";
 import MagasinCard from "../cards/MagasinCard";
 import API from "../../api/API";
+import { Link } from "react-router-dom";
 
 // Définissez l'URL de base de votre serveur (ajustez selon votre config)
 const BASE_URL = "http://localhost:5000"; 
@@ -86,9 +87,9 @@ export default function ListeMaisons() {
         {/* Bouton Voir plus */}
         {!loading && habitations.length > 0 && (
           <div className="mt-16 text-center">
-            <button className="px-8 py-3 border-2 border-maliGreen text-maliGreen font-bold rounded-full hover:bg-maliGreen hover:text-white transition-all duration-300">
+            <Link to="./location" className="px-8 py-3 border-2 border-maliGreen text-maliGreen font-bold rounded-full hover:bg-maliGreen hover:text-white transition-all duration-300">
               Découvrir toutes les offres
-            </button>
+            </Link>
           </div>
         )}
       </div>

@@ -8,7 +8,6 @@ export default function Navbar() {
   const navBgStyle = "bg-maliSand/95 backdrop-blur-sm";
 
   const closeMenu = () => setMenuOpen(false);
-
   return (
     <nav className={`${navBgStyle} border-b border-maliOcre/20 sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,7 +19,7 @@ export default function Navbar() {
                 <path d="M3 10.5L12 4l9 6.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M6 10.5v7.5a1 1 0 001 1h3v-5h4v5h3a1 1 0 001-1v-7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="font-semibold text-lg text-maliGreen">MaliLogement</span>
+              <span className="font-semibold text-lg text-maliGreen">ImmoMali</span>
             </Link>
           </div>
 
@@ -29,6 +28,16 @@ export default function Navbar() {
             <Link to="/" className="text-maliGreen/90 hover:text-maliGreen font-medium transition-colors">Accueil</Link>
             <Link to="/location" className="text-maliGreen/80 hover:text-maliGreen font-medium transition-colors">A Louer</Link>
             <Link to="/vente" className="text-maliGreen/80 hover:text-maliGreen font-medium transition-colors">A Vendre</Link>
+
+            {/* Numéro de téléphone Desktop */}
+            <a href={`tel:${import.meta.env.VITE_NUMERO_WHATSAPP}`} className="flex items-center gap-2 text-maliGreen font-bold hover:text-maliOrange transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span className="text-sm">
+                {import.meta.env.VITE_NUMERO_WHATSAPP?.replace(/\s+/g, "").slice(4).match(/.{1,2}/g).join(" ")}
+              </span>
+            </a>
 
             {/* Bouton de connexion Desktop */}
             <Link 
@@ -62,7 +71,6 @@ export default function Navbar() {
       </div>
 
       {/* --- MENU MOBILE ANIMÉ --- */}
-      {/* Ici on réutilise navBgStyle pour garantir l'identité visuelle */}
       <div
         className={`md:hidden absolute top-16 left-0 w-full ${navBgStyle} border-b border-maliOcre/15 shadow-xl transform transition-all duration-300 ease-in-out ${
           menuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
@@ -73,6 +81,16 @@ export default function Navbar() {
           <Link to="/location" onClick={closeMenu} className="block text-maliGreen font-semibold text-lg border-b border-maliOcre/5 pb-2">Louer</Link>
           <Link to="/vente" onClick={closeMenu} className="block text-maliGreen font-semibold text-lg border-b border-maliOcre/5 pb-2">Vendre</Link>
           
+          {/* Numéro de téléphone Mobile */}
+          <a href={`tel:${import.meta.env.VITE_NUMERO_WHATSAPP}`} onClick={closeMenu} className="flex items-center gap-3 text-maliGreen font-bold text-lg pb-2 border-b border-maliOcre/5">
+            <svg className="w-5 h-5 text-maliOrange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+              <span className="text-sm">
+                {import.meta.env.VITE_NUMERO_WHATSAPP?.replace(/\s+/g, "").slice(4).match(/.{1,2}/g).join(" ")}
+              </span>
+          </a>
+
           {/* Se connecter style onglet */}
           <Link to="/login" onClick={closeMenu} className="flex items-center gap-3 text-maliOrange font-bold text-lg pb-2 border-b border-maliOcre/5">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +98,6 @@ export default function Navbar() {
             </svg>
             Se connecter
           </Link>
-
         </div>
       </div>
     </nav>

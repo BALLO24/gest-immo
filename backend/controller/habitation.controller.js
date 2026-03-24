@@ -136,6 +136,7 @@ module.exports.getAllHabitations = async (req, res) => {
       if (f.connexionInternet && f.connexionInternet !== "tous") critere.connexionInternet = f.connexionInternet;
       if (f.energieSecours && f.energieSecours !== "tous") critere.energieSecours = f.energieSecours;
       if (f.toiletteInterne && f.toiletteInterne !== "tous") critere.toiletteInterne = f.toiletteInterne;
+      if (f.typeTerrain && f.typeTerrain !== "tous") critere.typeTerrain = f.typeTerrain;
       if (f.documentTerrain && f.documentTerrain !== "tous") critere.documentTerrain = f.documentTerrain;
       if (f.hot) critere.hot = f.hot;
       if(f.statut && f.statut === "disponible") critere.statut = "disponible";

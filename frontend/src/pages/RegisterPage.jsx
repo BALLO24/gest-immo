@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const [nom_proprietaire, setNomProprietaire] = useState("");
   const [telephone, setTelephone] = useState("");
   const [email, setEmail] = useState("");
-  const [nomUtilisateur, setNomUtilisateur] = useState("");
+  // const [nomUtilisateur, setNomUtilisateur] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -44,7 +44,7 @@ export default function RegisterPage() {
     if (password.length < 8) err.password = "8 caractères min.";
     if (confirm !== password) err.confirm = "Les mots de passe diffèrent";
     if (!acceptedTerms) err.terms = "Veuillez accepter les conditions";
-    if (!nomUtilisateur.trim()) err.username = "Requis";
+    // if (!nomUtilisateur.trim()) err.username = "Requis";
     
     setErrors(err);
     if (Object.keys(err).length > 0) return;
@@ -53,18 +53,18 @@ export default function RegisterPage() {
     const agenceData = {
       nom_agence: nom_agence.trim(),
       nom_proprietaire: nom_proprietaire.trim(),
-      numero_telephone: telephone.trim(),
-      email: email.trim(),
-      nomUtilisateur: nomUtilisateur.trim(),
+      numero_telephone: telephone.trim().replace(/\s+/g, ""), // Nettoyer les espaces du numéro
+      //email: email.trim(),
+      email: email ? email.trim() : nom_agence.trim().toLowerCase().replace(/\s+/g, "")+ "@example.com", // Générer un email fictif si non fourni
+      // nomUtilisateur: nomUtilisateur.trim(),
       password: password,
     };
 
     try {
       const result = await API.register(agenceData);
       if (result.success) {
-        showToast("Compte créé ! Redirection vers la connexion...", "success");
+        showToast("Compte créé avec succès ! ");
         
-        // Redirection après 2 secondes pour laisser le temps de lire le toast
         setTimeout(() => {
           navigate("/login");
         }, 1000);
@@ -72,7 +72,7 @@ export default function RegisterPage() {
       } else {
         showToast(result.error || "Erreur lors de l'enregistrement", "error");
         setErrors({ submit: result.error });
-        setLoading(false); // On arrête le loading seulement en cas d'erreur
+        setLoading(false); 
       }
     } catch (error) {
       showToast("Erreur de connexion au serveur", "error");
@@ -95,7 +95,7 @@ export default function RegisterPage() {
         <div className="hidden lg:flex flex-col justify-center gap-4 px-8 py-8 bg-white/10 rounded-2xl backdrop-blur-sm shadow-lg border border-white/20">
           <div>
             <h1 className="text-3xl font-extrabold text-white leading-tight">
-              Rejoins <span className="text-maliOrange">MaliImmo</span>
+              Rejoins <span className="text-maliOrange">ImmoMali</span>
             </h1>
             <p className="mt-1 text-sm text-white/90 max-w-md">
               Crée un compte pour publier des annonces et suivre des biens.
@@ -112,7 +112,7 @@ export default function RegisterPage() {
             </li>
           </ul>
           <div className="mt-4">
-            <img src="/images/image1.jpg" alt="illustration" className="w-full rounded-lg object-cover h-32 shadow-inner" />
+            <img src="/images/image1.webp" alt="illustration" className="w-full rounded-lg object-cover h-32 shadow-inner" />
           </div>
         </div>
 
@@ -167,11 +167,11 @@ export default function RegisterPage() {
 
             <div className={`${step === 2 ? 'block' : 'hidden'} lg:block space-y-3 animate-in slide-in-from-right-4 duration-300`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <label className="block text-sm">
+                {/* <label className="block text-sm">
                   <span className="text-gray-700 font-medium">Nom d'utilisateur <span className="text-red-500">*</span></span>
                   <input className={`${inputBase} mt-1`} value={nomUtilisateur} onChange={(e) => setNomUtilisateur(e.target.value)} placeholder="abdoul24" />
                   {errors.username && <p className="text-[10px] text-red-600 mt-0.5">{errors.username}</p>}
-                </label>
+                </label> */}
                 
                 <label className="block text-sm relative">
                   <span className="text-gray-700 font-medium">Mot de passe <span className="text-red-500">*</span></span>

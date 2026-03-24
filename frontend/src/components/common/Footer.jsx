@@ -36,7 +36,7 @@ const Footer=()=>{
   </div>
 
   <div class="mt-10 text-center text-gray-500 text-sm">
-    &copy; 2025 Abdoul W. Tous droits réservés.
+   &copy; {new Date().getFullYear()} Abdoul W. Tous droits réservés.
   </div>
 </footer>
     )

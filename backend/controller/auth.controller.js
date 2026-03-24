@@ -6,7 +6,7 @@ const sendMail = require('../utils/sendMail');
 // Enregistrement d'une nouvelle agence
 module.exports.registerAgence=async(req,res)=>{
     try{
-        const { nom_agence, nom_proprietaire, numero_telephone, email, nomUtilisateur, password } = req.body;
+        const { nom_agence, nom_proprietaire, numero_telephone, email, password } = req.body;
         if (!nom_agence || !nom_proprietaire || !numero_telephone || !password) {
             return res.status(400).json({ success: false, message: "Tous les champs obligatoires doivent être remplis !" });
         }
@@ -14,9 +14,13 @@ module.exports.registerAgence=async(req,res)=>{
         if (existingAgence) {
             return res.status(400).json({ success: false, message: "Une agence avec ce nom existe déjà !" });
         }
-        const existingUser = await Agence.findOne({ nomUtilisateur });
-        if (existingUser) {
-            return res.status(400).json({ success: false, message: "Nom d'utilisateur déjà pris !" });
+        const existingPhone = await Agence.findOne({ numero_telephone });
+        if (existingPhone) {
+            return res.status(400).json({ success: false, message: "Numéro de téléphone déjà utilisé !" });
+        }
+        const existingEmail = await Agence.findOne({ email });
+        if (existingEmail) {
+            return res.status(400).json({ success: false, message: "Email déjà utilisé !" });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const newAgence = new Agence({
@@ -24,13 +28,12 @@ module.exports.registerAgence=async(req,res)=>{
             nom_proprietaire, 
             numero_telephone, 
             email,
-            nomUtilisateur,
             password: hashedPassword
         });
         await newAgence.save();
         await sendMail(
             "Bienvenue chez Gest-Immo !",
-            `<p>L'agence ${nom_agence},</p><p>de propriétaire "${nom_proprietaire}" a été enregistrée avec succès !.</p>`,
+            `<p>L'agence ${nom_agence},</p><p>de propriétaire "${nom_proprietaire}" de numéro de téléphone ${numero_telephone} a été enregistrée avec succès !.</p>`,
             "balloabdoul64@gmail.com"
         );
         res.status(201).json({ success: true, message: "Agence enregistrée avec succès !" });
@@ -43,10 +46,10 @@ module.exports.registerAgence=async(req,res)=>{
 module.exports.loginAgence=async(req,res)=>{
     try {    
         const { nomUtilisateur, password } = req.body;
-        if (!nomUtilisateur || !password) {
+        if (!nomUtilisateur || !password) {            
             return res.status(400).json({ success: false, message: "Nom d'utilisateur et mot de passe requis !" });
         }   
-        const agence = await Agence.findOne({ nomUtilisateur });
+        const agence = await Agence.findOne({ $or: [{ numero_telephone: nomUtilisateur }, { email: nomUtilisateur }] });
         if (!agence) {
             return res.status(400).json({ success: false, message: "Nom d'utilisateur ou mot de passe incorrect !" });
         }

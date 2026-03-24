@@ -31,10 +31,10 @@ export default function DetailsModalTerrain({ item, onClose }) {
           <div className="overflow-y-auto flex-1">
             {/* SLIDER */}
             <div className="relative">
-              <img src={item.images[currentIndex]} className="w-full h-72 object-cover" />
+              <img src={item.images[currentIndex]} className="w-full h-72 object-cover" alt="slide image"/>
               <div className="flex gap-2 justify-center p-2 bg-white/80">
                 {item.images.map((img, index) => (
-                  <img key={index} src={img} onClick={() => setCurrentIndex(index)} className={`h-10 w-16 rounded object-cover cursor-pointer border-2 transition ${currentIndex === index ? "border-black scale-105" : "border-gray-300"}`} />
+                  <img key={index} src={img} alt={`slide ${index + 1}`}  onClick={() => setCurrentIndex(index)} className={`h-10 w-16 rounded object-cover cursor-pointer border-2 transition ${currentIndex === index ? "border-black scale-105" : "border-gray-300"}`} />
                 ))}
               </div>
             </div>

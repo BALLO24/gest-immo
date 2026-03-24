@@ -72,15 +72,12 @@ export default function FilterList() {
     connexionInternet, energieSecours, toiletteInterne
   ]);
 
-  // Vérifier si des filtres sont actifs
   const checkFiltreActif = useCallback(() => {
     const filtre = buildFiltre();
-    // Exclure statut et aLouer qui sont toujours présents
     const { statut, aLouer, ...filtresReels } = filtre;
     return Object.values(filtresReels).some(value => value !== undefined && value !== "");
   }, [buildFiltre]);
 
-  // Mise à jour de filtreActif quand les filtres changent
   useEffect(() => {
     setFiltreActif(checkFiltreActif());
   }, [checkFiltreActif]);
@@ -88,7 +85,6 @@ export default function FilterList() {
   const fetchHabitations = async (filtre) => {
     setIsLoading(true);
     try {
-      // Nettoyer le filtre des valeurs undefined
       const filtrePropre = Object.fromEntries(
         Object.entries(filtre).filter(([_, value]) => value !== undefined && value !== "")
       );
@@ -151,7 +147,7 @@ export default function FilterList() {
 
   // Chargement initial
   useEffect(() => {
-    const initialFiltre = { statut: "disponible", aLouer: true };
+    const initialFiltre = { statut: "disponible", aLouer: true, limit:20 };
     fetchHabitations(initialFiltre);
     fetchVilles();
     fetchQuartiers();
@@ -178,8 +174,8 @@ export default function FilterList() {
     setTypePaiementAppart("mensuel");
     
     // Lancer une recherche avec les filtres réinitialisés
-    const filtre = { statut: "disponible", aLouer: true };
-    fetchHabitations(filtre);
+    // const filtre = { statut: "disponible", aLouer: true };
+    // fetchHabitations(filtre);
   };
 
   return (
@@ -273,7 +269,7 @@ export default function FilterList() {
                             setQuartierSelected("tous");
                           }}
                         >
-                          {/* <option className="text-gray-900" value="">Peu importe</option> */}
+                          <option className="text-gray-900" value="">Peu importe</option>
                           {ville.map(v => (
                             <option className="text-gray-900" key={v._id} value={v._id}>{v.nom}</option>
                           ))}
@@ -660,7 +656,7 @@ export default function FilterList() {
                       )}
 
                       {/* Meublé, Climatisation, etc. */}
-                      <div className="grid grid-cols-2 gap-3">
+                      {type==="appartement" && (<div className="grid grid-cols-2 gap-3">
                         <div className="flex flex-col animate-in fade-in">
                           <label className="text-white/90 text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Meublé</label>
                           <div className="relative">
@@ -700,10 +696,7 @@ export default function FilterList() {
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Connexion Internet, Energie Secours */}
-                      <div className="grid grid-cols-2 gap-3">
                         <div className="flex flex-col animate-in fade-in">
                           <label className="text-white/90 text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Internet</label>
                           <div className="relative">
@@ -743,7 +736,11 @@ export default function FilterList() {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </div>)}
+
+                      {/* Connexion Internet, Energie Secours
+                      <div className="grid grid-cols-2 gap-3">
+                      </div> */}
                     </div>
                   )}
 
@@ -789,7 +786,7 @@ export default function FilterList() {
                     setQuartierSelected("tous");
                   }}
                 >
-                  {/* <option className="text-gray-900" value="">Peu importe</option> */}
+                  <option className="text-gray-900" value="">Peu importe</option>
                   {ville.map(v => (
                     <option className="text-gray-900" key={v._id} value={v._id}>{v.nom}</option>
                   ))}
@@ -1141,6 +1138,7 @@ export default function FilterList() {
                 )}
 
                 {/* Meublé, Climatisation, etc. */}
+                {type==="appartement" && (<>
                 <div className="flex flex-col animate-in fade-in">
                   <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Meublé</label>
                   <div className="relative">
@@ -1219,7 +1217,8 @@ export default function FilterList() {
                       </svg>
                     </div>
                   </div>
-                </div>
+                  </div>
+                  </>)}
               </>
             )}
 
