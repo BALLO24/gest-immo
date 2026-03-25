@@ -24,7 +24,7 @@ module.exports.addHabitation = async (req, res) => {
         // 2. Conversion en WebP avec Sharp
         // On utilise le buffer fourni par multer
         const webpBuffer = await sharp(file.buffer)
-          .webp({ quality: 80 }) // Compression optimisée
+          .webp({ quality: 60 }) // Compression optimisée
           .toBuffer();
 
         // 3. Appel de la fonction utilitaire avec le nouveau buffer WebP

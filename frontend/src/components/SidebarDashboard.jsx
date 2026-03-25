@@ -79,11 +79,11 @@ const SidebarDashboard = () => {
         <div>
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10 px-2">
-            <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-orange-900/20">
-              M
+            <div aria-hidden="true">
+              <img  src="/logo.png" alt="logo immo" className="w-7 h-7 object-contain -mt-1 rounded-md" aria-hidden="true" />
             </div>
             <h1 className="text-xl font-black text-white tracking-tight">
-              Mali<span className="text-orange-500">Logement</span>
+              Immo<span className="text-orange-500">Mali</span>
             </h1>
           </div>
 
