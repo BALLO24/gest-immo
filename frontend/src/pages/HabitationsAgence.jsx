@@ -18,7 +18,6 @@ import MagasinCard from "../components/cards/MagasinCard";
 import TerrainCard from "../components/cards/TerrainCard";
 import API from "../api/API";
 
-// URL de base pour les images (à adapter selon ton backend)
 const BASE_URL = "http://localhost:5000"; 
 
 export default function HabitationsAgence() {
@@ -46,7 +45,6 @@ export default function HabitationsAgence() {
       const decodedToken = jwtDecode(token);
       const data = await API.getHabitationsByAgence(decodedToken.agenceId);
 
-      // Traitement des images pour s'assurer qu'elles s'affichent correctement
       const formattedData = data.map(item => ({
         ...item,
         images: item.images?.map(img => 
@@ -126,7 +124,8 @@ export default function HabitationsAgence() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-3 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden ring-1 ring-black ring-opacity-5">
+                /* CORRECTION ICI : left-0 md:left-auto md:right-0 pour éviter le débordement à gauche */
+                <div className="absolute left-0 md:left-auto md:right-0 mt-3 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden ring-1 ring-black ring-opacity-5">
                   {types.slice(1).map((t) => (
                     <button
                       key={t.name}
@@ -165,7 +164,7 @@ export default function HabitationsAgence() {
             />
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-center md:justify-start">
             {types.map((t) => (
               <button
                 key={t.name}
@@ -204,7 +203,6 @@ export default function HabitationsAgence() {
               <p className="text-gray-500">Essayez d'ajuster vos critères de recherche.</p>
             </div>
           ) : (
-            /* Grille optimisée : centrée sur mobile, colonnes sur desktop */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
               {habitationsFiltrees.map((habitation) => (
                 <div key={habitation._id} className="w-full flex justify-center">

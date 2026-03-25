@@ -117,11 +117,12 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
         {/* HEADER */}
         <div className="px-8 py-4 border-b-2 border-gray-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-green-100 p-2 rounded-2xl" aria-hidden="true">
-              <LandPlot size={28} className="text-green-600" />
+            <div aria-hidden="true">
+              {/* <Home size={28} className="text-orange-600" /> */}
+              <img src="/logo.png" alt="logo immo" className="w-7 h-7 object-contain -mt-1" aria-hidden="true" />
             </div>
             <h2 id={modalId} className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-              Ajouter un terrain
+              Terrain
             </h2>
           </div>
           <button 

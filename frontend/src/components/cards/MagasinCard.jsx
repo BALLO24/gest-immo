@@ -159,18 +159,18 @@ export default function MagasinCard({ magasin, onUpdate }) {
           
           <div className="flex items-center text-gray-600 text-sm mb-3 font-medium">
             <MapPin className="w-4 h-4 mr-1 text-maliOrange" aria-hidden="true" />
-            <span>{magasin.quartier?.ville?.nom}</span>
+            <span>Ville : {magasin.quartier?.ville?.nom}</span>
           </div>
           
           <div className="flex items-center text-gray-600 text-sm mb-3">
             <MapPinHouse className="w-4 h-4 mr-1 text-maliOrange" aria-hidden="true" />
-            <span>{magasin.quartier?.nom}</span>
+            <span>Quartier : {magasin.quartier?.nom}</span>
           </div>
 
-          <div className="text-gray-700 text-xs mb-4 flex flex-wrap gap-2" aria-label="Détails techniques">
-            <span className="bg-gray-100 px-2 py-1 rounded">EDM Séparé : {magasin.compteurEDMSepare ? 'Oui' : 'Non'}</span>
-            <span className="bg-gray-100 px-2 py-1 rounded">Eau Séparée : {magasin.compteurEauSepare ? 'Oui' : 'Non'}</span>
-            <span className="bg-gray-100 px-2 py-1 rounded">Toilette : {magasin.toiletteInterne ? 'Oui' : 'Non'}</span>
+          <div className="flex justify-between text-gray-700 text-sm mb-4" aria-label="Détails techniques">
+            <span className="px-2 py-1 rounded">EDM Séparé : {magasin.compteurEDMSepare ? 'Oui' : 'Non'}</span>
+            <span className="px-2 py-1 rounded">Eau Séparée : {magasin.compteurEauSepare ? 'Oui' : 'Non'}</span>
+            <span className="px-2 py-1 rounded">Toilette : {magasin.toiletteInterne ? 'Oui' : 'Non'}</span>
           </div>
 
           <div className="flex justify-between items-center mt-auto">

@@ -165,11 +165,11 @@ export default function TerrainCard({ terrain, onUpdate }) {
             {terrain.quartier?.nom}
           </div>
 
-          <div className="text-gray-700 text-xs mb-4 flex flex-wrap gap-2" aria-label="Caractéristiques techniques">
-            <span className="bg-gray-100 px-2 py-1 rounded">
+          <div className="flex justify-between text-gray-700 text-sm mb-4" aria-label="Caractéristiques techniques">
+            <span className="px-2 py-1 rounded">
               <span className="font-semibold">Dimension:</span> {terrain.dimensionTerrain || "N/A"}
             </span>
-            <span className="bg-gray-100 px-2 py-1 rounded">
+            <span className="px-2 py-1 rounded">
               <span className="font-semibold">Doc:</span> {terrain.documentTerrain || "N/A"}
             </span>
           </div>

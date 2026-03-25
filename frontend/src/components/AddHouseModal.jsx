@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import { 
-  Home, MapPin, Banknote, Users, Bath, Sofa, 
+  Home, Banknote, 
   Coffee, ShoppingBag, Zap, Droplet, Car, X, 
   Flame, Image as ImageIcon, CheckCircle2, AlertCircle, Loader2,
-  ChevronDown, Briefcase
+  ChevronDown,
 } from "lucide-react";
 import API from "../api/API";
 
@@ -123,11 +123,12 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess, agenceId = n
         {/* HEADER */}
         <div className="px-8 py-4 border-b-2 border-gray-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-2 rounded-2xl" aria-hidden="true">
-              <Home size={28} className="text-orange-600" />
+            <div className="" aria-hidden="true">
+              {/* <Home size={28} className="text-orange-600" /> */}
+              <img src="/logo.png" alt="logo immo" className="w-7 h-7 object-contain -mt-1" aria-hidden="true" />
             </div>
             <h2 id={modalTitleId} className="text-lg font-black text-gray-900 tracking-tight">
-              Ajouter une maison
+              Maison
             </h2>
           </div>
           <button 

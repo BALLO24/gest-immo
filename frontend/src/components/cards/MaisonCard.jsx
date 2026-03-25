@@ -145,11 +145,11 @@ export default function MaisonCard({ maison, onUpdate }) {
           <h3 className="text-md font-bold text-maliGreen mb-1">N° {idCourt}</h3>
           <div className="flex items-center text-gray-600 text-sm mb-2 font-medium">
             <MapPin className="w-4 h-4 mr-1 text-maliOrange" aria-hidden="true" /> 
-            <span>{maison.quartier?.ville?.nom}</span>
+            <span>Ville : {maison.quartier?.ville?.nom}</span>
           </div>
           <div className="flex items-center text-gray-600 text-sm mb-3">
             <MapPinHouse className="w-4 h-4 mr-1 text-maliOrange" aria-hidden="true" /> 
-            <span>{maison?.quartier?.nom}</span>
+            <span>Quartier : {maison?.quartier?.nom}</span>
           </div>
 
           <div className="flex justify-between text-gray-700 text-sm mb-4" aria-label="Caractéristiques de la maison">

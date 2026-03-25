@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { 
-  Home, MapPin, Banknote, Users, Bath, Sofa, 
-  Coffee, ShoppingBag, Zap, Droplet, Car, X, 
+   MapPin, Banknote, Sofa, 
+  Coffee, Zap, X, 
   Flame, Image as ImageIcon, CheckCircle2, AlertCircle, Loader2,
-  ChevronDown, Wifi, Wind, Waves, Trees, Monitor
+  ChevronDown, Wifi, Wind, Monitor
 } from "lucide-react";
 import API from "../api/API";
 
@@ -27,10 +27,8 @@ export default function AddAppartementModal({ isOpen, onClose, onSuccess, agence
     cuisine: false,
     magasin: false,
     jardin: false,
-    // piscine: false,
     meuble: false,
     climatisation: false,
-    // balcon: false,
     connexionInternet: false,
     energieSecours: false,
     coursUnique: false,
@@ -143,11 +141,12 @@ export default function AddAppartementModal({ isOpen, onClose, onSuccess, agence
         {/* HEADER */}
         <div className="px-8 py-2 border-b-2 border-gray-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-2 rounded-2xl">
-              <Sofa size={28} className="text-orange-600" />
+            <div aria-hidden="true">
+              {/* <Home size={28} className="text-orange-600" /> */}
+              <img src="/logo.png" alt="logo immo" className="w-7 h-7 object-contain -mt-1" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="sm:text-xl font-black text-gray-900 tracking-tight">Ajouter un appartement</h2>
+              <h2 className="sm:text-xl font-black text-gray-900 tracking-tight">Appartement</h2>
               {/* <p className="text-gray-500 font-bold text-sm">Nouveau référencement immobilier</p> */}
             </div>
           </div>
@@ -257,9 +256,6 @@ export default function AddAppartementModal({ isOpen, onClose, onSuccess, agence
               <OptionCard label="Meublé" checked={form.meuble} icon={Monitor} onChange={(v) => handleChange("meuble", v)} />
               <OptionCard label="Clim" checked={form.climatisation} icon={Wind} onChange={(v) => handleChange("climatisation", v)} />
               <OptionCard label="Wifi" checked={form.connexionInternet} icon={Wifi} onChange={(v) => handleChange("connexionInternet", v)} />
-              {/* <OptionCard label="Piscine" checked={form.piscine} icon={Waves} onChange={(v) => handleChange("piscine", v)} /> */}
-              {/* <OptionCard label="Jardin" checked={form.jardin} icon={Trees} onChange={(v) => handleChange("jardin", v)} /> */}
-              {/* <OptionCard label="Balcon" checked={form.balcon} icon={Home} onChange={(v) => handleChange("balcon", v)} /> */}
               <OptionCard label="Groupe" checked={form.energieSecours} icon={Zap} onChange={(v) => handleChange("energieSecours", v)} />
               <OptionCard label="Unique" checked={form.coursUnique} icon={MapPin} onChange={(v) => handleChange("coursUnique", v)} />
               <OptionCard label="🔥 HOT" checked={form.hot} icon={Flame} onChange={(v) => handleChange("hot", v)} isHot />
