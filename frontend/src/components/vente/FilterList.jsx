@@ -6,7 +6,7 @@ import MagasinCard from "../cards/MagasinCard";
 import TerrainCard from "../cards/TerrainCard";
 
 export default function FilterList() {
-  // --- TOUTES TES VARIABLES CONSERVÉES ---
+  // --- ÉTATS ---
   const [habitations, setHabitations] = useState([]);
   const [filterVisible, setFilterVisible] = useState(false);
   const [ville, setVille] = useState([]);
@@ -22,10 +22,12 @@ export default function FilterList() {
   const [nbreSalon, setNbreSalon] = useState("");
   const [nbreChambres, setNbreChambres] = useState("");
   const [nombreDouche, setNombreDouche] = useState("");
-  
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fonction pour réinitialiser tous les filtres
+  // --- LOGIQUE D'ACCESSIBILITÉ ET DÉPENDANCE ---
+  // Le quartier est désactivé si aucune ville n'est sélectionnée (chaîne vide)
+  const isQuartierDisabled = !villeSelected || villeSelected === "";
+
   const resetAllFilters = () => {
     setVilleSelected("");
     setQuartierSelected("tous");
@@ -39,12 +41,8 @@ export default function FilterList() {
     setNbreChambres("");
     setNombreDouche("");
     setFilterVisible(false);
-    
-    // Recharge les données initiales
-    // fetchHabitations({ statut: "disponible", aLouer: false });
   };
 
-  // Vérifie si un filtre est différent de sa valeur par défaut pour afficher le bouton reset
   const isFiltered = villeSelected !== "" || quartierSelected !== "tous" || type !== "tous" || prixMin !== 0 || prixMax !== Infinity;
 
   const fetchHabitations = async (filtre) => {
@@ -79,9 +77,7 @@ export default function FilterList() {
 
   const manageBtnFilterVisibility = (visible) => {
     setFilterVisible(!visible);
-    if (!visible === false) {
-      setMagasin("tous");
-    }
+    if (visible) setMagasin("tous"); // Reset si on ferme
   };
 
   useEffect(() => {
@@ -117,9 +113,9 @@ export default function FilterList() {
       prixMax: prixMax === Infinity ? null : Number(prixMax),
       magasin: magasin !== "tous" ? magasin : "tous",
       documentTerrain: documentTerrain !== "tous" ? documentTerrain : "tous",
-      nbreSalon: nbreSalon !== "tous" ? Number(nbreSalon) : "tous",
-      nbreChambres: nbreChambres !== "tous" ? Number(nbreChambres) : "tous",
-      nombreDouche: nombreDouche !== "tous" ? Number(nombreDouche) : "tous",
+      nbreSalon: nbreSalon !== "" ? Number(nbreSalon) : "tous",
+      nbreChambres: nbreChambres !== "" ? Number(nbreChambres) : "tous",
+      nombreDouche: nombreDouche !== "" ? Number(nombreDouche) : "tous",
     };
     fetchHabitations(filtre);
   };
@@ -131,17 +127,16 @@ export default function FilterList() {
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
             <div className="space-y-1">
               <h2 className="text-white text-2xl sm:text-4xl font-extrabold tracking-tight drop-shadow-lg">
-                Trouvez le bien parfait <span className="inline-block hover:animate-bounce">🏠</span>
+                Trouvez le bien parfait <span className="inline-block hover:animate-bounce" aria-hidden="true">🏠</span>
               </h2>
               <p className="text-white/80 text-sm sm:text-base font-medium">Explorez nos maisons, magasins et terrains disponibles</p>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {/* Bouton Réinitialiser (visible si filtres actifs) */}
               {isFiltered && (
                 <button
                   onClick={resetAllFilters}
-                  className="flex items-center justify-center gap-2 py-2.5 px-5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-full border border-white/30 backdrop-blur-md transition-all shadow-lg"
+                  className="flex items-center justify-center gap-2 py-2.5 px-5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-full border border-white/30 backdrop-blur-md transition-all shadow-lg focus:ring-2 focus:ring-white outline-none"
                 >
                   Réinitialiser
                 </button>
@@ -150,10 +145,11 @@ export default function FilterList() {
               {type !== "tous" && (
                 <button
                   type="button"
+                  aria-expanded={filterVisible}
                   onClick={() => manageBtnFilterVisibility(filterVisible)}
-                  className="flex items-center justify-center gap-2 py-2.5 px-5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-full border border-white/30 backdrop-blur-md transition-all duration-300 active:scale-95 shadow-lg"
+                  className="flex items-center justify-center gap-2 py-2.5 px-5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-full border border-white/30 backdrop-blur-md transition-all duration-300 active:scale-95 shadow-lg focus:ring-2 focus:ring-white outline-none"
                 >
-                  <span className={`w-2 h-2 rounded-full ${filterVisible ? 'bg-red-400' : 'bg-green-400 animate-pulse'}`}></span>
+                  <span className={`w-2 h-2 rounded-full ${filterVisible ? 'bg-red-400' : 'bg-green-400 animate-pulse'}`} aria-hidden="true"></span>
                   {filterVisible ? 'Masquer les filtres' : 'Filtres avancés'}
                 </button>
               )}
@@ -163,13 +159,14 @@ export default function FilterList() {
           <form onSubmit={handleSubmit} className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
             {/* Ville */}
             <div className="flex flex-col">
-              <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Ville</label>
+              <label htmlFor="ville-select" className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Ville</label>
               <select
-                className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none appearance-none cursor-pointer"
+                id="ville-select"
+                className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none appearance-none cursor-pointer focus:border-white/50"
                 value={villeSelected}
                 onChange={(e) => {
                   setVilleSelected(e.target.value);
-                  setQuartierSelected("tous");
+                  setQuartierSelected("tous"); // Reset quartier quand la ville change
                 }}
               >
                 <option className="text-gray-900" value="">Peu importe</option>
@@ -177,25 +174,36 @@ export default function FilterList() {
               </select>
             </div>
 
-            {/* Quartier */}
+            {/* Quartier (Désactivé si pas de ville) */}
             <div className="flex flex-col">
-              <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Quartier</label>
+              <label 
+                htmlFor="quartier-select" 
+                className={`text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1 transition-opacity ${isQuartierDisabled ? 'opacity-50' : 'opacity-100'}`}
+              >
+                Quartier {isQuartierDisabled && <span className="sr-only">(Désactivé : sélectionnez une ville d'abord)</span>}
+              </label>
               <select
-                className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none cursor-pointer"
+                id="quartier-select"
+                disabled={isQuartierDisabled}
+                aria-disabled={isQuartierDisabled}
+                className={`w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none cursor-pointer transition-all ${isQuartierDisabled ? 'opacity-50 cursor-not-allowed grayscale-[0.5]' : 'opacity-100'}`}
                 onChange={(e) => setQuartierSelected(e.target.value)}
                 value={quartierSelected}
               >
                 <option className="text-gray-900" value="tous">Peu importe</option>
-                {Array.isArray(quartiers) && quartiers.filter(q => !villeSelected || q.ville?._id === villeSelected).map(q => (
-                  <option className="text-gray-900" key={q._id} value={q._id}>{q.nom}</option>
-                ))}
+                {!isQuartierDisabled && Array.isArray(quartiers) && quartiers
+                  .filter(q => q.ville?._id === villeSelected)
+                  .map(q => (
+                    <option className="text-gray-900" key={q._id} value={q._id}>{q.nom}</option>
+                  ))
+                }
               </select>
             </div>
 
             {/* Type */}
             <div className="flex flex-col">
-              <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Type de bien</label>
-              <select className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={type} onChange={(e) => setType(e.target.value)}>
+              <label htmlFor="type-select" className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Type de bien</label>
+              <select id="type-select" className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={type} onChange={(e) => setType(e.target.value)}>
                 <option value="tous" className="text-gray-900">Peu importe</option>
                 <option value="maison" className="text-gray-900">Maison</option>
                 <option value="magasin" className="text-gray-900">Magasin</option>
@@ -203,10 +211,10 @@ export default function FilterList() {
               </select>
             </div>
 
-            {type ==="terrain" && (
+            {type === "terrain" && (
               <div className="flex flex-col animate-in slide-in-from-left-2">
-                <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Type de terrain</label>
-                <select className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={typeTerrain} onChange={(e) => setTypeTerrain(e.target.value)}>
+                <label htmlFor="terrain-type" className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Type de terrain</label>
+                <select id="terrain-type" className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={typeTerrain} onChange={(e) => setTypeTerrain(e.target.value)}>
                   <option value="tous" className="text-gray-900">Peu importe</option>
                   <option value="residentiel" className="text-gray-900">Résidentiel</option>
                   <option value="agricole" className="text-gray-900">Agricole</option>
@@ -216,14 +224,14 @@ export default function FilterList() {
 
             {/* Prix Min */}
             <div className="flex flex-col">
-              <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Prix Min</label>
-              <input type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={prixMin === 0 ? "" : prixMin} onChange={(e) => setPrixMin(e.target.value)} />
+              <label htmlFor="prix-min" className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Prix Min</label>
+              <input id="prix-min" type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={prixMin === 0 ? "" : prixMin} onChange={(e) => setPrixMin(e.target.value)} />
             </div>
 
             {/* Prix Max */}
             <div className="flex flex-col">
-              <label className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Prix Max</label>
-              <input type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={prixMax === Infinity ? "" : prixMax} onChange={(e) => setPrixMax(e.target.value)} />
+              <label htmlFor="prix-max" className="text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 ml-1">Prix Max</label>
+              <input id="prix-max" type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={prixMax === Infinity ? "" : prixMax} onChange={(e) => setPrixMax(e.target.value)} />
             </div>
 
             {/* FILTRES AVANCÉS */}
@@ -232,23 +240,23 @@ export default function FilterList() {
                 {type === "maison" && (
                   <>
                     <div className="flex flex-col animate-in fade-in slide-in-from-top-2">
-                      <label className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Salon</label>
-                      <input type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={nbreSalon} onChange={(e) => setNbreSalon(e.target.value)} />
+                      <label htmlFor="salon-input" className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Salon</label>
+                      <input id="salon-input" type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={nbreSalon} onChange={(e) => setNbreSalon(e.target.value)} />
                     </div>
                     <div className="flex flex-col animate-in fade-in slide-in-from-top-2">
-                      <label className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Chambres</label>
-                      <input type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={nbreChambres} onChange={(e) => setNbreChambres(e.target.value)} />
+                      <label htmlFor="chambre-input" className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Chambres</label>
+                      <input id="chambre-input" type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={nbreChambres} onChange={(e) => setNbreChambres(e.target.value)} />
                     </div>
                     <div className="flex flex-col animate-in fade-in slide-in-from-top-2">
-                      <label className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Toilettes</label>
-                      <input type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={nombreDouche} onChange={(e) => setNombreDouche(e.target.value)} />
+                      <label htmlFor="douche-input" className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Toilettes</label>
+                      <input id="douche-input" type="number" className="w-full h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={nombreDouche} onChange={(e) => setNombreDouche(e.target.value)} />
                     </div>
                   </>
                 )}
                 {(type === "maison" || type === "magasin" || type === "terrain") && (
                   <div className="flex flex-col animate-in fade-in slide-in-from-top-2">
-                    <label className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Document</label>
-                    <select className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={documentTerrain} onChange={(e) => setDocumentTerrain(e.target.value)}>
+                    <label htmlFor="doc-select" className="text-white/90 text-[10px] font-bold uppercase mb-1.5 ml-1">Document</label>
+                    <select id="doc-select" className="w-full h-11 px-3 rounded-xl border border-white/20 bg-white/10 text-white outline-none" value={documentTerrain} onChange={(e) => setDocumentTerrain(e.target.value)}>
                       <option value="tous" className="text-gray-900">Peu importe</option>
                       <option value="Titre Foncier" className="text-gray-900">Titre Foncier</option>
                       <option value="Permis" className="text-gray-900">Permis</option>
@@ -262,8 +270,8 @@ export default function FilterList() {
             )}
 
             <div className="flex items-end col-span-2 sm:col-span-2 md:col-span-1">
-              <button type="submit" className="w-full h-11 bg-maliOrange hover:bg-maliOrange/90 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button type="submit" className="w-full h-11 bg-maliOrange hover:bg-maliOrange/90 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 focus:ring-2 focus:ring-white">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 Rechercher
@@ -278,11 +286,12 @@ export default function FilterList() {
           <h2 className="text-center text-2xl font-bold text-gray-800 mb-8">Biens disponibles à la vente</h2>
 
           {isLoading ? (
-            <div className="flex justify-center items-center py-20">
+            <div className="flex justify-center items-center py-20" aria-busy="true" aria-live="polite">
               <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-maliOrange"></div>
+              <span className="sr-only">Chargement des résultats...</span>
             </div>
           ) : habitations.length === 0 ? (
-            <div className="text-center text-gray-600 py-10">
+            <div className="text-center text-gray-600 py-10" role="status">
               Aucun résultat trouvé 😕
               <p className="text-sm text-gray-500">Modifiez vos filtres.</p>
             </div>

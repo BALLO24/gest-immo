@@ -7,3 +7,8 @@
     @apply bg-maliSand ;
   }
 }
+/* Dans index.css */
+:focus-visible {
+  outline: 2px solid #EA580C; /* Orange ImmoMali */
+  outline-offset: 2px;
+}

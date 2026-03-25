@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import { 
-  Store, MapPin, Banknote, Bath, X, Flame, 
+  Store, Banknote, X, Flame, 
   Image as ImageIcon, CheckCircle2, AlertCircle, 
-  Loader2, ChevronDown, Zap, Droplet, MessageSquare
+  Loader2, ChevronDown, Zap, Droplet
 } from "lucide-react";
 import API from "../api/API";
 
 export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId = null }) {
   const initialState = {
-    // titre: "",
     agence: agenceId || "",
     quartier: "",
     aLouer: true,
     prix: "",
     images: [],
     hot: false,
-    toiletteInterne: "",
+    toiletteInterne: "0",
     statut: "disponible",
     position: "",
     compteurEDMSepare: false,
@@ -32,6 +31,9 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
   const [villes, setVilles] = useState([]);
   const [quartiers, setQuartiers] = useState([]);
   const [villeSelected, setVilleSelected] = useState("");
+
+  const modalId = useId();
+  const priceInputId = useId();
 
   useEffect(() => {
     if (isOpen) {
@@ -71,26 +73,19 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
     setError(null);
 
     if (!form.quartier || !form.prix || !form.agence) {
-      setError("Veuillez remplir au minimum le nom de l'agence, le quartier et le prix.");
+      setError("Veuillez remplir au minimum l'agence, le quartier et le prix.");
       return;
     }
 
     const fd = new FormData();
     fd.append("type", "magasin");
-    fd.append("agence", form.agence);
-    // fd.append("titre", form.titre);
-    fd.append("quartier", form.quartier);
-    fd.append("aLouer", form.aLouer);
-    fd.append("prix", form.prix);
-    fd.append("position", form.position || "");
-    fd.append("toiletteInterne", form.toiletteInterne || 0);
-    fd.append("hot", form.hot);
-    fd.append("statut", form.statut);
-    fd.append("compteurEDMSepare", form.compteurEDMSepare);
-    fd.append("compteurEauSepare", form.compteurEauSepare);
-    fd.append("description", form.description);
-    //fd.append("toiletteInterne", form.toiletteInterne);
+    
+    // Append all text/boolean fields
+    Object.keys(form).forEach(key => {
+      if (key !== 'images') fd.append(key, form[key]);
+    });
 
+    // Append images
     form.images.forEach((file) => fd.append("images", file));
 
     try {
@@ -113,21 +108,29 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-      <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200">
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4"
+      role="dialog"
+      aria-labelledby={modalId}
+      aria-modal="true"
+    >
+      <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200 animate-in fade-in zoom-in duration-200">
         
         {/* HEADER */}
-        <div className="px-8 py-2 border-b-2 border-gray-100 flex justify-between items-center bg-white">
+        <div className="px-8 py-4 border-b-2 border-gray-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-2 rounded-2xl">
+            <div className="bg-orange-100 p-2 rounded-2xl" aria-hidden="true">
               <Store size={28} className="text-orange-600" />
             </div>
-            <div>
-              <h2 className="sm:text-2xl font-black text-gray-900 tracking-tight">Ajouter un magasin</h2>
-              {/* <p className="text-gray-500 font-bold text-sm">Nouvel espace commercial</p> */}
-            </div>
+            <h2 id={modalId} className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+              Ajouter un magasin
+            </h2>
           </div>
-          <button onClick={onClose} className="p-3 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black">
+          <button 
+            onClick={onClose} 
+            className="p-3 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black outline-none focus:ring-2 focus:ring-orange-500"
+            aria-label="Fermer"
+          >
             <X size={28} strokeWidth={3} />
           </button>
         </div>
@@ -139,12 +142,12 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
             <div className="space-y-6">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-orange-600 mb-4">01. Localisation & Agence</h3>
               
-              {/* <InputBlock label="Nom du Magasin / Titre" icon={Store} value={form.titre} onChange={(v) => handleChange("titre", v)} placeholder="Ex: Boutique Prêt-à-porter" /> */}
-              
-              {agenceId === null && <SelectBlock label="Agence" value={form.agence} onChange={(v) => handleChange("agence", v)}>
-                <option value="">Sélectionner une agence</option>
-                {agences.map(a => <option key={a._id} value={a._id}>{a.nom_agence}</option>)}
-              </SelectBlock>}
+              {agenceId === null && (
+                <SelectBlock label="Agence" value={form.agence} onChange={(v) => handleChange("agence", v)} required>
+                  <option value="">Sélectionner une agence</option>
+                  {agences.map(a => <option key={a._id} value={a._id}>{a.nom_agence}</option>)}
+                </SelectBlock>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <SelectBlock label="Ville" value={villeSelected} onChange={(v) => { setVilleSelected(v); handleChange("quartier", ""); }}>
@@ -152,7 +155,7 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
                   {villes.map(v => <option key={v._id} value={v._id}>{v.nom}</option>)}
                 </SelectBlock>
                 
-                <SelectBlock label="Quartier" value={form.quartier} onChange={(v) => handleChange("quartier", v)} disabled={!villeSelected}>
+                <SelectBlock label="Quartier" value={form.quartier} onChange={(v) => handleChange("quartier", v)} disabled={!villeSelected} required>
                   <option value="">Sélectionner</option>
                   {quartiers.filter(q => q.ville?._id === villeSelected).map(q => (
                     <option key={q._id} value={q._id}>{q.nom}</option>
@@ -162,9 +165,10 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
 
               {/* Transaction & Prix */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-black text-gray-900 ml-1">Prix & Type</label>
+                <label htmlFor={priceInputId} className="text-sm font-black text-gray-900 ml-1">Prix & Type</label>
                 <div className="flex items-stretch border-2 border-gray-300 rounded-2xl overflow-hidden focus-within:border-orange-600 transition-all shadow-sm">
                   <select 
+                    aria-label="Type de transaction"
                     value={form.aLouer} 
                     onChange={(e) => handleChange("aLouer", e.target.value === "true")}
                     className="bg-gray-50 border-r-2 border-gray-300 px-4 text-sm font-black text-gray-900 outline-none cursor-pointer"
@@ -173,8 +177,16 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
                     <option value="false">Vente</option>
                   </select>
                   <div className="relative flex-1 bg-white flex items-center">
-                    <Banknote className="ml-4 text-gray-400" size={20} />
-                    <input type="number" placeholder="Prix (XOF)" className="w-full pl-3 pr-4 py-4 text-lg font-black text-gray-900 outline-none" value={form.prix} onChange={(e) => handleChange("prix", e.target.value)} />
+                    <Banknote className="ml-4 text-gray-400" size={20} aria-hidden="true" />
+                    <input 
+                      id={priceInputId}
+                      type="number" 
+                      placeholder="Prix (FCFA)" 
+                      required
+                      className="w-full pl-3 pr-4 py-4 text-lg font-black text-gray-900 outline-none" 
+                      value={form.prix} 
+                      onChange={(e) => handleChange("prix", e.target.value)} 
+                    />
                   </div>
                 </div>
               </div>
@@ -185,18 +197,13 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-orange-600 mb-4">02. Caractéristiques</h3>
               
               <div className="grid grid-cols-2 gap-4">
-                <NumberBox label="Toilettes interne" value={form.toiletteInterne} onChange={(v) => handleChange("toiletteInterne", v)} />
-                {/* <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black text-gray-500 text-center uppercase tracking-tighter">Toilettes Internes</label>
-                  <select 
-                    value={form.toiletteInterne} 
-                    onChange={(e) => handleChange("toiletteInterne", e.target.value === "true")}
-                    className="w-full bg-gray-50 border-2 border-gray-300 rounded-2xl py-4 px-4 text-center font-black text-gray-900 text-base focus:border-orange-600 outline-none"
-                  >
-                    <option value="true">OUI</option>
-                    <option value="false">NON</option>
-                  </select>
-                </div> */}
+                <NumberBox label="Toilettes internes" value={form.toiletteInterne} onChange={(v) => handleChange("toiletteInterne", v)} />
+                <SelectBlock label="Position" value={form.position} onChange={(v) => handleChange("position", v)}>
+                  <option value="">Sélectionner</option>
+                  <option value="0">Rez-de-chaussée</option>
+                  <option value="1">1er étage</option>
+                  <option value="2">En galerie / Centre</option>
+                </SelectBlock>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -214,7 +221,7 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
           {/* COMMODITÉS */}
           <div className="pt-6 border-t-2 border-gray-100">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">03. Installations & Options</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" role="group" aria-label="Commodités">
               <OptionCard label="Compteur EDM Séparé" checked={form.compteurEDMSepare} icon={Zap} onChange={(v) => handleChange("compteurEDMSepare", v)} />
               <OptionCard label="Compteur Eau Séparé" checked={form.compteurEauSepare} icon={Droplet} onChange={(v) => handleChange("compteurEauSepare", v)} />
               <OptionCard label="🔥 TOP EMPLACEMENT" checked={form.hot} icon={Flame} onChange={(v) => handleChange("hot", v)} isHot />
@@ -226,15 +233,21 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
             <h3 className="text-xs font-black text-gray-900 uppercase mb-4 text-center">Photos Vitrine (Max 3)</h3>
             <div className="flex flex-wrap justify-center gap-4">
               {previewImages.length < 3 && (
-                <label className="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-400 bg-white hover:border-orange-600 transition-all cursor-pointer flex flex-col items-center justify-center group">
-                  <ImageIcon size={32} className="text-gray-300 group-hover:text-orange-600 transition-colors" />
+                <label className="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-400 bg-white hover:border-orange-600 transition-all cursor-pointer flex flex-col items-center justify-center group focus-within:ring-2 focus-within:ring-orange-500">
+                  <ImageIcon size={32} className="text-gray-300 group-hover:text-orange-600 transition-colors" aria-hidden="true" />
+                  <span className="sr-only">Ajouter une photo</span>
                   <input type="file" multiple accept="image/*" onChange={handleImages} className="hidden" />
                 </label>
               )}
               {previewImages.map((src, i) => (
                 <div key={i} className="relative w-28 h-28 rounded-2xl overflow-hidden shadow-lg border-2 border-white group">
-                  <img src={src} className="w-full h-full object-cover" alt="preview" />
-                  <button type="button" onClick={() => removeImage(i)} className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <img src={src} className="w-full h-full object-cover" alt={`Aperçu ${i+1}`} />
+                  <button 
+                    type="button" 
+                    onClick={() => removeImage(i)} 
+                    className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity outline-none"
+                    aria-label="Supprimer l'image"
+                  >
                     <X size={28} strokeWidth={3} />
                   </button>
                 </div>
@@ -243,23 +256,36 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
           </div>
 
           {error && (
-            <div className="p-4 bg-red-600 text-white rounded-2xl flex items-center gap-3 font-black text-sm shadow-lg shadow-red-200">
-              <AlertCircle size={20} strokeWidth={3} /> {error}
+            <div role="alert" className="p-4 bg-red-600 text-white rounded-2xl flex items-center gap-3 font-black text-sm shadow-lg shadow-red-200">
+              <AlertCircle size={20} strokeWidth={3} aria-hidden="true" /> {error}
             </div>
           )}
 
           {/* ACTIONS */}
           <div className="flex items-center gap-4 pt-4 pb-2">
-            <button type="button" onClick={onClose} className="px-8 py-4 text-gray-500 font-black hover:text-black transition-colors">
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="px-8 py-4 text-gray-500 font-black hover:text-black transition-colors focus:outline-none focus:underline"
+            >
               ANNULER
             </button>
             <button 
               type="submit" 
               disabled={submitting}
-              className="flex-1 py-4 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-md shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+              className="flex-1 py-4 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-md shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 outline-none focus:ring-4 focus:ring-orange-200"
             >
-              {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
-              {submitting ? "ENREGISTREMENT..." : "PUBLIER"}
+              {submitting ? (
+                <>
+                  <Loader2 className="animate-spin" size={24} aria-hidden="true" />
+                  <span>ENREGISTREMENT...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={24} aria-hidden="true" />
+                  <span>PUBLIER L'ANNONCE</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -269,30 +295,16 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
   );
 }
 
-// COMPOSANTS REUTILISABLES (Design System)
-function InputBlock({ label, icon: Icon, value, onChange, placeholder }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-black text-gray-900 ml-1">{label}</label>
-      <div className="relative">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={22} />
-        <input 
-          type="text" value={value} 
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full bg-white border-2 border-gray-300 rounded-2xl pl-12 pr-4 py-4 text-gray-900 font-bold text-base focus:border-orange-600 outline-none transition-all shadow-sm"
-        />
-      </div>
-    </div>
-  );
-}
-
+// COMPOSANTS REUTILISABLES
 function NumberBox({ label, value, onChange }) {
+  const id = useId();
   return (
     <div className="flex flex-col gap-2 flex-1">
-      <label className="text-[10px] font-black text-gray-500 text-center uppercase tracking-tighter">{label}</label>
+      <label htmlFor={id} className="text-[10px] font-black text-gray-500 text-center uppercase tracking-tighter">{label}</label>
       <input 
-        type="number" value={value} 
+        id={id}
+        type="number" 
+        value={value} 
         onChange={(e) => onChange(e.target.value)}
         className="w-full bg-gray-50 border-2 border-gray-300 rounded-2xl py-4 text-center font-black text-gray-900 text-xl focus:border-orange-600 outline-none transition-all"
         placeholder="0"
@@ -301,20 +313,24 @@ function NumberBox({ label, value, onChange }) {
   );
 }
 
-function SelectBlock({ label, value, onChange, children, disabled }) {
+function SelectBlock({ label, value, onChange, children, disabled, required }) {
+  const id = useId();
   return (
     <div className="flex flex-col gap-2 flex-1">
-      <label className="text-sm font-black text-gray-900 ml-1">{label}</label>
+      <label htmlFor={id} className={`text-sm font-black text-gray-900 ml-1 ${disabled ? 'opacity-50' : ''}`}>
+        {label} {required && <span className="text-orange-600">*</span>}
+      </label>
       <div className="relative">
         <select 
+          id={id}
           value={value} 
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className="w-full appearance-none bg-white border-2 border-gray-300 rounded-2xl px-5 py-4 text-gray-900 font-bold text-base focus:border-orange-600 outline-none disabled:bg-gray-100 cursor-pointer transition-all shadow-sm"
+          className="w-full appearance-none bg-white border-2 border-gray-300 rounded-2xl px-5 py-4 text-gray-900 font-bold text-base focus:border-orange-600 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed cursor-pointer transition-all shadow-sm"
         >
           {children}
         </select>
-        <ChevronDown size={22} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+        <ChevronDown size={22} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" aria-hidden="true" />
       </div>
     </div>
   );
@@ -325,13 +341,14 @@ function OptionCard({ label, checked, onChange, icon: Icon, isHot }) {
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all ${
+      aria-pressed={checked}
+      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all outline-none focus:ring-2 focus:ring-orange-400 ${
         checked 
           ? (isHot ? "bg-orange-600 border-orange-600 text-white shadow-lg" : "bg-gray-900 border-gray-900 text-white") 
           : "bg-white border-gray-200 text-gray-400 hover:border-gray-400 hover:text-gray-600 shadow-sm"
       }`}
     >
-      <Icon size={20} />
+      <Icon size={20} aria-hidden="true" />
       <span className="text-[10px] font-black uppercase text-center leading-none tracking-tighter">{label}</span>
     </button>
   );

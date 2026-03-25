@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import { 
-  LandPlot, MapPin, Banknote, FileText, X, Flame, 
+  LandPlot, Banknote, X, Flame, 
   Image as ImageIcon, CheckCircle2, AlertCircle, 
-  Loader2, ChevronDown, Maximize, Trees, Info
+  Loader2, ChevronDown, Maximize
 } from "lucide-react";
 import API from "../api/API";
 
 export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId = null }) {
   const initialState = {
-    // titre: "",
     agence: agenceId || "",
     quartier: "",
     aLouer: false,
@@ -31,6 +30,9 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
   const [villes, setVilles] = useState([]);
   const [quartiers, setQuartiers] = useState([]);
   const [villeSelected, setVilleSelected] = useState("");
+
+  const modalId = useId();
+  const dimensionId = useId();
 
   useEffect(() => {
     if (isOpen) {
@@ -70,23 +72,17 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
     setError(null);
 
     if (!form.quartier || !form.prix || !form.agence) {
-      setError("Veuillez remplir au minimum le nom de l'agence, le quartier et le prix.");
+      setError("Veuillez remplir l'agence, le quartier et le prix total.");
       return;
     }
 
     const fd = new FormData();
     fd.append("type", "terrain");
-    fd.append("agence", form.agence);
-    // fd.append("titre", form.titre);
-    fd.append("quartier", form.quartier);
-    fd.append("aLouer", false); // Par défaut pour terrain
-    fd.append("prix", form.prix);
-    fd.append("hot", form.hot);
-    fd.append("statut", form.statut);
-    fd.append("documentTerrain", form.documentTerrain);
-    fd.append("dimensionTerrain", form.dimensionTerrain);
-    fd.append("typeTerrain", form.typeTerrain);
-    fd.append("description", form.description);
+    
+    // On ajoute toutes les clés sauf images
+    Object.keys(form).forEach(key => {
+      if (key !== 'images') fd.append(key, form[key]);
+    });
 
     form.images.forEach((file) => fd.append("images", file));
 
@@ -94,7 +90,7 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
       setSubmitting(true);
       const response = await API.addHabitation(fd);
       if (response) {
-        onSuccess("Terrain ajouté avec succès !");
+        onSuccess("Terrain référencé avec succès !");
         setForm(initialState);
         setPreviewImages([]);
         setVilleSelected("");
@@ -110,21 +106,29 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-      <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200">
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={modalId}
+    >
+      <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200 animate-in fade-in zoom-in duration-200">
         
         {/* HEADER */}
-        <div className="px-8 py-2 border-b-2 border-gray-100 flex justify-between items-center bg-white">
+        <div className="px-8 py-4 border-b-2 border-gray-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-green-100 p-2 rounded-2xl">
+            <div className="bg-green-100 p-2 rounded-2xl" aria-hidden="true">
               <LandPlot size={28} className="text-green-600" />
             </div>
-            <div>
-              <h2 className="sm:text-2xl font-black text-gray-900 tracking-tight">Ajouter un terrain</h2>
-              {/* <p className="text-gray-500 font-bold text-sm">Référencement foncier</p> */}
-            </div>
+            <h2 id={modalId} className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+              Ajouter un terrain
+            </h2>
           </div>
-          <button onClick={onClose} className="p-3 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black">
+          <button 
+            onClick={onClose} 
+            className="p-3 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black outline-none focus:ring-2 focus:ring-green-500"
+            aria-label="Fermer"
+          >
             <X size={28} strokeWidth={3} />
           </button>
         </div>
@@ -136,12 +140,12 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
             <div className="space-y-6">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-orange-600 mb-4">01. Emplacement & Agence</h3>
               
-              {/* <InputBlock label="Titre du terrain" icon={LandPlot} value={form.titre} onChange={(v) => handleChange("titre", v)} placeholder="Ex: Terrain 500m² ACI 2000" /> */}
-              
-              {agenceId === null && <SelectBlock label="Agence" value={form.agence} onChange={(v) => handleChange("agence", v)}>
-                <option value="">Sélectionner une agence</option>
-                {agences.map(a => <option key={a._id} value={a._id}>{a.nom_agence}</option>)}
-              </SelectBlock>}
+              {agenceId === null && (
+                <SelectBlock label="Agence" value={form.agence} onChange={(v) => handleChange("agence", v)} required>
+                  <option value="">Sélectionner une agence</option>
+                  {agences.map(a => <option key={a._id} value={a._id}>{a.nom_agence}</option>)}
+                </SelectBlock>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <SelectBlock label="Ville" value={villeSelected} onChange={(v) => { setVilleSelected(v); handleChange("quartier", ""); }}>
@@ -149,7 +153,7 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
                   {villes.map(v => <option key={v._id} value={v._id}>{v.nom}</option>)}
                 </SelectBlock>
                 
-                <SelectBlock label="Quartier" value={form.quartier} onChange={(v) => handleChange("quartier", v)} disabled={!villeSelected}>
+                <SelectBlock label="Quartier" value={form.quartier} onChange={(v) => handleChange("quartier", v)} disabled={!villeSelected} required>
                   <option value="">Sélectionner</option>
                   {quartiers.filter(q => q.ville?._id === villeSelected).map(q => (
                     <option key={q._id} value={q._id}>{q.nom}</option>
@@ -157,7 +161,7 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
                 </SelectBlock>
               </div>
 
-              <InputBlock label="Prix Total (XOF)" icon={Banknote} value={form.prix} onChange={(v) => handleChange("prix", v)} placeholder="Prix de vente" type="number" />
+              <InputBlock label="Prix Total (FCFA)" icon={Banknote} value={form.prix} onChange={(v) => handleChange("prix", v)} placeholder="Prix de vente" type="number" required />
             </div>
 
             {/* COLONNE DROITE */}
@@ -165,11 +169,25 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-orange-600 mb-4">02. Spécifications Techniques</h3>
               
               <div className="grid grid-cols-2 gap-4">
-                <InputBlock label="Dimension (m²)" icon={Maximize} value={form.dimensionTerrain} onChange={(v) => handleChange("dimensionTerrain", v)} placeholder="Ex: 20/25" />
+                <div className="flex flex-col gap-2">
+                  <label htmlFor={dimensionId} className="text-sm font-black text-gray-900 ml-1">Dimension (m²)</label>
+                  <div className="relative">
+                    <Maximize className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input 
+                      id={dimensionId}
+                      type="text" 
+                      placeholder="Ex: 20x25"
+                      value={form.dimensionTerrain}
+                      onChange={(e) => handleChange("dimensionTerrain", e.target.value)}
+                      className="w-full bg-white border-2 border-gray-300 rounded-2xl pl-12 pr-4 py-4 text-gray-900 font-bold focus:border-orange-600 outline-none transition-all shadow-sm"
+                    />
+                  </div>
+                </div>
+
                 <SelectBlock label="Usage" value={form.typeTerrain} onChange={(v) => handleChange("typeTerrain", v)}>
                   <option value="residentiel">Résidentiel</option>
                   <option value="agricole">Agricole</option>
-                  {/* <option value="commercial">Commercial</option> */}
+                  <option value="commercial">Commercial</option>
                 </SelectBlock>
               </div>
 
@@ -199,27 +217,28 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">03. Mise en avant</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                <OptionCard label="🔥 OPPORTUNITÉ" checked={form.hot} icon={Flame} onChange={(v) => handleChange("hot", v)} isHot />
-               {/* <div className="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-2xl border-2 border-blue-100 opacity-60">
-                 <Info size={18} />
-                 <span className="text-[10px] font-black uppercase tracking-tighter">Vente uniquement</span>
-               </div> */}
             </div>
           </div>
 
-          {/* PHOTOS DU SITE */}
+          {/* PHOTOS */}
           <div className="bg-gray-50 p-6 rounded-[2rem] border-2 border-gray-100">
-            <h3 className="text-xs font-black text-gray-900 uppercase mb-4">Photos du terrain (Max 3)</h3>
-            <div className="flex flex-wrap gap-4">
+            <h3 className="text-xs font-black text-gray-900 uppercase mb-4 text-center">Photos du terrain (Max 3)</h3>
+            <div className="flex flex-wrap justify-center gap-4">
               {previewImages.length < 3 && (
-                <label className="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-400 bg-white hover:border-orange-600 transition-all cursor-pointer flex flex-col items-center justify-center group">
-                  <ImageIcon size={32} className="text-gray-300 group-hover:text-orange-600 transition-colors" />
+                <label className="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-400 bg-white hover:border-orange-600 transition-all cursor-pointer flex flex-col items-center justify-center group focus-within:ring-2 focus-within:ring-green-500">
+                  <ImageIcon size={32} className="text-gray-300 group-hover:text-orange-600 transition-colors" aria-hidden="true" />
                   <input type="file" multiple accept="image/*" onChange={handleImages} className="hidden" />
                 </label>
               )}
               {previewImages.map((src, i) => (
                 <div key={i} className="relative w-28 h-28 rounded-2xl overflow-hidden shadow-lg border-2 border-white group">
-                  <img src={src} className="w-full h-full object-cover" alt="preview" />
-                  <button type="button" onClick={() => removeImage(i)} className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <img src={src} className="w-full h-full object-cover" alt={`Aperçu ${i+1}`} />
+                  <button 
+                    type="button" 
+                    onClick={() => removeImage(i)} 
+                    className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity outline-none focus:opacity-100"
+                    aria-label="Supprimer l'image"
+                  >
                     <X size={28} strokeWidth={3} />
                   </button>
                 </div>
@@ -228,23 +247,36 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
           </div>
 
           {error && (
-            <div className="p-4 bg-red-600 text-white rounded-2xl flex items-center gap-3 font-black text-sm shadow-lg shadow-red-200">
-              <AlertCircle size={20} strokeWidth={3} /> {error}
+            <div role="alert" className="p-4 bg-red-600 text-white rounded-2xl flex items-center gap-3 font-black text-sm shadow-lg shadow-red-200">
+              <AlertCircle size={20} strokeWidth={3} aria-hidden="true" /> {error}
             </div>
           )}
 
           {/* ACTIONS */}
           <div className="flex items-center gap-4 pt-4 pb-2">
-            <button type="button" onClick={onClose} className="px-8 py-4 text-gray-500 font-black hover:text-black transition-colors">
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="px-8 py-4 text-gray-500 font-black hover:text-black transition-colors focus:outline-none focus:underline"
+            >
               ANNULER
             </button>
             <button 
               type="submit" 
               disabled={submitting}
-              className="flex-1 py-4 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-md shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+              className="flex-1 py-4 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-md shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 outline-none focus:ring-4 focus:ring-orange-200"
             >
-              {submitting ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle2 size={24} />}
-              {submitting ? "PUBLICATION EN COURS..." : "PUBLIER"}
+              {submitting ? (
+                <>
+                  <Loader2 className="animate-spin" size={24} aria-hidden="true" />
+                  <span>PUBLICATION EN COURS...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={24} aria-hidden="true" />
+                  <span>PUBLIER L'ANNONCE</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -254,14 +286,18 @@ export default function AddTerrainModal({ isOpen, onClose, onSuccess, agenceId =
   );
 }
 
-// COMPOSANTS DE STYLE RÉUTILISÉS
-function InputBlock({ label, icon: Icon, value, onChange, placeholder, type = "text" }) {
+// COMPOSANTS DE STYLE
+function InputBlock({ label, icon: Icon, value, onChange, placeholder, type = "text", required }) {
+  const id = useId();
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-black text-gray-900 ml-1">{label}</label>
+      <label htmlFor={id} className="text-sm font-black text-gray-900 ml-1">
+        {label} {required && <span className="text-orange-600">*</span>}
+      </label>
       <div className="relative">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={22} />
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={22} aria-hidden="true" />
         <input 
+          id={id}
           type={type} value={value} 
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -272,12 +308,16 @@ function InputBlock({ label, icon: Icon, value, onChange, placeholder, type = "t
   );
 }
 
-function SelectBlock({ label, value, onChange, children, disabled }) {
+function SelectBlock({ label, value, onChange, children, disabled, required }) {
+  const id = useId();
   return (
     <div className="flex flex-col gap-2 flex-1">
-      <label className="text-sm font-black text-gray-900 ml-1">{label}</label>
+      <label htmlFor={id} className="text-sm font-black text-gray-900 ml-1">
+        {label} {required && <span className="text-orange-600">*</span>}
+      </label>
       <div className="relative">
         <select 
+          id={id}
           value={value} 
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
@@ -285,7 +325,7 @@ function SelectBlock({ label, value, onChange, children, disabled }) {
         >
           {children}
         </select>
-        <ChevronDown size={22} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+        <ChevronDown size={22} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" aria-hidden="true" />
       </div>
     </div>
   );
@@ -296,13 +336,14 @@ function OptionCard({ label, checked, onChange, icon: Icon, isHot }) {
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all ${
+      aria-pressed={checked}
+      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all outline-none focus:ring-2 focus:ring-orange-400 ${
         checked 
           ? (isHot ? "bg-orange-600 border-orange-600 text-white shadow-lg" : "bg-gray-900 border-gray-900 text-white") 
           : "bg-white border-gray-200 text-gray-400 hover:border-gray-400 hover:text-gray-600 shadow-sm"
       }`}
     >
-      <Icon size={20} />
+      <Icon size={20} aria-hidden="true" />
       <span className="text-[10px] font-black uppercase text-center leading-none tracking-tighter">{label}</span>
     </button>
   );

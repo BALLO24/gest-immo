@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import { 
   MapPin, X, PlusCircle, Loader2, 
@@ -10,6 +10,10 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
   const [villes, setVilles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({ nom: "", ville: "" });
+
+  const modalId = useId();
+  const nomId = useId();
+  const villeId = useId();
 
   useEffect(() => {
     if (isOpen) {
@@ -50,7 +54,12 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={modalId}
+    >
       <div 
         className="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-100 transition-all animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()}
@@ -58,17 +67,20 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
         {/* HEADER SECTION */}
         <div className="px-8 py-6 border-b-2 border-gray-50 flex justify-between items-center bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-3 rounded-2xl">
+            <div className="bg-orange-100 p-3 rounded-2xl" aria-hidden="true">
               <Navigation size={24} className="text-orange-600" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-gray-900 tracking-tight">Découpage Urbain</h3>
+              <h3 id={modalId} className="text-xl font-black text-gray-900 tracking-tight">
+                Découpage Urbain
+              </h3>
               <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Nouveau Quartier</p>
             </div>
           </div>
           <button 
             onClick={close} 
-            className="p-2 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black"
+            aria-label="Fermer la fenêtre"
+            className="p-2 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black outline-none focus:ring-2 focus:ring-orange-500"
           >
             <X size={24} strokeWidth={3} />
           </button>
@@ -82,10 +94,12 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* INPUT NOM DU QUARTIER */}
               <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-600 transition-colors">
+                <label htmlFor={nomId} className="sr-only">Nom du quartier</label>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-600 transition-colors z-10">
                   <MapPin size={20} />
                 </div>
                 <input
+                  id={nomId}
                   type="text"
                   required
                   placeholder="Nom du quartier"
@@ -97,10 +111,12 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
 
               {/* SELECT VILLE PARENTE */}
               <div className="relative group">
+                <label htmlFor={villeId} className="sr-only">Rattacher à une ville</label>
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-600 transition-colors z-10">
                   <Building2 size={20} />
                 </div>
                 <select
+                  id={villeId}
                   required
                   value={formData.ville}
                   onChange={(e) => setFormData({ ...formData, ville: e.target.value })}
@@ -111,7 +127,7 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
                     <option key={v._id} value={v._id}>{v.nom}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" size={20} aria-hidden="true" />
               </div>
             </div>
           </div>
@@ -121,27 +137,32 @@ const AddQuartierModal = ({ isOpen, close, onSuccess, onError }) => {
             <button 
               type="button" 
               onClick={close} 
-              className="px-6 py-4 text-gray-400 font-black hover:text-gray-900 transition-colors text-sm uppercase tracking-widest"
+              className="px-6 py-4 text-gray-400 font-black hover:text-gray-900 transition-colors text-sm uppercase tracking-widest outline-none focus:underline"
             >
               ANNULER
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg shadow-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+              className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg shadow-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 outline-none focus:ring-4 focus:ring-orange-200"
             >
               {isSubmitting ? (
-                <Loader2 className="animate-spin" size={24} />
+                <>
+                  <Loader2 className="animate-spin" size={24} aria-hidden="true" />
+                  <span>TRAITEMENT...</span>
+                </>
               ) : (
-                <PlusCircle size={24} />
+                <>
+                  <PlusCircle size={24} aria-hidden="true" />
+                  <span>CRÉER LE QUARTIER</span>
+                </>
               )}
-              {isSubmitting ? "TRAITEMENT..." : "CRÉER"}
             </button>
           </div>
         </form>
 
-        {/* ACCENT BAR */}
-        <div className="h-2 bg-gradient-to-r from-green-500 via-yellow-400 to-red-500"></div>
+        {/* ACCENT BAR - Drapeau National Style */}
+        <div className="h-2 bg-gradient-to-r from-[#1EB53A] via-[#FCD116] to-[#CE1126]" aria-hidden="true"></div>
       </div>
     </div>,
     document.body

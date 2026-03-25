@@ -2,7 +2,7 @@ import { useState } from "react";
 import { 
   MapPin, BedDouble, Bath, ChevronLeft, ChevronRight, 
   House, MapPinHouse, Trash2, MoreVertical, Pencil,
-  MessageCircle // Ajouté pour WhatsApp
+  MessageCircle 
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
@@ -32,30 +32,26 @@ export default function MaisonCard({ maison, onUpdate }) {
     }
   }
 
+  const idCourt = maison._id?.slice(-6).toUpperCase() || "N/A";
+
   const handleUpdateSuccess = (updatedMaison) => {
     setShowEdit(false);
     toast.success("Maison mise à jour avec succès !", {
       style: { borderRadius: '10px', background: '#333', color: '#fff' }
     });
-    if (onUpdate) {
-      onUpdate(updatedMaison);
-    }
+    if (onUpdate) onUpdate(updatedMaison);
   };
 
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true);
       const result = await API.deleteHabitation(maison._id);
-      
       if (result) {
         setIsSuppressionModalOpen(false);
         setShowStatusMenu(false);
-        if (onUpdate) {
-          onUpdate({ ...maison, isDeleted: true });
-        }
+        if (onUpdate) onUpdate({ ...maison, isDeleted: true });
       }
     } catch (err) {
-      console.error("Erreur suppression:", err);
       toast.error("Erreur lors de la suppression");
     } finally {
       setIsDeleting(false);
@@ -74,82 +70,122 @@ export default function MaisonCard({ maison, onUpdate }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out w-full max-w-[400px] mx-auto"
+        className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out w-full max-w-[400px] mx-auto focus-within:ring-2 focus-within:ring-maliOrange"
       >
-        <div className="relative w-full h-56 overflow-hidden">
+        {/* Galerie Photo */}
+        <div className="relative w-full h-56 overflow-hidden" role="region" aria-label={`Photos de la maison ${idCourt}`}>
           <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-bold text-maliOrange border border-maliOrange/30 shadow-sm z-10 flex items-center gap-1">
-            <House className="w-3.5 h-3.5" /> Maison
+            <House className="w-3.5 h-3.5" aria-hidden="true" /> 
+            Maison
           </div>
 
           {canEditStatus && (
             <div className="absolute top-3 right-3 z-20">
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowStatusMenu(!showStatusMenu); }}
-                className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md text-gray-700 hover:text-maliOrange transition-colors"
+                aria-haspopup="menu"
+                aria-expanded={showStatusMenu}
+                aria-label="Menu de gestion"
+                className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md text-gray-700 hover:text-maliOrange transition-colors focus:outline-none focus:ring-2 focus:ring-maliOrange"
               >
-                < MoreVertical size={20} />
+                <MoreVertical size={20} aria-hidden="true" />
               </button>
               
               {showStatusMenu && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden" role="menu">
                   <button 
+                    role="menuitem"
                     onClick={() => { setShowEdit(true); setShowStatusMenu(false); }}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
                   >
-                    <Pencil size={16} /> Modifier
+                    <Pencil size={16} aria-hidden="true" /> Modifier
                   </button>
                   <button 
+                    role="menuitem"
                     onClick={() => { setIsSuppressionModalOpen(true); setShowStatusMenu(false); }}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-gray-50"
                   >
-                    <Trash2 size={16} /> Supprimer
+                    <Trash2 size={16} aria-hidden="true" /> Supprimer
                   </button>
                 </div>
               )}
             </div>
           )}
           
-          <img src={maison.images[currentImage]} alt={maison.titre} className="w-full h-full object-cover" />
+          <div aria-live="polite" className="w-full h-full">
+            <img 
+              src={maison.images[currentImage]} 
+              alt={`Vue ${currentImage + 1} de la maison située à ${maison.quartier?.nom}`} 
+              className="w-full h-full object-cover" 
+            />
+          </div>
 
           {maison.images.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-maliGreen hover:text-white p-2 rounded-full transition"><ChevronLeft size={18} /></button>
-              <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-maliGreen hover:text-white p-2 rounded-full transition"><ChevronRight size={18} /></button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); prevImage(); }} 
+                aria-label="Image précédente"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-maliGreen hover:text-white p-2 rounded-full transition focus:outline-none focus:ring-2 focus:ring-maliGreen"
+              >
+                <ChevronLeft size={18} aria-hidden="true" />
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); nextImage(); }} 
+                aria-label="Image suivante"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-maliGreen hover:text-white p-2 rounded-full transition focus:outline-none focus:ring-2 focus:ring-maliGreen"
+              >
+                <ChevronRight size={18} aria-hidden="true" />
+              </button>
             </>
           )}
         </div>
 
+        {/* Détails */}
         <div className="p-4">
-          <h3 className="text-md font-bold text-maliGreen mb-1">N° {maison._id?.slice(-6).toUpperCase()}</h3>
+          <h3 className="text-md font-bold text-maliGreen mb-1">N° {idCourt}</h3>
           <div className="flex items-center text-gray-600 text-sm mb-2 font-medium">
-            <MapPin className="w-4 h-4 mr-1 text-maliOrange" /> {maison.quartier?.ville?.nom}
+            <MapPin className="w-4 h-4 mr-1 text-maliOrange" aria-hidden="true" /> 
+            <span>{maison.quartier?.ville?.nom}</span>
           </div>
           <div className="flex items-center text-gray-600 text-sm mb-3">
-            <MapPinHouse className="w-4 h-4 mr-1 text-maliOrange" /> {maison?.quartier?.nom}
+            <MapPinHouse className="w-4 h-4 mr-1 text-maliOrange" aria-hidden="true" /> 
+            <span>{maison?.quartier?.nom}</span>
           </div>
 
-          <div className="flex justify-between text-gray-700 text-sm mb-4">
-            <span className="flex items-center gap-1">Salon<House className="w-4 h-4 text-maliGreen" /> {maison.nombreSalon}</span>
-            <span className="flex items-center gap-1">Chambre<BedDouble className="w-4 h-4 text-maliGreen" /> {maison.nombreChambres}</span>
-            <span className="flex items-center gap-1">Toilette<Bath className="w-4 h-4 text-maliGreen" /> {maison.nombreSallesBain}</span>
+          <div className="flex justify-between text-gray-700 text-sm mb-4" aria-label="Caractéristiques de la maison">
+            <span className="flex items-center gap-1">
+              <House className="w-4 h-4 text-maliGreen" aria-hidden="true" /> 
+              {maison.nombreSalon} {maison.nombreSalon > 1 ? 'Salons' : 'Salon'}
+            </span>
+            <span className="flex items-center gap-1">
+              <BedDouble className="w-4 h-4 text-maliGreen" aria-hidden="true" /> 
+              {maison.nombreChambres} {maison.nombreChambres > 1 ? 'Chambres' : 'Chambre'}
+            </span>
+            <span className="flex items-center gap-1">
+              <Bath className="w-4 h-4 text-maliGreen" aria-hidden="true" /> 
+              {maison.nombreSallesBain} {maison.nombreSallesBain > 1 ? 'Toilettes' : 'Toilette'}
+            </span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-lg font-bold text-maliOrange">{maison?.prix?.toLocaleString()} XOF / mois</span>
+            <span className="text-lg font-bold text-maliOrange" aria-label="Prix du loyer">
+              {maison?.prix?.toLocaleString()} XOF / mois
+            </span>
             <div className="flex gap-2">
-              {/* BOUTON WHATSAPP */}
               <a 
-                href={`https://wa.me/${import.meta.env.VITE_NUMERO_WHATSAPP}?text=Bonjour, je suis intéressé par la maison N° ${maison._id?.slice(-6).toUpperCase()}`}
+                href={`https://wa.me/${import.meta.env.VITE_NUMERO_WHATSAPP}?text=Bonjour, je suis intéressé par la maison N° ${idCourt}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all shadow-md"
+                aria-label={`Contacter sur WhatsApp pour la maison ${idCourt} (ouvre un nouvel onglet)`}
+                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-green-400"
               >
-                <MessageCircle size={20} />
+                <MessageCircle size={20} aria-hidden="true" />
               </a>
               
               <button 
-                className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all"
+                className="px-4 py-2 bg-maliGreen text-white text-sm font-semibold rounded-full hover:bg-maliOrange transition-all focus:outline-none focus:ring-2 focus:ring-maliOrange"
                 onClick={() => setShowDetails(true)}
+                aria-label={`Voir les détails complets de la maison ${idCourt}`}
               >
                 Détails
               </button>
@@ -158,6 +194,7 @@ export default function MaisonCard({ maison, onUpdate }) {
         </div>
       </motion.div>
 
+      {/* Modals */}
       <ModifHouseModal 
         isOpen={showEdit} 
         onClose={() => setShowEdit(false)} 

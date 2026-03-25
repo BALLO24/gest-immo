@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import { createPortal } from "react-dom";
 import { 
   Building2, UserCircle, Phone, Mail, X, 
@@ -15,7 +15,7 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
     numero_telephone: "",
     email: "",
     nomUtilisateur: "", 
-    password: "", // Changé de motDePasse à password pour correspondre au Schéma
+    password: "",
     statut: "actif",
     description: "",
   };
@@ -24,6 +24,11 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // IDs pour l'accessibilité
+  const modalTitleId = useId();
+  const passwordId = useId();
+  const descriptionId = useId();
 
   const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -31,7 +36,6 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
     e.preventDefault();
     setError(null);
 
-    // Validation des champs requis
     if (!form.nom_agence || !form.nom_proprietaire || !form.nomUtilisateur || !form.password) {
       setError("Veuillez remplir les champs obligatoires (Agence, Responsable et Accès).");
       return;
@@ -39,8 +43,6 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
 
     try {
       setSubmitting(true);
-      
-      // Envoi direct de l'objet form (JSON)
       const response = await API.addAgence(form); 
       
       if (response) {
@@ -58,21 +60,32 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-      <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200">
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={modalTitleId}
+    >
+      <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border border-gray-200 animate-in fade-in zoom-in duration-200">
         
         {/* HEADER */}
         <div className="px-8 py-6 border-b-2 border-gray-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-3 rounded-2xl">
+            <div className="bg-orange-100 p-3 rounded-2xl" aria-hidden="true">
               <Building2 size={28} className="text-orange-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Configuration Agence</h2>
+              <h2 id={modalTitleId} className="text-2xl font-black text-gray-900 tracking-tight">
+                Configuration Agence
+              </h2>
               <p className="text-gray-500 font-bold text-sm">Identifiants et profil partenaire</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-3 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black">
+          <button 
+            onClick={onClose} 
+            aria-label="Fermer la fenêtre"
+            className="p-3 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-black focus:ring-2 focus:ring-orange-500 outline-none"
+          >
             <X size={28} strokeWidth={3} />
           </button>
         </div>
@@ -90,6 +103,7 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
                 value={form.nom_agence} 
                 onChange={(v) => handleChange("nom_agence", v)} 
                 placeholder="Ex: Mali Immo Prestige" 
+                required
               />
             </div>
 
@@ -108,6 +122,7 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
                   icon={Briefcase} 
                   value={form.nom_proprietaire} 
                   onChange={(v) => handleChange("nom_proprietaire", v)} 
+                  required
                 />
               </div>
               <InputBlock 
@@ -119,7 +134,7 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
               />
             </div>
 
-            {/* SECTION 03: ACCÈS (PASSWORD SYNC) */}
+            {/* SECTION 03: ACCÈS */}
             <div className="space-y-6 bg-gray-50 p-6 rounded-[2rem] border-2 border-gray-100">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">03. Accès système</h3>
               
@@ -129,23 +144,28 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
                 value={form.nomUtilisateur} 
                 onChange={(v) => handleChange("nomUtilisateur", v)} 
                 placeholder="agence_bamako" 
+                required
               />
               
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-black text-gray-900 ml-1">Mot de passe</label>
+                <label htmlFor={passwordId} className="text-sm font-black text-gray-900 ml-1">Mot de passe</label>
                 <div className="relative shadow-sm rounded-2xl overflow-hidden">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} aria-hidden="true" />
                   <input 
+                    id={passwordId}
                     type={showPassword ? "text" : "password"} 
-                    value={form.password} // Utilisation de 'password'
+                    value={form.password}
                     onChange={(e) => handleChange("password", e.target.value)}
                     placeholder="••••••••"
+                    required
+                    aria-required="true"
                     className="w-full bg-white border-2 border-gray-300 rounded-2xl pl-12 pr-12 py-4 text-gray-900 font-bold text-base focus:border-orange-600 outline-none transition-all placeholder:text-gray-300"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600 transition-colors"
+                    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600 transition-colors focus:outline-none"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -164,10 +184,11 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
                 type="email"
               />
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-black text-gray-900 ml-1">Notes & Description</label>
+                <label htmlFor={descriptionId} className="text-sm font-black text-gray-900 ml-1">Notes & Description</label>
                 <div className="relative">
-                  <TextQuote className="absolute left-4 top-4 text-gray-400" size={20} />
+                  <TextQuote className="absolute left-4 top-4 text-gray-400" size={20} aria-hidden="true" />
                   <textarea 
+                    id={descriptionId}
                     className="w-full bg-white border-2 border-gray-300 rounded-2xl pl-12 pr-4 py-4 text-gray-900 font-bold focus:border-orange-600 outline-none h-[100px] transition-all shadow-sm resize-none"
                     value={form.description}
                     onChange={(e) => handleChange("description", e.target.value)}
@@ -178,8 +199,12 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 text-red-600 border-2 border-red-100 rounded-2xl flex items-center gap-3 font-bold text-sm">
-              <AlertCircle size={20} strokeWidth={3} /> {error}
+            <div 
+              role="alert" 
+              aria-live="polite"
+              className="p-4 bg-red-50 text-red-600 border-2 border-red-100 rounded-2xl flex items-center gap-3 font-bold text-sm"
+            >
+              <AlertCircle size={20} strokeWidth={3} aria-hidden="true" /> {error}
             </div>
           )}
 
@@ -188,21 +213,26 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
             <button 
               type="button" 
               onClick={onClose} 
-              className="px-8 py-5 text-gray-500 font-black hover:text-black transition-colors"
+              className="px-8 py-5 text-gray-500 font-black hover:text-black transition-colors focus:outline-none focus:underline"
             >
               ANNULER
             </button>
             <button 
               type="submit" 
               disabled={submitting}
-              className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white md:rounded-2xl font-black text-lg shadow-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+              className="flex-1 py-5 bg-gray-900 hover:bg-orange-600 text-white md:rounded-2xl font-black text-lg shadow-2xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 outline-none focus:ring-4 focus:ring-orange-200"
             >
               {submitting ? (
-                <Loader2 className="animate-spin" size={24} />
+                <>
+                  <Loader2 className="animate-spin" size={24} aria-hidden="true" />
+                  <span>ENREGISTREMENT...</span>
+                </>
               ) : (
-                <CheckCircle2 size={24} />
+                <>
+                  <CheckCircle2 size={24} aria-hidden="true" />
+                  <span>VALIDER</span>
+                </>
               )}
-              {submitting ? "ENREGISTREMENT..." : "VALIDER"}
             </button>
           </div>
         </form>
@@ -212,17 +242,23 @@ export default function AddAgenceModal({ isOpen, onClose, onSuccess }) {
   );
 }
 
-function InputBlock({ label, icon: Icon, value, onChange, placeholder, type = "text" }) {
+function InputBlock({ label, icon: Icon, value, onChange, placeholder, type = "text", required = false }) {
+  const inputId = useId();
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-black text-gray-900 ml-1">{label}</label>
+      <label htmlFor={inputId} className="text-sm font-black text-gray-900 ml-1">
+        {label} {required && <span className="text-orange-600" aria-hidden="true">*</span>}
+      </label>
       <div className="relative shadow-sm rounded-2xl overflow-hidden">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} aria-hidden="true" />
         <input 
+          id={inputId}
           type={type} 
           value={value} 
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          required={required}
+          aria-required={required}
           className="w-full bg-white border-2 border-gray-300 rounded-2xl pl-12 pr-4 py-4 text-gray-900 font-bold text-base focus:border-orange-600 outline-none transition-all placeholder:text-gray-300 shadow-sm"
         />
       </div>
