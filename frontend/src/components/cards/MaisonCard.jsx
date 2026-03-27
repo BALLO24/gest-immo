@@ -70,7 +70,7 @@ export default function MaisonCard({ maison, onUpdate }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out w-full max-w-[400px] mx-auto focus-within:ring-2 focus-within:ring-maliOrange"
+        className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out w-full max-w-[400px] mx-auto"
       >
         {/* Galerie Photo */}
         <div className="relative w-full h-56 overflow-hidden" role="region" aria-label={`Photos de la maison ${idCourt}`}>
@@ -116,7 +116,7 @@ export default function MaisonCard({ maison, onUpdate }) {
             <img 
               src={maison.images[currentImage]} 
               alt={`Vue ${currentImage + 1} de la maison située à ${maison.quartier?.nom}`} 
-              className="w-full h-full object-cover" 
+              className="w-full h-full object-cover transition-all duration-700 ease-in-out" 
             />
           </div>
 
@@ -136,6 +136,21 @@ export default function MaisonCard({ maison, onUpdate }) {
               >
                 <ChevronRight size={18} aria-hidden="true" />
               </button>
+
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1" role="tablist" aria-label="Points de navigation">
+                {maison.images.map((_, i) => (
+                  <button
+                    key={i}
+                    role="tab"
+                    aria-selected={i === currentImage}
+                    aria-label={`Voir l'image ${i + 1}`}
+                    onClick={(e) => { e.stopPropagation(); setCurrentImage(i); }}
+                    className={`w-2 h-2 rounded-full ${
+                      i === currentImage ? "bg-maliOrange" : "bg-white/70 hover:bg-maliOrange/60"
+                    } transition-all duration-300`}
+                  ></button>
+                ))}
+              </div>
             </>
           )}
         </div>

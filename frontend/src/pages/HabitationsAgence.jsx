@@ -18,7 +18,7 @@ import MagasinCard from "../components/cards/MagasinCard";
 import TerrainCard from "../components/cards/TerrainCard";
 import API from "../api/API";
 
-const BASE_URL = "http://localhost:5000"; 
+const BASE_URL = "https://gest-immo-three.vercel.app/"; 
 
 export default function HabitationsAgence() {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { HelmetProvider, Helmet } from "react-helmet-async";
+import { Helmet } from "react-helmet-async";
 import { jwtDecode } from "jwt-decode";
 
 // Layouts & Pages
@@ -21,21 +21,44 @@ import QuartiersPage from "./pages/QuartierPage";
 import NotFoundPage from "./pages/NotFound";
 
 /**
- * COMPOSANT SEO : Permet de définir les metas par défaut
- * et de changer le titre de l'onglet facilement.
+ * COMPOSANT SEO : Centralise toute la logique de référencement.
+ * @param {string} title - Titre de la page
+ * @param {string} description - Description SEO (max 160 car.)
+ * @param {string} url - Chemin de la page (ex: /vente)
+ * @param {string} image - URL de l'image de partage (facultatif)
  */
-const SEO = ({ title, description }) => (
-  <Helmet>
-    <title>{title ? `${title} | MonAppImmo` : "MonAppImmo - Trouvez votre terrain ou maison"}</title>
-    <meta name="description" content={description || "Plateforme de gestion et de recherche immobilière : terrains, villas et appartements."} />
-    <html lang="fr" />
-  </Helmet>
-);
+const SEO = ({ title, description, url, image }) => {
+  const siteName = "ImmoMali";
+  const baseUrl = "https://gest-immo-three.vercel.app"; // À remplacer par ton futur domaine
+  const fullTitle = title ? `${title} | ${siteName}` : `${siteName} - L'immobilier au Mali en un clic`;
+  const metaDescription = description || "Achat, vente et location de terrains titrés, maisons et appartements au Mali.";
+  const metaImage = image || `${baseUrl}/preview-image.jpg`;
+  const metaUrl = `${baseUrl}${url || ""}`;
 
-/**
- * ACCESSIBILITÉ : Remonte en haut de page à chaque changement de route
- * et pourrait plus tard gérer l'annonce vocale du changement de page.
- */
+  return (
+    <Helmet>
+      {/* Balises standards */}
+      <title>{fullTitle}</title>
+      <meta name="description" content={metaDescription} />
+      <link rel="canonical" href={metaUrl} />
+      <html lang="fr" />
+
+      {/* Open Graph / Facebook / LinkedIn / WhatsApp */}
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content={metaUrl} />
+      <meta property="og:title" content={fullTitle} />
+      <meta property="og:description" content={metaDescription} />
+      <meta property="og:image" content={metaImage} />
+
+      {/* Twitter Cards */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={fullTitle} />
+      <meta name="twitter:description" content={metaDescription} />
+      <meta name="twitter:image" content={metaImage} />
+    </Helmet>
+  );
+};
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -44,15 +67,14 @@ const ScrollToTop = () => {
   return null;
 };
 
-// --- LOGIQUE DE ROUTAGE (Gardée identique à la tienne avec corrections mineures) ---
+// --- LOGIQUE DE ROUTAGE ---
 
 const PublicRoute = () => {
   const token = localStorage.getItem("authToken");
   if (token) {
     try {
       const decoded = jwtDecode(token);
-      const isExpired = decoded.exp * 1000 < Date.now();
-      if (!isExpired) {
+      if (decoded.exp * 1000 > Date.now()) {
         return <Navigate to={decoded.role === "admin" ? "/dashboard" : "/agence"} replace />;
       }
     } catch (e) {
@@ -68,17 +90,13 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   try {
     const decoded = jwtDecode(token);
-    const isExpired = decoded.exp * 1000 < Date.now();
-
-    if (isExpired) {
+    if (decoded.exp * 1000 < Date.now()) {
       localStorage.removeItem("authToken");
       return <Navigate to="/login" replace />;
     }
-
     if (allowedRoles && !allowedRoles.includes(decoded.role)) {
       return <Navigate to="/" replace />;
     }
-
     return <Outlet />;
   } catch (error) {
     localStorage.removeItem("authToken");
@@ -88,70 +106,81 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
 function App() {
   return (
-    <HelmetProvider>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* --- ROUTES PUBLIQUES --- */}
-          <Route path="/" element={<AppLayout />}>
-            <Route index element={
-              <>
-                <SEO title="Accueil" description="Découvrez les meilleures offres immobilières, terrains et maisons à louer ou à vendre." />
-                <HomePage />
-              </>
-            } />
-            <Route path="location" element={
-              <>
-                <SEO title="Locations Immobilières" description="Trouvez votre futur appartement ou maison en location." />
-                <LocationPage />
-              </>
-            } />
-            <Route path="vente" element={
-              <>
-                <SEO title="Ventes Immobilières" description="Achetez des terrains titrés et des maisons de luxe." />
-                <VentePage />
-              </>
-            } />
+    <Router>
+      <ScrollToTop />
+      <Routes>
+        {/* --- ROUTES PUBLIQUES --- */}
+        <Route path="/" element={<AppLayout />}>
+          <Route index element={
+            <>
+              <SEO title="Accueil" url="/" />
+              <HomePage />
+            </>
+          } />
+          <Route path="location" element={
+            <>
+              <SEO 
+                title="Location de Maisons et Appartements" 
+                description="Louez votre futur chez-vous au Mali : appartements, villas et magasins disponibles." 
+                url="/location" 
+              />
+              <LocationPage />
+            </>
+          } />
+          <Route path="vente" element={
+            <>
+              <SEO 
+                title="Vente de Terrains et Villas" 
+                description="Achetez des terrains avec titres fonciers sécurisés et des propriétés d'exception au Mali." 
+                url="/vente" 
+              />
+              <VentePage />
+            </>
+          } />
+        </Route>
+
+        {/* --- AUTHENTIFICATION --- */}
+        <Route element={<PublicRoute />}>
+          <Route path="login" element={
+            <>
+              <SEO title="Connexion" url="/login" />
+              <LoginPage />
+            </>
+          } />
+          <Route path="register" element={
+            <>
+              <SEO title="Inscription" url="/register" />
+              <RegisterPage />
+            </>
+          } />
+        </Route>          
+
+        {/* --- DASHBOARD ADMIN --- */}
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route path="/dashboard" element={<Dashboard />}>
+            <Route index element={<HomeDashboard />} />
+            <Route path="habitations" element={<HabitationsDashboard />} />
+            <Route path="villes" element={<VillesPage />} />
+            <Route path="quartiers" element={<QuartiersPage />} />
+            <Route path="agences" element={<AgencesDashboardPage />} />
           </Route>
+        </Route>
 
-          {/* --- AUTHENTIFICATION --- */}
-          <Route element={<PublicRoute />}>
-            <Route path="login" element={
-              <>
-                <SEO title="Connexion" description="Connectez-vous à votre espace agence ou administrateur." />
-                <LoginPage />
-              </>
-            } />
-            <Route path="register" element={
-              <>
-                <SEO title="Inscription" />
-                <RegisterPage />
-              </>
-            } />
-          </Route>          
+        {/* --- ESPACE AGENCE --- */}
+        <Route element={<ProtectedRoute allowedRoles={["admin", "agence"]} />}>
+          <Route path="/agence" element={<HabitationsAgence />} />
+          <Route path="change" element={<ChangePasswordPage />} />
+        </Route>
 
-          {/* --- DASHBOARD ADMIN --- */}
-          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-            <Route path="/dashboard" element={<Dashboard />}>
-              <Route index element={<HomeDashboard />} />
-              <Route path="habitations" element={<HabitationsDashboard />} />
-              <Route path="villes" element={<VillesPage />} />
-              <Route path="quartiers" element={<QuartiersPage />} />
-              <Route path="agences" element={<AgencesDashboardPage />} />
-            </Route>
-          </Route>
-
-          {/* --- ESPACE AGENCE --- */}
-          <Route element={<ProtectedRoute allowedRoles={["admin", "agence"]} />}>
-            <Route path="/agence" element={<HabitationsAgence />} />
-            <Route path="change" element={<ChangePasswordPage />} />
-          </Route>
-
-          {/* --- 404 --- */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Router>
-    </HelmetProvider>
+        {/* --- 404 --- */}
+        <Route path="*" element={
+          <>
+            <SEO title="Page Introuvable" />
+            <NotFoundPage />
+          </>
+        } />
+      </Routes>
+    </Router>
   );
 }
 

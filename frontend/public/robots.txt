@@ -1,0 +1,19 @@
+# https://www.robotstxt.org/robotstxt.html
+
+# Autoriser tous les robots
+User-agent: *
+
+# --- SECTIONS À NE PAS INDEXER (Confidentialité & Sécurité) ---
+Disallow: /dashboard/          # Empêche l'indexation de l'admin
+Disallow: /agence/             # Empêche l'indexation de l'espace agence
+Disallow: /login               # Inutile d'indexer la page de connexion
+Disallow: /register            # Inutile d'indexer la page d'inscription
+Disallow: /change              # Page de changement de mot de passe
+
+# --- SECTIONS À INDEXER ---
+Allow: /                       # Indexer la page d'accueil
+Allow: /location               # Indexer le catalogue de location
+Allow: /vente                  # Indexer le catalogue de vente
+
+# Indiquer le chemin du sitemap pour aider les robots à trouver tes annonces
+Sitemap: https://gest-immo-three.vercel.app/sitemap.xml

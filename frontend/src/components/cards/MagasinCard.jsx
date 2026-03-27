@@ -72,7 +72,7 @@ export default function MagasinCard({ magasin, onUpdate }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out w-full max-w-[400px] mx-auto focus-within:ring-2 focus-within:ring-maliOrange"
+        className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out w-full max-w-[400px] mx-auto"
       >
         {/* En-tête Image & Galerie */}
         <div className="relative w-full h-56 overflow-hidden" role="region" aria-label={`Galerie photos du magasin ${idCourt}`}>
