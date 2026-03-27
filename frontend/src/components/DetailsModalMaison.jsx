@@ -77,7 +77,7 @@ export default function DetailsModalMaison({ item, onClose }) {
                     <span className="text-lg font-bold text-gray-800">{item.prix?.toLocaleString()} XOF / mois</span>
                   </div>
                 </div>
-                <a href={`https://wa.me/${telephoneProprio}?text=Bonjour,%20je%20suis%20intéressé%20par%20le%20bien%20${item.titre}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg text-sm transition">
+                <a href={`https://wa.me/${telephoneProprio}?text=Bonjour,%20je%20suis%20intéressé%20par%20le%20bien%20${item._id.slice(-5).toUpperCase()}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg text-sm transition">
                   <MessageCircle className="w-4 h-4" />Contacter sur WhatsApp
                 </a>
               </div>
