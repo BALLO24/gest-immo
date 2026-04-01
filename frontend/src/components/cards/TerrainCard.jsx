@@ -199,7 +199,7 @@ export default function TerrainCard({ terrain, onUpdate }) {
               </button>
             </div>
           </div>
-          {role === "admin" ? <p>{terrain.agence?.nom_agence}</p> : "null"}
+          {role === "admin" ? <p>{terrain.agence?.nom_agence}</p> : null}
         </div>
       </motion.div>
 
