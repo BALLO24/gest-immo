@@ -1,10 +1,8 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, } from "react";
 import API from "../../api/API";
-import BienCard from "../cards/BienCard";
 import MaisonCard from "../cards/MaisonCard";
 import AppartementCard from "../cards/AppartementCard";
 import MagasinCard from "../cards/MagasinCard";
-import DetailsModal from "../DetailsModalMaison";
 
 export default function FilterList() {
   const [habitations, setHabitations] = useState([]);
@@ -33,9 +31,7 @@ export default function FilterList() {
   const [energieSecours, setEnergieSecours] = useState("tous");
   const [typePaiementAppart, setTypePaiementAppart] = useState("mensuel");
   const [toiletteInterne, setToiletteInterne] = useState("tous");
-  const [statut, setStatut] = useState("disponible");
   const [isLoading, setIsLoading] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
   const [filtreActif, setFiltreActif] = useState(false);
 
   // Fonction pour construire le filtre de manière centralisée
@@ -95,7 +91,6 @@ export default function FilterList() {
       console.error('Erreur lors de la récupération des habitations:', error);
     } finally {
       setIsLoading(false);
-      setInitialLoad(false);
     }
   };
 
