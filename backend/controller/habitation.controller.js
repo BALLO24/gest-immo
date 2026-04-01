@@ -146,15 +146,20 @@ module.exports.getAllHabitations = async (req, res) => {
     const filtreFinal = await buildCriteria(filtre);
 
     // Récupération des habitations
-    const habitations = await Habitation.find(filtreFinal)
-      .populate({
+const habitations = await Habitation.find(filtreFinal)
+  .populate([
+    {
       path: "quartier",
       populate: {
         path: "ville",
-        },
-      path: "agence",
-    }).limit(limit || 0).lean();
-    
+      },
+    },
+    {
+      path: "agence", // Maintenant "agence" est traité séparément
+    }
+  ])
+  .limit(limit || 0)
+  .lean();    
     // Transformation des IDs Google Drive en URLs d'affichage
     const habitationsAvecUrls = habitations.map((hab) => {
       const habObj = hab;
