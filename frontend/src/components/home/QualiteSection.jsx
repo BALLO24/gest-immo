@@ -1,75 +1,119 @@
-import { motion } from "framer-motion";
 import { ShieldCheck, Zap, Globe2, Home, Smile } from "lucide-react";
 
 const qualites = [
   {
-    // Ajout de aria-hidden="true" sur les icônes
-    icon: <ShieldCheck className="w-10 h-10 text-maliGreen" aria-hidden="true" />,
+    icon: "🛡️",
     title: "Equipe d'experts",
-    text: "Pour faire vos documents immobiliers(titre foncier ...) et vous assister dans vos litiges fonciers et constructions.",
+    text: "Pour faire vos documents immobiliers (titre foncier...) et vous assister dans vos litiges fonciers et constructions.",
   },
   {
-    icon: <Zap className="w-10 h-10 text-maliOrange" aria-hidden="true" />,
+    icon: "⚡",
     title: "Rapide et fluide",
     text: "Navigation optimisée pour trouver ou publier une annonce en quelques clics.",
   },
   {
-    icon: <Globe2 className="w-10 h-10 text-maliGreen" aria-hidden="true" />,
+    icon: "🌐",
     title: "Accessible partout",
     text: "ImmoMali est disponible sur ordinateur, tablette et téléphone.",
   },
   {
-    icon: <Home className="w-10 h-10 text-maliOrange" aria-hidden="true" />,
+    icon: "🏠",
     title: "Annonces vérifiées",
     text: "Chaque bien est contrôlé pour garantir authenticité et fiabilité.",
   },
   {
-    icon: <Smile className="w-10 h-10 text-maliGreen" aria-hidden="true" />,
-    title: "Simplicité d’utilisation",
+    icon: "😊",
+    title: "Simplicité d'utilisation",
     text: "Une interface claire et intuitive, adaptée à tous les utilisateurs.",
   },
 ];
 
 export default function QualitesSection() {
   return (
-    <section 
-      className="bg-gradient-to-b from-maliSand via-white to-maliSand/70 py-16 px-6 sm:px-12"
+    <section
+      className="mx-2 mb-2"
       aria-labelledby="section-qualites-titre"
+      style={{ fontFamily: 'Tahoma, Arial, sans-serif' }}
     >
-      <div className="text-center mb-12">
-        <h2 id="section-qualites-titre" className="text-3xl sm:text-4xl font-bold text-maliGreen mb-2">
-          Pourquoi choisir <span className="text-maliOrange">ImmoMali</span> ?
-        </h2>
-        <p className="text-gray-600 text-base sm:text-lg">
-          Découvrez les avantages qui font de ImmoMali la référence immobilière au Mali.
-        </p>
-      </div>
+      {/* === OUTER WINDOW === */}
+      <div className="win-window">
 
-      <div 
-        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 place-items-center"
-        role="list"
-      >
-        {qualites.map((q, index) => (
-          <motion.div
-            key={index}
-            role="listitem"
-            className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-500 ease-out transform hover:-translate-y-2 hover:bg-maliSand/90 text-center max-w-xs focus-within:ring-2 focus-within:ring-maliOrange outline-none"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
-          >
-            <div className="flex justify-center mb-4 transition-transform duration-500 group-hover:scale-110">
-              {q.icon}
-            </div>
-            <h3 className="text-lg font-semibold text-maliGreen mb-2 group-hover:text-maliOrange transition-colors duration-300">
-              {q.title}
-            </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              {q.text}
+        {/* Title bar */}
+        <div className="win-titlebar">
+          <div className="flex items-center gap-2">
+            <span aria-hidden="true">⭐</span>
+            <h2 id="section-qualites-titre">
+              Pourquoi choisir ImmoMali ?
+            </h2>
+          </div>
+          <div className="flex gap-1" aria-hidden="true">
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>_</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>□</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs font-black leading-none" style={{ minWidth: '18px', minHeight: '16px', color: '#CC0000' }}>✕</button>
+          </div>
+        </div>
+
+        {/* Content area */}
+        <div className="p-3" style={{ backgroundColor: '#D4D0C8' }}>
+          {/* Inner description */}
+          <div className="win-inset p-2 mb-3">
+            <p className="text-xs" style={{ color: '#000080', fontWeight: 'bold' }}>
+              Découvrez les avantages qui font de ImmoMali la référence immobilière au Mali.
             </p>
-          </motion.div>
-        ))}
+          </div>
+
+          {/* Cards grid */}
+          <div
+            className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+            role="list"
+          >
+            {qualites.map((q, index) => (
+              <div
+                key={index}
+                role="listitem"
+                className="win-window"
+                style={{ cursor: 'default' }}
+              >
+                {/* Mini title bar for each card */}
+                <div
+                  className="px-2 py-1 text-xs font-bold flex items-center gap-1"
+                  style={{
+                    background: 'linear-gradient(to right, #000080, #1084d0)',
+                    color: '#FFFFFF',
+                    fontSize: '10px',
+                  }}
+                >
+                  <span aria-hidden="true">{q.icon}</span>
+                  <span className="truncate">{q.title}</span>
+                </div>
+                <div className="p-2" style={{ backgroundColor: '#D4D0C8' }}>
+                  <p className="text-xs leading-relaxed" style={{ color: '#000000' }}>
+                    {q.text}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* OK Button row */}
+          <div className="mt-3 flex justify-end gap-2">
+            <button className="win-btn font-bold text-xs" style={{ color: '#000080' }}>
+              ✔ OK
+            </button>
+            <button className="win-btn text-xs">
+              ✖ Fermer
+            </button>
+          </div>
+        </div>
+
+        {/* Status bar */}
+        <div className="win-statusbar">
+          <div className="win-status-panel">
+            {qualites.length} avantages répertoriés
+          </div>
+          <div style={{ marginLeft: 'auto', color: '#808080', fontSize: '10px' }} aria-hidden="true">◢</div>
+        </div>
+
       </div>
     </section>
   );

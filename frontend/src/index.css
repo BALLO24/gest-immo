@@ -4,6 +4,169 @@
 
 @layer base {
   body {
-    @apply bg-maliSand ;
+    background-color: #008080;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    font-size: 11px;
+    color: #000000;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Tahoma', 'Arial', sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Windows 2000 classic raised 3D border */
+  .win-raised {
+    border: 2px solid;
+    border-color: #FFFFFF #404040 #404040 #FFFFFF;
+    box-shadow: 1px 1px 0 #808080 inset, -1px -1px 0 #D4D0C8 inset;
+  }
+
+  /* Windows 2000 sunken border (for text fields, etc.) */
+  .win-sunken {
+    border: 2px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    box-shadow: 1px 1px 0 #404040 inset, -1px -1px 0 #D4D0C8 inset;
+  }
+
+  /* Classic button up */
+  .win-btn {
+    background-color: #D4D0C8;
+    border: 2px solid;
+    border-color: #FFFFFF #404040 #404040 #FFFFFF;
+    padding: 3px 12px;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    color: #000000;
+    white-space: nowrap;
+    box-shadow: 1px 1px 0 #808080 inset, -1px -1px 0 #D4D0C8 inset;
+  }
+  .win-btn:hover {
+    background-color: #E0DDD5;
+  }
+  .win-btn:active {
+    border-color: #404040 #FFFFFF #FFFFFF #404040;
+    box-shadow: 1px 1px 0 #D4D0C8 inset, -1px -1px 0 #808080 inset;
+  }
+
+  /* Blue title bar (Active Window) */
+  .win-titlebar {
+    background: linear-gradient(to right, #000080, #1084d0);
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 11px;
+    padding: 3px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    user-select: none;
+  }
+
+  /* Window panel */
+  .win-window {
+    background-color: #D4D0C8;
+    border: 2px solid;
+    border-color: #FFFFFF #404040 #404040 #FFFFFF;
+    box-shadow: 2px 2px 0 #808080;
+  }
+
+  /* Inset content area */
+  .win-inset {
+    background-color: #FFFFFF;
+    border: 2px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+  }
+
+  /* Tab style */
+  .win-tab {
+    background-color: #D4D0C8;
+    border: 2px solid;
+    border-color: #FFFFFF #404040 #D4D0C8 #FFFFFF;
+    padding: 3px 12px;
+    font-size: 11px;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    cursor: pointer;
+  }
+
+  .win-tab-active {
+    background-color: #D4D0C8;
+    border: 2px solid;
+    border-color: #FFFFFF #D4D0C8 #FFFFFF #FFFFFF;
+    border-bottom: none;
+    padding: 4px 12px 5px;
+    z-index: 1;
+    font-size: 11px;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+  }
+
+  /* Status bar */
+  .win-statusbar {
+    background-color: #D4D0C8;
+    border-top: 2px solid #808080;
+    padding: 2px 6px;
+    font-size: 11px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .win-status-panel {
+    border: 2px solid;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    padding: 1px 8px;
+    flex: 1;
+    font-size: 11px;
+  }
+
+  /* Menu bar */
+  .win-menubar {
+    background-color: #D4D0C8;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 2px;
+    font-size: 11px;
+    border-bottom: 1px solid #808080;
+  }
+
+  .win-menuitem {
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 11px;
+    text-decoration: underline;
+    text-underline-offset: 1px;
+  }
+  .win-menuitem:hover {
+    background-color: #000080;
+    color: #FFFFFF;
+  }
+
+  /* Horizontal rule in Win2k style */
+  .win-separator {
+    border: none;
+    border-top: 1px solid #808080;
+    border-bottom: 1px solid #FFFFFF;
+    margin: 4px 0;
+  }
+
+  /* Scrollbar styling via the .win-inset on scrollable containers */
+  .win-scroll {
+    overflow-y: auto;
+    scrollbar-color: #D4D0C8 #FFFFFF;
+    scrollbar-width: auto;
+  }
+
+  /* Classic progress bar */
+  .win-progress-bar {
+    background-color: #FFFFFF;
+    border: 2px solid #808080;
+    height: 16px;
+  }
+  .win-progress-fill {
+    background-color: #000080;
+    height: 100%;
   }
 }

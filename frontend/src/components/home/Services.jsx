@@ -1,166 +1,206 @@
-import { motion } from "framer-motion";
-
 export default function Services() {
   return (
-    <div className="w-full bg-maliSand text-gray-800">
-      {/* SECTION À PROPOS */}
-      <section className="py-16" aria-labelledby="about-title">
-        <div className="container mx-auto px-4 text-center">
-          <motion.h2
-            id="about-title"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl sm:text-4xl font-bold mb-6 text-maliGreen drop-shadow-md"
-          >
-            À propos de ImmoMali
-          </motion.h2>
+    <div className="w-full" style={{ fontFamily: 'Tahoma, Arial, sans-serif' }}>
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-gray-700/90 max-w-2xl mx-auto mb-12"
-          >
-            Nous facilitons la recherche de logements, d’appartements et de terrains au Mali
-            grâce à une plateforme moderne, fiable et simple d’utilisation.
-          </motion.p>
+      {/* === A PROPOS WINDOW === */}
+      <div className="win-window mx-2 mb-2">
+        <div className="win-titlebar">
+          <div className="flex items-center gap-2">
+            <span aria-hidden="true">ℹ️</span>
+            <h2 id="about-title">À propos de ImmoMali</h2>
+          </div>
+          <div className="flex gap-1" aria-hidden="true">
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>_</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>□</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs font-black leading-none" style={{ minWidth: '18px', minHeight: '16px', color: '#CC0000' }}>✕</button>
+          </div>
+        </div>
+        <div className="p-3" style={{ backgroundColor: '#D4D0C8' }}>
+          {/* Description text in inset box */}
+          <div className="win-inset p-2 mb-3">
+            <p className="text-xs leading-relaxed">
+              Nous facilitons la recherche de logements, d&apos;appartements et de terrains au Mali
+              grâce à une plateforme moderne, fiable et simple d&apos;utilisation.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6" role="list">
+          {/* Three feature cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" role="list">
             {[
-              {
-                title: "Simplicité et rapidité",
-                text: "Trouvez le bien idéal en quelques clics grâce à nos filtres puissants.",
-                color: "text-maliGreen",
-              },
-              {
-                title: "Fiabilité garantie",
-                text: "Les annonces sont vérifiées pour assurer votre sécurité et votre sérénité.",
-                color: "text-maliOrange",
-              },
-              {
-                title: "Couverture nationale",
-                text: "Nous connectons acheteurs et vendeurs à travers tout le Mali.",
-                color: "text-maliGreen",
-              },
+              { icon: "⚡", title: "Simplicité et rapidité", text: "Trouvez le bien idéal en quelques clics grâce à nos filtres puissants.", color: '#000080' },
+              { icon: "✅", title: "Fiabilité garantie", text: "Les annonces sont vérifiées pour assurer votre sécurité et votre sérénité.", color: '#006400' },
+              { icon: "🗺️", title: "Couverture nationale", text: "Nous connectons acheteurs et vendeurs à travers tout le Mali.", color: '#000080' },
             ].map((item, i) => (
-              <motion.div
-                key={i}
-                role="listitem"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
-                className="p-6 bg-white/70 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-              >
-                <h3 className={`text-xl font-semibold mb-2 ${item.color}`}>
-                  {item.title}
-                </h3>
-                <p className="text-gray-700">{item.text}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION SERVICES */}
-      <section className="py-16 bg-white/60 backdrop-blur-sm" aria-labelledby="services-title">
-        <div className="container mx-auto px-4 text-center">
-          <h2 id="services-title" className="text-3xl sm:text-4xl font-bold mb-12 text-maliGreen drop-shadow-md">
-            Nos Services
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8" role="list">
-            {[
-              {
-                icon: "🏠",
-                title: "Location de maisons",
-                text: "Des logements confortables et bien situés à Bamako et dans tout le Mali.",
-                color: "text-maliOrange",
-              },
-              {
-                icon: "🪜",
-                title: "Vente de terrains",
-                text: "Des terrains sécurisés et bien localisés pour vos projets immobiliers.",
-                color: "text-maliGreen",
-              },
-              {
-                icon: "💬",
-                title: "Assistance & conseils",
-                text: "Un accompagnement personnalisé tout au long de vos démarches administratives immobilières.",
-                color: "text-maliOrange",
-              },
-            ].map((service, i) => (
-              <motion.div
-                key={i}
-                role="listitem"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
-                className="p-6 bg-white/80 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
-              >
-                <div 
-                  className={`text-5xl mb-4 ${service.color}`} 
-                  role="img" 
-                  aria-hidden="true"
+              <div key={i} role="listitem" className="win-window">
+                <div
+                  className="px-2 py-1 text-xs font-bold flex items-center gap-1"
+                  style={{ background: 'linear-gradient(to right, #000080, #1084d0)', color: '#FFFFFF', fontSize: '10px' }}
                 >
-                  {service.icon}
+                  <span aria-hidden="true">{item.icon}</span> {item.title}
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-900">
-                  {service.title}
-                </h3>
-                <p className="text-gray-700">{service.text}</p>
-              </motion.div>
+                <div className="p-2" style={{ backgroundColor: '#D4D0C8' }}>
+                  <p className="text-xs">{item.text}</p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
-      </section>
+        <div className="win-statusbar">
+          <div className="win-status-panel">Prêt</div>
+          <div style={{ marginLeft: 'auto', color: '#808080', fontSize: '10px' }} aria-hidden="true">◢</div>
+        </div>
+      </div>
 
-      {/* SECTION FAQ */}
-      <section className="py-16 bg-maliGreen/10" aria-labelledby="faq-title">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <h2 id="faq-title" className="text-3xl sm:text-4xl font-bold text-center mb-12 text-maliGreen drop-shadow-md">
-            Questions fréquentes
-          </h2>
+      {/* === NOS SERVICES WINDOW === */}
+      <div className="win-window mx-2 mb-2">
+        <div className="win-titlebar">
+          <div className="flex items-center gap-2">
+            <span aria-hidden="true">🗂️</span>
+            <h2 id="services-title">Nos Services</h2>
+          </div>
+          <div className="flex gap-1" aria-hidden="true">
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>_</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>□</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs font-black leading-none" style={{ minWidth: '18px', minHeight: '16px', color: '#CC0000' }}>✕</button>
+          </div>
+        </div>
 
-          <div className="space-y-4">
+        {/* Tab strip */}
+        <div
+          className="flex items-end px-2 pt-1"
+          style={{ backgroundColor: '#D4D0C8', borderBottom: '2px solid #808080' }}
+          role="tablist"
+        >
+          {['🏠 Location', '🌿 Terrain', '💬 Assistance'].map((tab, i) => (
+            <button
+              key={i}
+              role="tab"
+              aria-selected={i === 0}
+              className={i === 0 ? 'win-tab-active' : 'win-tab'}
+              style={{ position: 'relative', bottom: '-2px', marginRight: '2px', fontSize: '11px' }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-3" style={{ backgroundColor: '#D4D0C8' }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2" role="list">
             {[
-              {
-                q: "Comment publier une annonce ?",
-                a: "Créez un compte gratuitement, puis accédez à votre espace pour ajouter votre bien avec photos et détails.",
-              },
-              {
-                q: "Les annonces sont-elles vérifiées ?",
-                a: "Oui, chaque annonce est examinée avant publication pour garantir la qualité et la véracité des informations.",
-              },
-              {
-                q: "Quels sont les frais d’utilisation ?",
-                a: "Les annonces sont publiées gratuitement sans frais d'utilisation.",
-              },
-            ].map((faq, i) => (
-              <motion.details
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group bg-white/80 backdrop-blur-md p-6 rounded-lg shadow hover:shadow-lg transition-all duration-400 open:ring-1 open:ring-maliGreen"
-              >
-                <summary className="cursor-pointer font-semibold text-maliGreen list-none flex justify-between items-center focus:outline-none focus:text-maliOrange transition-colors">
-                  {faq.q}
-                  <span className="transition-transform group-open:rotate-180" aria-hidden="true">▼</span>
-                </summary>
-                <p className="mt-4 text-gray-700 leading-relaxed border-t border-gray-100 pt-4">
-                  {faq.a}
-                </p>
-              </motion.details>
+              { icon: "🏠", title: "Location de maisons", text: "Des logements confortables et bien situés à Bamako et dans tout le Mali." },
+              { icon: "🌿", title: "Vente de terrains", text: "Des terrains sécurisés et bien localisés pour vos projets immobiliers." },
+              { icon: "💬", title: "Assistance & conseils", text: "Un accompagnement personnalisé tout au long de vos démarches administratives immobilières." },
+            ].map((service, i) => (
+              <div key={i} role="listitem" className="win-window">
+                <div
+                  className="px-2 py-1 text-xs font-bold flex items-center gap-1"
+                  style={{ background: 'linear-gradient(to right, #000080, #1084d0)', color: '#FFFFFF', fontSize: '10px' }}
+                >
+                  <span aria-hidden="true">{service.icon}</span> {service.title}
+                </div>
+                <div className="p-3" style={{ backgroundColor: '#D4D0C8' }}>
+                  <p className="text-xs leading-relaxed">{service.text}</p>
+                  <div className="mt-2">
+                    <button className="win-btn text-xs w-full">En savoir plus</button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
-      </section>
+        <div className="win-statusbar">
+          <div className="win-status-panel">3 services disponibles</div>
+          <div style={{ marginLeft: 'auto', color: '#808080', fontSize: '10px' }} aria-hidden="true">◢</div>
+        </div>
+      </div>
+
+      {/* === FAQ WINDOW === */}
+      <div className="win-window mx-2 mb-2">
+        <div className="win-titlebar">
+          <div className="flex items-center gap-2">
+            <span aria-hidden="true">❓</span>
+            <h2 id="faq-title">Questions fréquentes (FAQ)</h2>
+          </div>
+          <div className="flex gap-1" aria-hidden="true">
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>_</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>□</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs font-black leading-none" style={{ minWidth: '18px', minHeight: '16px', color: '#CC0000' }}>✕</button>
+          </div>
+        </div>
+
+        <div className="p-3" style={{ backgroundColor: '#D4D0C8' }}>
+          <div className="flex gap-3 items-start mb-3">
+            {/* Warning icon like Windows dialogs */}
+            <div
+              className="flex-shrink-0 flex items-center justify-center"
+              style={{ width: '32px', height: '32px', backgroundColor: '#FFFFFF', border: '1px solid #808080', fontSize: '18px' }}
+              aria-hidden="true"
+            >
+              ❓
+            </div>
+            <div className="win-inset p-2 flex-1">
+              <p className="text-xs font-bold" style={{ color: '#000080' }}>
+                Aide en ligne — ImmoMali Support Center
+              </p>
+              <p className="text-xs mt-1">
+                Consultez les réponses aux questions les plus posées.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            {[
+              { q: "Comment publier une annonce ?", a: "Créez un compte gratuitement, puis accédez à votre espace pour ajouter votre bien avec photos et détails." },
+              { q: "Les annonces sont-elles vérifiées ?", a: "Oui, chaque annonce est examinée avant publication pour garantir la qualité et la véracité des informations." },
+              { q: "Quels sont les frais d'utilisation ?", a: "Les annonces sont publiées gratuitement sans frais d'utilisation." },
+            ].map((faq, i) => (
+              <details
+                key={i}
+                className="win-window"
+              >
+                <summary
+                  className="cursor-pointer px-2 py-1.5 text-xs font-bold flex items-center gap-2 select-none list-none"
+                  style={{ backgroundColor: '#D4D0C8' }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#D4D0C8',
+                      border: '2px solid',
+                      borderColor: '#FFFFFF #404040 #404040 #FFFFFF',
+                      fontSize: '8px',
+                      lineHeight: '8px',
+                      textAlign: 'center',
+                      flexShrink: 0,
+                    }}
+                    aria-hidden="true"
+                  >
+                    +
+                  </span>
+                  <span style={{ color: '#000080' }}>{faq.q}</span>
+                </summary>
+                <div className="win-inset p-2 m-1">
+                  <p className="text-xs leading-relaxed">{faq.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+
+          <div className="mt-3 flex justify-end gap-2">
+            <button className="win-btn font-bold text-xs" style={{ color: '#000080' }}>
+              ✔ OK
+            </button>
+            <button className="win-btn text-xs">Aide</button>
+          </div>
+        </div>
+        <div className="win-statusbar">
+          <div className="win-status-panel">Prêt</div>
+          <div style={{ marginLeft: 'auto', color: '#808080', fontSize: '10px' }} aria-hidden="true">◢</div>
+        </div>
+      </div>
+
     </div>
   );
 }
