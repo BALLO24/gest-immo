@@ -33,75 +33,163 @@ export default function HeroBanner() {
   }, []);
 
   return (
-    <section 
-      className="relative w-full h-[45vh] sm:h-[70vh] flex items-center justify-center overflow-hidden bg-black"
+    <section
+      className="relative w-full"
       role="region"
       aria-roledescription="carousel"
       aria-label="Galerie de présentation immobilière"
+      style={{ fontFamily: 'Tahoma, Arial, sans-serif' }}
     >
-      {/* Images de fond avec fondu croisé */}
-      {slides.map((slide, index) => (
+      {/* === OUTER WINDOW === */}
+      <div className="win-window mx-2 mt-2">
+
+        {/* Window title bar */}
+        <div className="win-titlebar">
+          <div className="flex items-center gap-2">
+            <span aria-hidden="true">🏠</span>
+            <span>Bienvenue sur ImmoMali - Annonces Immobilières</span>
+          </div>
+          <div className="flex gap-1" aria-hidden="true">
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>_</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs leading-none" style={{ minWidth: '18px', minHeight: '16px' }}>□</button>
+            <button className="win-btn !px-1.5 !py-0 text-xs font-black leading-none" style={{ minWidth: '18px', minHeight: '16px', color: '#CC0000' }}>✕</button>
+          </div>
+        </div>
+
+        {/* Tab row */}
+        <div className="flex items-end px-2 pt-1" style={{ backgroundColor: '#D4D0C8', borderBottom: '2px solid #808080' }} role="tablist" aria-label="Catégories">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              role="tab"
+              aria-selected={i === current}
+              aria-label={`Diapositive ${i + 1}`}
+              className={i === current ? 'win-tab-active' : 'win-tab'}
+              style={{ position: 'relative', bottom: '-2px', fontSize: '11px', marginRight: '2px' }}
+            >
+              {i === 0 ? '🏠 Maisons' : i === 1 ? '🌿 Terrains' : '🏢 Appartements'}
+            </button>
+          ))}
+        </div>
+
+        {/* Main image area */}
         <div
-          key={index}
-          role="img"
-          aria-label={slide.alt}
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
-            index === current ? "opacity-100 motion-safe:scale-105" : "opacity-0 scale-100"
-          }`}
-          style={{
-            backgroundImage: `url(${slide.image})`,
-            transitionProperty: "opacity, transform",
-            transitionDuration: "1500ms, 6000ms",
-          }}
+          className="relative overflow-hidden win-inset"
+          style={{ height: '320px' }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70"></div>
-        </div>
-      ))}
+          {slides.map((slide, index) => (
+            <div
+              key={index}
+              role="img"
+              aria-label={slide.alt}
+              className={`absolute inset-0 transition-opacity duration-700 ${index === current ? 'opacity-100' : 'opacity-0'}`}
+              style={{ backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+            >
+              {/* Dark overlay */}
+              <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}></div>
+            </div>
+          ))}
 
-      {/* Contenu texte */}
-      <div className="relative z-20 text-center px-4 sm:px-8 max-w-5xl" aria-live="polite">
-        <div className="overflow-hidden">
-          <h1 className="text-3xl sm:text-6xl font-black text-white drop-shadow-2xl mb-4 animate-in slide-in-from-bottom-8 duration-700">
-            {slides[current].title}
-          </h1>
-        </div>
-        <p className="text-white/90 text-base sm:text-2xl mb-8 sm:mb-12 font-medium max-w-4xl mx-auto drop-shadow-lg animate-in fade-in slide-in-from-bottom-12 duration-1000">
-          {slides[current].text}
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-in fade-in zoom-in duration-1000 delay-300">
-          <Link
-            to="./location"
-            className="w-auto sm:w-auto px-4 py-4 mb-2 bg-maliOrange hover:bg-maliOrange/90 text-white font-bold rounded-xl shadow-[0_10px_20px_rgba(232,119,34,0.3)] transition-all duration-300 hover:scale-105 active:scale-95"
+          {/* Text overlay in a "dialog box" style */}
+          <div
+            className="absolute bottom-4 left-4 right-4 win-window p-0"
+            style={{ zIndex: 10 }}
+            aria-live="polite"
           >
-            Voir les annonces
-          </Link>
-        </div>
-      </div>
+            <div className="win-titlebar text-xs">
+              <span>📢 Annonce #{current + 1} sur {slides.length}</span>
+            </div>
+            <div className="px-3 py-2" style={{ backgroundColor: '#D4D0C8' }}>
+              <h1 className="font-bold text-sm mb-1" style={{ color: '#000080' }}>
+                {slides[current].title}
+              </h1>
+              <p className="text-xs mb-3" style={{ color: '#000000' }}>
+                {slides[current].text}
+              </p>
+              <div className="flex gap-2 items-center">
+                <Link to="./location">
+                  <button className="win-btn font-bold text-xs" style={{ color: '#000080' }}>
+                    🔍 Voir les annonces
+                  </button>
+                </Link>
+                <Link to="./vente">
+                  <button className="win-btn text-xs">
+                    📋 Vente
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
 
-      {/* Indicateurs de navigation */}
-      <div className="absolute bottom-6 sm:bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-30" role="tablist" aria-label="Sélectionner une image">
-        {slides.map((_, i) => (
+          {/* Navigation arrows */}
           <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            role="tab"
-            aria-selected={i === current}
-            aria-label={`Passer à la diapositive ${i + 1}`}
-            className="group relative py-2"
+            onClick={() => setCurrent((p) => (p === 0 ? slides.length - 1 : p - 1))}
+            aria-label="Image précédente"
+            className="absolute left-2 top-1/2 -translate-y-1/2 win-btn text-sm font-bold"
+            style={{ zIndex: 20 }}
           >
-            <div className={`h-1.5 rounded-full transition-all duration-500 ${
-              i === current ? "w-12 sm:w-16 bg-maliOrange" : "w-4 sm:w-6 bg-white/40 group-hover:bg-white/60"
-            }`}></div>
+            ◀
           </button>
-        ))}
+          <button
+            onClick={() => setCurrent((p) => (p + 1) % slides.length)}
+            aria-label="Image suivante"
+            className="absolute right-2 top-1/2 -translate-y-1/2 win-btn text-sm font-bold"
+            style={{ zIndex: 20 }}
+          >
+            ▶
+          </button>
+        </div>
+
+        {/* Status bar */}
+        <div className="win-statusbar" aria-label="Barre de statut">
+          <div className="win-status-panel">
+            ✅ {slides.length} annonces en vedette
+          </div>
+          <div className="win-status-panel" style={{ maxWidth: '180px' }}>
+            📍 Bamako, Mali
+          </div>
+          <div className="win-status-panel flex gap-1 items-center" style={{ maxWidth: '160px' }}>
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                aria-label={`Diapo ${i + 1}`}
+                aria-pressed={i === current}
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  backgroundColor: i === current ? '#000080' : '#D4D0C8',
+                  border: '1px solid #808080',
+                  cursor: 'pointer',
+                }}
+              />
+            ))}
+          </div>
+          {/* Resize grip */}
+          <div style={{ marginLeft: 'auto', color: '#808080', fontSize: '10px' }} aria-hidden="true">◢</div>
+        </div>
+
       </div>
 
-      {/* Vague décorative */}
-      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10" aria-hidden="true">
-        <svg className="relative block w-full h-[40px] sm:h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.21,113,113.15,108.82,164,95.14,213.62,81.76,263.39,67.23,321.39,56.44Z" fill="#ffffff"></path>
-        </svg>
+      {/* === QUICK LINKS ROW === */}
+      <div
+        className="mx-2 mt-1 mb-2 px-3 py-2 flex flex-wrap gap-2 items-center"
+        style={{ backgroundColor: '#D4D0C8', border: '2px solid', borderColor: '#FFFFFF #404040 #404040 #FFFFFF' }}
+      >
+        <span className="text-xs font-bold" style={{ color: '#000080' }}>Accès rapide :</span>
+        <Link to="./location">
+          <button className="win-btn text-xs">🏠 Location</button>
+        </Link>
+        <Link to="./vente">
+          <button className="win-btn text-xs">🌿 Vente terrain</button>
+        </Link>
+        <Link to="/login">
+          <button className="win-btn text-xs">👤 Mon compte</button>
+        </Link>
+        <div style={{ marginLeft: 'auto', fontSize: '10px', color: '#808080' }}>
+          Internet Explorer 6.0 — Immobilier du Mali
+        </div>
       </div>
     </section>
   );
