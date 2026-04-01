@@ -69,7 +69,7 @@ export default function DetailsModalTerrain({ item, onClose }) {
                     className="inline-flex items-center justify-center gap-2 px-4 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition group"
                 >
                     <Phone className="w-4 h-4" />
-                    <span className="font-semibold">(+223) 82 08 38 14</span>
+                    <span className="font-semibold">{telephoneProprio}</span>
                 </a>
                 </div>
              </div>
