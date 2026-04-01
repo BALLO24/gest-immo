@@ -227,7 +227,7 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
               </button>
             </div>
           </div>
-          {role === "admin" ? <p>{appartement.agence?.nom}</p> : null}
+          {role === "admin" ? <p>{appartement.agence?.nom_agence}</p> : null}
         </div>
       </motion.div>
 

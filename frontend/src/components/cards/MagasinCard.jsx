@@ -199,7 +199,7 @@ export default function MagasinCard({ magasin, onUpdate }) {
               </button>
             </div>
           </div>
-          {role === "admin" ? <p>{magasin.agence?.nom}</p> : null}
+          {role === "admin" ? <p>{magasin.agence?.nom_agence}</p> : null}
         </div>
       </motion.div>
 

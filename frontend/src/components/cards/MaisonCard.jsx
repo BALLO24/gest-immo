@@ -207,7 +207,7 @@ export default function MaisonCard({ maison, onUpdate }) {
               </button>
             </div>
           </div>
-          {role === "admin" ? <p>{maison.agence?.nom}</p> : null}
+          {role === "admin" ? <p>{maison.agence?.nom_agence}</p> : null}
         </div>
       </motion.div>
 

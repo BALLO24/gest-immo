@@ -4,7 +4,7 @@ import { MapPin, Map, Locate, Sofa, Bed, Bath, Square, ChefHat, Store, Snowflake
 
 export default function DetailsModalAppart({ item, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const telephoneProprio = "+22364 08 38 14"; 
+  const telephoneProprio = import.meta.env.VITE_NUMERO_WHATSAPP || "64600036"; // Valeur par défaut si la variable d'environnement n'est pas définie
   if (!item) return null;
 
   const getPositionLabel = (pos) => {

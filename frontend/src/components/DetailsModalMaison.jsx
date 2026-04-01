@@ -4,7 +4,7 @@ import { MapPin, Map, Locate, Sofa, Bed, Bath, Home, ChefHat, Store, Zap, Drople
 
 export default function DetailsModalMaison({ item, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const telephoneProprio = "+22382083814";
+  const telephoneProprio = import.meta.env.VITE_NUMERO_WHATSAPP || "64600036"; // Valeur par défaut si la variable d'environnement n'est pas définie
   
   if (!item) return null;
 
