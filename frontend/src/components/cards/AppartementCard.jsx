@@ -19,8 +19,10 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
 
   const token = localStorage.getItem("authToken");
+  const role = token ? jwtDecode(token).role : null;
   let canEditStatus = false;
   if (token) {
     try {
@@ -225,6 +227,7 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
               </button>
             </div>
           </div>
+          {role === "admin" ? <p>{appartement.agence?.nom}</p> : null}
         </div>
       </motion.div>
 

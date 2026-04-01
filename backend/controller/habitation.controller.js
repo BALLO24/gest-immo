@@ -151,7 +151,8 @@ module.exports.getAllHabitations = async (req, res) => {
       path: "quartier",
       populate: {
         path: "ville",
-      }
+        },
+      path: "agence",
     }).limit(limit || 0).lean();
     
     // Transformation des IDs Google Drive en URLs d'affichage

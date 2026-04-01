@@ -4,8 +4,7 @@ import { MapPin, Map, Locate, Sofa, Bed, Bath, Square, ChefHat, Store, Snowflake
 
 export default function DetailsModalAppart({ item, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const telephoneProprio = "+22382083814";
-  
+  const telephoneProprio = "+22364 08 38 14"; 
   if (!item) return null;
 
   const getPositionLabel = (pos) => {

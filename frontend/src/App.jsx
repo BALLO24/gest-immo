@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { jwtDecode } from "jwt-decode";
 
-// Layouts & Pages
+// Layouts & Pages (Gardés tels quels)
 import AppLayout from "./layouts/AppLayout";
 import HomePage from "./pages/HomePage";
 import LocationPage from "./pages/LocationPage";
@@ -21,30 +21,30 @@ import QuartiersPage from "./pages/QuartierPage";
 import NotFoundPage from "./pages/NotFound";
 
 /**
- * COMPOSANT SEO : Centralise toute la logique de référencement.
- * @param {string} title - Titre de la page
- * @param {string} description - Description SEO (max 160 car.)
- * @param {string} url - Chemin de la page (ex: /vente)
- * @param {string} image - URL de l'image de partage (facultatif)
+ * COMPOSANT SEO ENRICHI
  */
-const SEO = ({ title, description, url, image }) => {
+const SEO = ({ title, description, url, image, type = "website" }) => {
   const siteName = "ImmoMali";
-  const baseUrl = "https://gest-immo-three.vercel.app"; // À remplacer par ton futur domaine
-  const fullTitle = title ? `${title} | ${siteName}` : `${siteName} - L'immobilier au Mali en un clic`;
-  const metaDescription = description || "Achat, vente et location de terrains titrés, maisons et appartements au Mali.";
+  const baseUrl = "https://immomali.net"; // Utilise ton domaine final
+  const fullTitle = title 
+    ? `${title} | ${siteName} - Immobilier Mali` 
+    : `ImmoMali | N°1 de l'Immobilier au Mali : Achat, Vente, Location`;
+  
+  const metaDescription = description || "Trouvez des terrains titrés, villas de luxe, appartements meublés et magasins à Bamako. Sécurisez votre investissement immobilier au Mali avec ImmoMali.";
   const metaImage = image || `${baseUrl}/preview-image.jpg`;
   const metaUrl = `${baseUrl}${url || ""}`;
 
   return (
     <Helmet>
-      {/* Balises standards */}
+      {/* Balises standards renforcées */}
       <title>{fullTitle}</title>
       <meta name="description" content={metaDescription} />
       <link rel="canonical" href={metaUrl} />
       <html lang="fr" />
 
-      {/* Open Graph / Facebook / LinkedIn / WhatsApp */}
-      <meta property="og:type" content="website" />
+      {/* Balises Open Graph pour WhatsApp/Facebook (Très utilisé au Mali) */}
+      <meta property="og:site_name" content={siteName} />
+      <meta property="og:type" content={type} />
       <meta property="og:url" content={metaUrl} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={metaDescription} />
@@ -67,8 +67,7 @@ const ScrollToTop = () => {
   return null;
 };
 
-// --- LOGIQUE DE ROUTAGE ---
-
+// --- LOGIQUE DE ROUTAGE (Gardée telle quelle pour la sécurité) ---
 const PublicRoute = () => {
   const token = localStorage.getItem("authToken");
   if (token) {
@@ -87,16 +86,13 @@ const PublicRoute = () => {
 const ProtectedRoute = ({ allowedRoles }) => {
   const token = localStorage.getItem("authToken");
   if (!token) return <Navigate to="/login" replace />;
-
   try {
     const decoded = jwtDecode(token);
     if (decoded.exp * 1000 < Date.now()) {
       localStorage.removeItem("authToken");
       return <Navigate to="/login" replace />;
     }
-    if (allowedRoles && !allowedRoles.includes(decoded.role)) {
-      return <Navigate to="/" replace />;
-    }
+    if (allowedRoles && !allowedRoles.includes(decoded.role)) return <Navigate to="/" replace />;
     return <Outlet />;
   } catch (error) {
     localStorage.removeItem("authToken");
@@ -109,29 +105,35 @@ function App() {
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* --- ROUTES PUBLIQUES --- */}
+        {/* --- ROUTES PUBLIQUES OPTIMISÉES --- */}
         <Route path="/" element={<AppLayout />}>
           <Route index element={
             <>
-              <SEO title="Accueil" url="/" />
+              <SEO 
+                title="Vente et Location Immobilière à Bamako" 
+                description="La plateforme immobilière de référence au Mali. Terrains avec Titre Foncier, villas à l'ACI 2000, appartements meublés et champs."
+                url="/" 
+              />
               <HomePage />
             </>
           } />
+          
           <Route path="location" element={
             <>
               <SEO 
-                title="Location de Maisons et Appartements" 
-                description="Louez votre futur chez-vous au Mali : appartements, villas et magasins disponibles." 
+                title="Location Appartement et Maison Mali" 
+                description="Trouvez une location à Bamako : appartements meublés, villas à Sébénikoro ou Sotuba, et magasins commerciaux au meilleur prix." 
                 url="/location" 
               />
               <LocationPage />
             </>
           } />
+          
           <Route path="vente" element={
             <>
               <SEO 
-                title="Vente de Terrains et Villas" 
-                description="Achetez des terrains avec titres fonciers sécurisés et des propriétés d'exception au Mali." 
+                title="Vente Terrain Titré et Villa Mali" 
+                description="Achetez votre terrain avec Titre Foncier (TF) au Mali. Large choix de parcelles à bâtir, villas duplex et terres agricoles sécurisées." 
                 url="/vente" 
               />
               <VentePage />
@@ -139,23 +141,22 @@ function App() {
           } />
         </Route>
 
-        {/* --- AUTHENTIFICATION --- */}
+        {/* --- AUTH & DASHBOARD (SEO moins critique ici, mais présent) --- */}
         <Route element={<PublicRoute />}>
           <Route path="login" element={
             <>
-              <SEO title="Connexion" url="/login" />
+              <SEO title="Connexion Espace Client" url="/login" />
               <LoginPage />
             </>
           } />
           <Route path="register" element={
             <>
-              <SEO title="Inscription" url="/register" />
+              <SEO title="Créer un compte Agence" url="/register" />
               <RegisterPage />
             </>
           } />
         </Route>          
 
-        {/* --- DASHBOARD ADMIN --- */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/dashboard" element={<Dashboard />}>
             <Route index element={<HomeDashboard />} />
@@ -166,16 +167,14 @@ function App() {
           </Route>
         </Route>
 
-        {/* --- ESPACE AGENCE --- */}
         <Route element={<ProtectedRoute allowedRoles={["admin", "agence"]} />}>
           <Route path="/agence" element={<HabitationsAgence />} />
           <Route path="change" element={<ChangePasswordPage />} />
         </Route>
 
-        {/* --- 404 --- */}
         <Route path="*" element={
           <>
-            <SEO title="Page Introuvable" />
+            <SEO title="Page non trouvée" />
             <NotFoundPage />
           </>
         } />

@@ -19,6 +19,7 @@ export default function TerrainCard({ terrain, onUpdate }) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const token = localStorage.getItem("authToken");
+  const role = token ? jwtDecode(token).role : null;
   let canEditStatus = false;
   if (token) {
     try {
@@ -198,6 +199,7 @@ export default function TerrainCard({ terrain, onUpdate }) {
               </button>
             </div>
           </div>
+          {role === "admin" ? <p>{terrain.agence?.nom}</p> : null}
         </div>
       </motion.div>
 

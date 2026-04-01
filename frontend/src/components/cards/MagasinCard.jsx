@@ -20,6 +20,7 @@ export default function MagasinCard({ magasin, onUpdate }) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const token = localStorage.getItem("authToken");
+  const role = token ? jwtDecode(token).role : null;
   let canEditStatus = false;
   if (token) {
     try {
@@ -198,6 +199,7 @@ export default function MagasinCard({ magasin, onUpdate }) {
               </button>
             </div>
           </div>
+          {role === "admin" ? <p>{magasin.agence?.nom}</p> : null}
         </div>
       </motion.div>
 

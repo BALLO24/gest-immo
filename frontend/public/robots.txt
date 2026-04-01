@@ -16,4 +16,4 @@ Allow: /location               # Indexer le catalogue de location
 Allow: /vente                  # Indexer le catalogue de vente
 
 # Indiquer le chemin du sitemap pour aider les robots à trouver tes annonces
-Sitemap: https://gest-immo-three.vercel.app/sitemap.xml
+Sitemap: https://immomali.net/sitemap.xml
