@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation }
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { jwtDecode } from "jwt-decode";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Layouts & Pages
 import AppLayout from "./layouts/AppLayout";
@@ -108,6 +109,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <SpeedInsights />
       <Routes>
         {/* --- ROUTES PUBLIQUES --- */}
         <Route path="/" element={<AppLayout />}>
