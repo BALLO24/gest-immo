@@ -19,14 +19,15 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
 
   const token = localStorage.getItem("authToken");
-  const role = token ? jwtDecode(token).role : null;
   let canEditStatus = false;
   if (token) {
     try {
       const decoded = jwtDecode(token);
+      setIsAdmin(decoded.role === "admin");
       const agenceId = appartement.agence?._id || appartement.agence;
       canEditStatus = decoded.role === "admin" || decoded.agenceId === agenceId;
     } catch (e) {
@@ -227,7 +228,7 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
               </button>
             </div>
           </div>
-          {role === "admin" ? <p>{appartement.agence?.nom_agence}</p> : null}
+          {isAdmin ? <p>{appartement.agence?.nom_agence}</p> : null}
         </div>
       </motion.div>
 

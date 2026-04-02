@@ -19,14 +19,14 @@ export default function MaisonCard({ maison, onUpdate }) {
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const token = localStorage.getItem("authToken");
-  const decoded = token ? jwtDecode(token) : null;
-  const role = token ? decoded.role : null;
   let canEditStatus = false;
   if (token) {
     try {
       const decoded = jwtDecode(token);
+      setIsAdmin(decoded.role === "admin");
       const maisonAgenceId = maison.agence?._id || maison.agence;
       canEditStatus = decoded.role === "admin" || decoded.agenceId === maisonAgenceId;
     } catch (e) {
@@ -208,7 +208,7 @@ export default function MaisonCard({ maison, onUpdate }) {
               </button>
             </div>
           </div>
-          {role === "admin" ? <p>{maison.agence?.nom_agence}</p> : null}
+          {isAdmin ? <p>{maison.agence?.nom_agence}</p> : null}
         </div>
       </motion.div>
 

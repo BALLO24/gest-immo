@@ -17,13 +17,14 @@ export default function TerrainCard({ terrain, onUpdate }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const token = localStorage.getItem("authToken");
-  const role = token ? jwtDecode(token).role : null;
   let canEditStatus = false;
   if (token) {
     try {
       const decoded = jwtDecode(token);
+      setIsAdmin(decoded.role === "admin");
       const agenceId = terrain.agence?._id || terrain.agence;
       canEditStatus = decoded.role === "admin" || decoded.agenceId === agenceId;
     } catch (e) {
@@ -199,7 +200,7 @@ export default function TerrainCard({ terrain, onUpdate }) {
               </button>
             </div>
           </div>
-          {role === "admin" ? <p>{terrain.agence?.nom_agence}</p> : null}
+          {isAdmin ? <p>{terrain.agence?.nom_agence}</p> : null}
         </div>
       </motion.div>
 
