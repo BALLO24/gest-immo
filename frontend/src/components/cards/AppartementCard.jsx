@@ -18,16 +18,15 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  
+  const [isDeleting, setIsDeleting] = useState(false);  
 
   const token = localStorage.getItem("authToken");
   let canEditStatus = false;
+  let isAdmin = false;
   if (token) {
     try {
       const decoded = jwtDecode(token);
-      setIsAdmin(decoded.role === "admin");
+      isAdmin = decoded.role === "admin";
       const agenceId = appartement.agence?._id || appartement.agence;
       canEditStatus = decoded.role === "admin" || decoded.agenceId === agenceId;
     } catch (e) {

@@ -18,13 +18,13 @@ export default function MagasinCard({ magasin, onUpdate }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const token = localStorage.getItem("authToken");
   let canEditStatus = false;
+  let isAdmin = false;
   if (token) {
     try {
       const decoded = jwtDecode(token);
-      setIsAdmin(decoded.role === "admin");
+      isAdmin = decoded.role === "admin";
       const agenceId = magasin.agence?._id || magasin.agence;
       canEditStatus = decoded.role === "admin" || decoded.agenceId === agenceId;
     } catch (e) {

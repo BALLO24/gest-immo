@@ -19,14 +19,14 @@ export default function MaisonCard({ maison, onUpdate }) {
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const token = localStorage.getItem("authToken");
   let canEditStatus = false;
+  let isAdmin = false;
   if (token) {
     try {
       const decoded = jwtDecode(token);
-      setIsAdmin(decoded.role === "admin");
+      isAdmin = decoded.role === "admin";
       const maisonAgenceId = maison.agence?._id || maison.agence;
       canEditStatus = decoded.role === "admin" || decoded.agenceId === maisonAgenceId;
     } catch (e) {
