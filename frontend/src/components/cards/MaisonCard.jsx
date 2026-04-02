@@ -21,7 +21,8 @@ export default function MaisonCard({ maison, onUpdate }) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const token = localStorage.getItem("authToken");
-  const role = token ? jwtDecode(token).role : null;
+  const decoded = token ? jwtDecode(token) : null;
+  const role = token ? decoded.role : null;
   let canEditStatus = false;
   if (token) {
     try {
