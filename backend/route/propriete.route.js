@@ -10,6 +10,10 @@ router.post("/", proprieteController.getAllProprietes); // recherche/filtre, pub
 // AJOUT : doit être déclarée AVANT "/:id" ci-dessous, sinon Express
 // interpréterait "admin" comme une valeur du paramètre :id.
 router.get("/admin/corbeille", authenticateToken, authorizeRoles('admin'), proprieteController.getCorbeilleAdmin);
+// AJOUT : idem, doit être déclarée avant "/:id" — publique (le sitemap est
+// consommé par le middleware Vercel du frontend et directement par les
+// robots d'indexation, sans authentification).
+router.get("/sitemap-data", proprieteController.getSitemapData);
 router.get("/:id", proprieteController.getProprieteById); // AJOUT : détail d'un bien, public
 router.get("/agence/:agenceId", proprieteController.getProprietesByAgence);
 

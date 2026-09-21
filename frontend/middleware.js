@@ -19,8 +19,13 @@
 //   (import.meta.env). Ce middleware tourne côté edge Vercel, dans un
 //   contexte totalement séparé du bundle React ; il lit process.env.
 
+// AJOUT : le matcher couvre maintenant aussi /sitemap.xml — avant, ce
+// fichier était statique (public/sitemap.xml, 3 URLs figées), incapable de
+// suivre des annonces qui changent en continu. Générer dynamiquement ici
+// réutilise exactement le même mécanisme (fetch vers BACKEND_API_URL) que
+// pour les aperçus WhatsApp/Facebook ci-dessous.
 export const config = {
-  matcher: "/bien/:path*",
+  matcher: ["/bien/:path*", "/sitemap.xml"],
 };
 
 const CRAWLER_USER_AGENTS = [
@@ -56,6 +61,57 @@ function escapeHtml(str = "") {
 const TYPE_LABELS = { maison: "Maison", appartement: "Appartement", magasin: "Magasin", terrain: "Terrain" };
 
 export default async function middleware(request) {
+  const url = new URL(request.url);
+  const backendUrl = process.env.BACKEND_API_URL;
+
+  // AJOUT : génération du sitemap — répond à TOUTE requête sur ce chemin
+  // (Googlebot, un navigateur qui l'ouvre directement, un outil de test
+  // SEO...), contrairement aux aperçus WhatsApp ci-dessous qui ne
+  // concernent que des robots précis reconnus par leur user-agent.
+  if (url.pathname === "/sitemap.xml") {
+    if (!backendUrl) {
+      console.error("BACKEND_API_URL manquant — sitemap indisponible.");
+      return new Response("Sitemap temporairement indisponible.", { status: 503 });
+    }
+    try {
+      const res = await fetch(`${backendUrl}/proprietes/sitemap-data`);
+      const { proprietes = [] } = res.ok ? await res.json() : {};
+
+      const pagesStatiques = [
+        { loc: `${url.origin}/`, priority: "1.0", changefreq: "daily" },
+        { loc: `${url.origin}/location`, priority: "0.9", changefreq: "daily" },
+        { loc: `${url.origin}/vente`, priority: "0.9", changefreq: "daily" },
+      ];
+
+      const entreesStatiques = pagesStatiques
+        .map((p) => `  <url>\n    <loc>${p.loc}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>`)
+        .join("\n");
+
+      const entreesBiens = proprietes
+        .map((p) => {
+          const lastmod = p.updatedAt ? new Date(p.updatedAt).toISOString().split("T")[0] : "";
+          return `  <url>\n    <loc>${url.origin}/bien/${escapeHtml(p.slug)}</loc>\n    ${lastmod ? `<lastmod>${lastmod}</lastmod>\n    ` : ""}<changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`;
+        })
+        .join("\n");
+
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entreesStatiques}\n${entreesBiens}\n</urlset>`;
+
+      return new Response(xml, {
+        status: 200,
+        headers: {
+          "content-type": "application/xml; charset=utf-8",
+          // Mise en cache courte : un sitemap n'a pas besoin d'être
+          // regénéré à chaque requête, mais doit rester raisonnablement à
+          // jour (nouvelles annonces publiées régulièrement).
+          "cache-control": "public, max-age=3600",
+        },
+      });
+    } catch (err) {
+      console.error("Erreur génération sitemap:", err);
+      return new Response("Erreur lors de la génération du sitemap.", { status: 500 });
+    }
+  }
+
   const userAgent = request.headers.get("user-agent");
 
   // Visiteur humain normal : on ne touche à rien, le SPA React se charge
@@ -64,9 +120,7 @@ export default async function middleware(request) {
     return;
   }
 
-  const url = new URL(request.url);
   const slug = url.pathname.replace(/^\/bien\//, "");
-  const backendUrl = process.env.BACKEND_API_URL;
 
   if (!backendUrl) {
     console.error("BACKEND_API_URL manquant — impossible de pré-rendre les balises OG.");

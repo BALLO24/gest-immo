@@ -509,3 +509,29 @@ module.exports.getCorbeilleAdmin = async (req, res) => {
         res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
 };
+
+// AJOUT : endpoint dédié au sitemap dynamique — avant, sitemap.xml était un
+// fichier statique de 3 URLs, ne référençant jamais aucune fiche de bien
+// individuelle (là où se trouve la vraie valeur SEO : longue traîne du type
+// "villa titre foncier Badalabougou"). Public (pas d'authentification, comme
+// getAllProprietes), volontairement léger : seuls slug + date de mise à jour,
+// sans limite (un sitemap doit lister TOUT, contrairement à la recherche
+// publique plafonnée à 20 résultats).
+module.exports.getSitemapData = async (req, res) => {
+    try {
+        const proprietes = await Propriete.find({ deletedAt: null, statut: "disponible" })
+            .select("__t typeOffre quartier updatedAt")
+            .populate({ path: "quartier", populate: { path: "ville" } })
+            .lean();
+
+        const data = proprietes.map((p) => ({
+            slug: construireSlugBien(p),
+            updatedAt: p.updatedAt,
+        }));
+
+        res.status(200).json({ success: true, proprietes: data });
+    } catch (error) {
+        console.error("Erreur données sitemap:", error);
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};

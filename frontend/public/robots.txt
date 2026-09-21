@@ -4,16 +4,27 @@
 User-agent: *
 
 # --- SECTIONS À NE PAS INDEXER (Confidentialité & Sécurité) ---
-Disallow: /dashboard/          # Empêche l'indexation de l'admin
-Disallow: /agence/             # Empêche l'indexation de l'espace agence
-Disallow: /login               # Inutile d'indexer la page de connexion
-Disallow: /register            # Inutile d'indexer la page d'inscription
-Disallow: /change              # Page de changement de mot de passe
+# Empêche l'indexation de l'admin
+Disallow: /dashboard/
+# Empêche l'indexation de l'espace agence
+Disallow: /agence/
+# Inutile d'indexer la page de connexion
+Disallow: /login
+# Inutile d'indexer la page d'inscription
+Disallow: /register
+# Page de changement de mot de passe
+Disallow: /change
 
 # --- SECTIONS À INDEXER ---
-Allow: /                       # Indexer la page d'accueil
-Allow: /location               # Indexer le catalogue de location
-Allow: /vente                  # Indexer le catalogue de vente
+# Indexer la page d'accueil
+Allow: /
+# Indexer le catalogue de location
+Allow: /location
+# Indexer le catalogue de vente
+Allow: /vente
+# Indexer les fiches de biens individuelles
+Allow: /bien/
 
-# Indiquer le chemin du sitemap pour aider les robots à trouver tes annonces
+# Indiquer le chemin du sitemap pour aider les robots à trouver tes annonces.
+# Généré dynamiquement (voir middleware.js), pas un fichier statique.
 Sitemap: https://immomali.net/sitemap.xml
