@@ -276,7 +276,7 @@ module.exports.getAllProprietes = async (req, res) => {
         if (limit) query = query.limit(limit);
 
         const proprietes = await query;
-        const proprietesAvecUrls = proprietes.map(withImageUrls);
+        const proprietesAvecUrls = proprietes.map((p) => withImageUrls(p));
 
         res.status(200).json(proprietesAvecUrls);
     } catch (error) {
@@ -488,7 +488,7 @@ module.exports.getProprietesByAgence = async (req, res) => {
             .sort({ datePublication: -1 })
             .lean();
 
-        res.status(200).json({ proprietes: proprietes.map(withImageUrls) });
+        res.status(200).json({ proprietes: proprietes.map((p) => withImageUrls(p)) });
     } catch (error) {
         console.error("Erreur agence:", error);
         res.status(500).json({ message: "Erreur serveur", error: error.message });
@@ -510,7 +510,7 @@ module.exports.getCorbeilleAdmin = async (req, res) => {
             .sort({ deletedAt: -1 })
             .lean();
 
-        res.status(200).json({ success: true, proprietes: proprietes.map(withImageUrls) });
+        res.status(200).json({ success: true, proprietes: proprietes.map((p) => withImageUrls(p)) });
     } catch (error) {
         console.error("Erreur corbeille admin:", error);
         res.status(500).json({ message: "Erreur serveur", error: error.message });
