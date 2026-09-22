@@ -20,7 +20,14 @@ const modelMap = {
 // quartier et de la ville. Nécessite que "quartier" (et "quartier.ville")
 // soient populés — c'est déjà le cas partout où withImageUrls est appelé.
 // Le slug n'est jamais utilisé pour retrouver le document : seul l'_id compte.
-function withImageUrls(propriete) {
+// CORRIGÉ (PageSpeed : 495 Kio d'économies signalées) : une largeur fixe de
+// 800px était appliquée à TOUTES les images, y compris les vignettes de
+// cartes affichées à 300-400px de large dans une grille — un gaspillage de
+// bande passante d'un facteur 2 à 3 pour ces cas-là. Largeur réduite par
+// défaut (adaptée aux cartes), et une largeur plus grande explicitement
+// demandée pour la fiche détail d'un bien (seul endroit où l'image est
+// vraiment affichée en grand).
+function withImageUrls(propriete, largeur = 500) {
     const obj = { ...propriete };
     if (obj.images && obj.images.length > 0) {
         // CORRIGÉ (migration ImageKit) : les biens créés avant la migration
@@ -30,7 +37,7 @@ function withImageUrls(propriete) {
         // correct pour les deux générations de biens sans script de migration.
         obj.images = obj.images.map((imageId) =>
             imageId.startsWith(PREFIXE_IMAGEKIT)
-                ? urlImageKit(imageId) // f_auto + qualité 80 + largeur plafonnée
+                ? urlImageKit(imageId, largeur) // f_auto + qualité 80 + largeur adaptée au contexte
                 : "https://lh3.googleusercontent.com/d/" + imageId // ancien format, inchangé
         );
     }
@@ -306,7 +313,7 @@ module.exports.getProprieteById = async (req, res) => {
         if (!propriete) {
             return res.status(404).json({ success: false, message: "Bien non trouvé" });
         }
-        res.status(200).json({ success: true, propriete: withImageUrls(propriete) });
+        res.status(200).json({ success: true, propriete: withImageUrls(propriete, 1200) });
     } catch (error) {
         console.error("Erreur lors de la récupération du bien:", error);
         res.status(500).json({ message: "Erreur serveur", error: error.message });

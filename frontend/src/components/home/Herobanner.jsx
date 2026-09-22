@@ -1,21 +1,25 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const slides = [
   {
     image: "/images/image1.webp",
+    imageMobile: "/images/mobile/image1.webp",
     title: "Trouvez la maison de vos rêves",
     text: "Découvrez les plus belles villas et appartements à Bamako et partout au Mali.",
     alt: "Grande villa moderne à Bamako",
   },
   {
     image: "/images/image2.webp",
+    imageMobile: "/images/mobile/image2.webp",
     title: "Investissez dans un avenir sûr",
     text: "Des terrains bien situés, prêts pour vos projets immobiliers.",
     alt: "Terrain résidentiel prêt pour construction",
   },
   {
     image: "/images/image3.webp",
+    imageMobile: "/images/mobile/image3.webp",
     title: "Louez en toute sérénité",
     text: "Appartements modernes et confortables pour un quotidien paisible.",
     alt: "Intérieur d'un appartement moderne",
@@ -61,20 +65,43 @@ export default function HeroBanner() {
       onBlur={() => setPause(false)}
       onKeyDown={handleKeyDown}
     >
+      {/* AJOUT : préchargement de la 1ère image (LCP - Largest Contentful
+          Paint), une par taille d'écran via l'attribut media — corrige
+          l'avertissement PageSpeed "Détection de la requête LCP". */}
+      <Helmet>
+        <link rel="preload" as="image" href={slides[0].imageMobile} media="(max-width: 639px)" />
+        <link rel="preload" as="image" href={slides[0].image} media="(min-width: 640px)" />
+      </Helmet>
+
       {slides.map((slide, index) => (
-        <div
-          key={index}
-          role="img"
-          aria-label={slide.alt}
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out motion-reduce:transition-none ${
-            index === current ? "opacity-100 motion-safe:scale-105" : "opacity-0 scale-100"
-          }`}
-          style={{
-            backgroundImage: `url(${slide.image})`,
-            transitionProperty: "opacity, transform",
-            transitionDuration: "1500ms, 6000ms",
-          }}
-        >
+        <div key={index} className="absolute inset-0" role="img" aria-label={slide.alt}>
+          {/* CORRIGÉ (495 Kio d'économies signalées par PageSpeed) : avant,
+              une seule image (dimensionnée pour desktop, ~1536px de large)
+              était chargée sur TOUS les écrans, mobile compris — un
+              téléphone téléchargeait donc une image bien plus lourde que ce
+              qu'il peut afficher. Deux éléments distincts ici, un seul
+              visible selon la largeur d'écran : le navigateur ne charge
+              jamais l'image de celui qui est masqué (display:none). */}
+          <div
+            className={`sm:hidden absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out motion-reduce:transition-none ${
+              index === current ? "opacity-100 motion-safe:scale-105" : "opacity-0 scale-100"
+            }`}
+            style={{
+              backgroundImage: `url(${slide.imageMobile})`,
+              transitionProperty: "opacity, transform",
+              transitionDuration: "1500ms, 6000ms",
+            }}
+          />
+          <div
+            className={`hidden sm:block absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out motion-reduce:transition-none ${
+              index === current ? "opacity-100 motion-safe:scale-105" : "opacity-0 scale-100"
+            }`}
+            style={{
+              backgroundImage: `url(${slide.image})`,
+              transitionProperty: "opacity, transform",
+              transitionDuration: "1500ms, 6000ms",
+            }}
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70"></div>
         </div>
       ))}
@@ -112,7 +139,7 @@ export default function HeroBanner() {
             role="tab"
             aria-selected={i === current}
             aria-label={`Passer à la diapositive ${i + 1}`}
-            className="group relative py-2"
+            className="group relative flex items-center justify-center p-3 -m-1"
           >
             <div className={`h-1.5 rounded-full transition-all duration-500 ${
               i === current ? "w-12 sm:w-16 bg-maliOrange" : "w-4 sm:w-6 bg-white/40 group-hover:bg-white/60"
