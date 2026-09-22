@@ -25,6 +25,7 @@
 // réutilise exactement le même mécanisme (fetch vers BACKEND_API_URL) que
 // pour les aperçus WhatsApp/Facebook ci-dessous.
 export const config = {
+  runtime: 'nodejs',
   matcher: ["/bien/:path*", "/sitemap.xml"],
 };
 
