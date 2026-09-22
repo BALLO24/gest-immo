@@ -166,10 +166,12 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
                 aria-selected={i === currentImage}
                 aria-label={`Voir l'image ${i + 1}`}
                 onClick={() => setCurrentImage(i)}
-                className={`w-2 h-2 rounded-full ${
+                className="p-2.5 -m-1.5 flex items-center justify-center"
+              >
+                <span className={`w-2 h-2 rounded-full ${
                   i === currentImage ? "bg-maliOrange" : "bg-white/70 hover:bg-maliOrange/60"
-                } transition-all duration-300`}
-              ></button>
+                } transition-all duration-300`} />
+              </button>
             ))}
           </div>
         </div>
