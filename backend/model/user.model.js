@@ -51,6 +51,19 @@ const UserSchema = new Schema(
             enum: ['active', 'inactive', 'suspendue'],
             default: 'active',
         },
+        // AJOUT : réinitialisation de mot de passe en libre-service. On ne
+        // stocke jamais le token en clair (comme un mot de passe) — seul son
+        // hash SHA-256 est en base, comparé au hash du token reçu dans le lien.
+        resetPasswordToken: {
+            type: String,
+            default: null,
+            select: false,
+        },
+        resetPasswordExpires: {
+            type: Date,
+            default: null,
+            select: false,
+        },
     },
     { timestamps: true }
 );

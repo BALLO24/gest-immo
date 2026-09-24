@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Heart } from "lucide-react";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,6 +47,9 @@ export default function Navbar() {
             </Link>
             <Link to="/vente" className={`px-3 py-2 text-sm font-semibold transition-colors ${location.pathname === "/vente" ? "text-maliOrange" : "text-maliGreen/80 hover:text-maliOrange"}`}>
               À Vendre
+            </Link>
+            <Link to="/favoris" className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold transition-colors ${location.pathname === "/favoris" ? "text-maliOrange" : "text-maliGreen/80 hover:text-maliOrange"}`}>
+              <Heart size={16} className={location.pathname === "/favoris" ? "fill-maliOrange" : ""} /> Favoris
             </Link>
 
             <div className="h-6 w-[1px] bg-maliOcre/20 mx-2"></div>
@@ -101,6 +105,9 @@ export default function Navbar() {
           <Link to="/" className="text-maliGreen font-bold text-xl hover:text-maliOrange transition-colors">Accueil</Link>
           <Link to="/location" className="text-maliGreen font-bold text-xl hover:text-maliOrange transition-colors">Louer</Link>
           <Link to="/vente" className="text-maliGreen font-bold text-xl hover:text-maliOrange transition-colors">Vendre</Link>
+          <Link to="/favoris" className="flex items-center gap-2 text-maliGreen font-bold text-xl hover:text-maliOrange transition-colors">
+            <Heart size={20} /> Favoris
+          </Link>
           
           <div className="h-[1px] bg-maliOcre/10 w-full"></div>
 

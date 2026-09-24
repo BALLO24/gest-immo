@@ -1,11 +1,30 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { jwtDecode } from "jwt-decode";
+import toast from "react-hot-toast";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   MapPin, Map, Locate, Sofa, Bed, Bath, Home, ChefHat, Store, Zap, Droplets,
   Wallet, MessageCircle, Phone, ArrowLeft, Loader2, Building2, Mail, ImageOff,
+  Share2, Facebook, Link2, CalendarClock, X as XIcon, User, Flag,
 } from "lucide-react";
 import API from "../api/API";
+
+// AJOUT : correctif standard — Leaflet référence en interne ses icônes de
+// marqueur par des chemins relatifs qui ne survivent pas au bundling
+// (Vite/Webpack), résultat : marqueur invisible ou cassé sans ce correctif.
+// Solution connue de l'écosystème react-leaflet : pointer explicitement
+// vers des URLs de CDN plutôt que de laisser Leaflet deviner ses propres
+// chemins de fichiers.
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
 
 // AJOUT : cette page n'existait pas — chaque bien n'était consultable qu'en
 // modal (state React local), sans URL propre. Conséquences : aucune annonce
@@ -116,7 +135,35 @@ export default function ProprieteDetailPage() {
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
+  // AJOUT : demande de visite — jusqu'ici, une demande de visite se faisait
+  // uniquement via WhatsApp, sans aucune trace côté plateforme.
+  const [visiteOpen, setVisiteOpen] = useState(false);
+  const [visiteEnvoi, setVisiteEnvoi] = useState(false);
+  const [visiteEnvoyee, setVisiteEnvoyee] = useState(false);
+  const [visiteForm, setVisiteForm] = useState({ nomClient: "", telephoneClient: "", emailClient: "", dateSouhaitee: "", message: "" });
+  // AJOUT : signalement d'annonce.
+  const [signalementOpen, setSignalementOpen] = useState(false);
+  const [signalementEnvoi, setSignalementEnvoi] = useState(false);
+  const [signalementEnvoye, setSignalementEnvoye] = useState(false);
+  const [signalementForm, setSignalementForm] = useState({ motif: "", message: "", contactSignaleur: "" });
+  // WhatsApp/Appel utilisent TOUJOURS le numéro central du site (variable
+  // d'environnement), jamais celui d'une agence en particulier — ce
+  // comportement existait déjà, on le garde tel quel.
   const telephoneSite = import.meta.env.VITE_NUMERO_WHATSAPP || "64600036";
+
+  // AJOUT : le numéro/email PUBLIC de l'agence (différent du numéro central
+  // ci-dessus) n'est visible que pour un administrateur connecté — un
+  // visiteur normal ne doit voir que le contact WhatsApp/téléphone du site.
+  const isAdmin = (() => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) return false;
+      return jwtDecode(token).role === "admin";
+    } catch {
+      return false;
+    }
+  })();
 
   useEffect(() => {
     let cancelled = false;
@@ -164,6 +211,90 @@ export default function ProprieteDetailPage() {
   const seoImage = item.images?.[0];
   const seoUrl = `${SITE_URL}/bien/${item.slug || item._id}`;
 
+  // AJOUT : bouton Partager — utilise le partage natif du téléphone quand
+  // disponible (accède à TOUTES les apps installées : WhatsApp, Messenger,
+  // SMS, etc., pas seulement les 2-3 qu'on pourrait lister nous-mêmes), avec
+  // un petit menu de secours pour les navigateurs qui ne le supportent pas
+  // (essentiellement desktop).
+  const partagerNatif = async () => {
+    try {
+      await navigator.share({ title: seoTitle, text: seoDescription, url: seoUrl });
+    } catch (err) {
+      // L'utilisateur a annulé le partage, ou une erreur est survenue — pas
+      // besoin d'afficher quoi que ce soit dans les deux cas.
+    }
+  };
+
+  const copierLien = async () => {
+    try {
+      await navigator.clipboard.writeText(seoUrl);
+      toast.success("Lien copié !");
+    } catch {
+      toast.error("Impossible de copier le lien.");
+    }
+    setShareOpen(false);
+  };
+
+  const partagerWhatsapp = () => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(`${seoTitle} ${seoUrl}`)}`, "_blank", "noopener,noreferrer");
+    setShareOpen(false);
+  };
+
+  const partagerFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(seoUrl)}`, "_blank", "noopener,noreferrer");
+    setShareOpen(false);
+  };
+
+  const handlePartager = () => {
+    if (navigator.share) {
+      partagerNatif();
+    } else {
+      setShareOpen((o) => !o);
+    }
+  };
+
+  const handleDemandeVisite = async (e) => {
+    e.preventDefault();
+    if (!visiteForm.nomClient.trim() || !visiteForm.telephoneClient.trim()) {
+      toast.error("Nom et téléphone sont obligatoires.");
+      return;
+    }
+    setVisiteEnvoi(true);
+    const result = await API.creerDemandeVisite({
+      proprieteId: item._id,
+      ...visiteForm,
+    });
+    setVisiteEnvoi(false);
+    if (result.success) {
+      setVisiteEnvoyee(true);
+    } else {
+      toast.error(result.error);
+    }
+  };
+
+  const handleSignalement = async (e) => {
+    e.preventDefault();
+    if (!signalementForm.motif) {
+      toast.error("Veuillez choisir un motif.");
+      return;
+    }
+    if (!signalementForm.message.trim()) {
+      toast.error("Merci de préciser les détails de votre signalement.");
+      return;
+    }
+    setSignalementEnvoi(true);
+    const result = await API.creerSignalement({
+      proprieteId: item._id,
+      ...signalementForm,
+    });
+    setSignalementEnvoi(false);
+    if (result.success) {
+      setSignalementEnvoye(true);
+    } else {
+      toast.error(result.error);
+    }
+  };
+
   const infos = buildInfos(item);
   const images = item.images?.length ? item.images : [];
 
@@ -199,9 +330,38 @@ export default function ProprieteDetailPage() {
               <span className="text-xs font-bold text-maliOrange uppercase tracking-wide">{typeLabel}</span>
               <h1 className="text-lg font-bold text-maliGreen">N° {idCourt}</h1>
             </div>
-            {item.misEnAvant && (
-              <span className="text-xs font-black bg-orange-100 text-orange-700 px-3 py-1 rounded-full">🔥 En vedette</span>
-            )}
+            <div className="flex items-center gap-2">
+              {item.misEnAvant && (
+                <span className="text-xs font-black bg-orange-100 text-orange-700 px-3 py-1 rounded-full">🔥 En vedette</span>
+              )}
+              {/* AJOUT : bouton Partager */}
+              <div className="relative">
+                <button
+                  onClick={handlePartager}
+                  aria-label="Partager ce bien"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-maliGreen bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors"
+                >
+                  <Share2 size={14} /> Partager
+                </button>
+
+                {shareOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShareOpen(false)}></div>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-1.5 animate-in fade-in zoom-in-95 duration-100">
+                      <button onClick={partagerWhatsapp} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        <MessageCircle size={16} className="text-green-600" /> WhatsApp
+                      </button>
+                      <button onClick={partagerFacebook} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Facebook size={16} className="text-blue-600" /> Facebook
+                      </button>
+                      <button onClick={copierLien} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Link2 size={16} className="text-gray-400" /> Copier le lien
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* SLIDER */}
@@ -238,6 +398,36 @@ export default function ProprieteDetailPage() {
                 <InfoCompact key={idx} {...info} />
               ))}
             </div>
+
+            {/* AJOUT : carte de localisation — les coordonnées GPS existent
+                en base (localisation.coordinates) depuis longtemps mais
+                n'étaient affichées nulle part. GeoJSON stocke
+                [longitude, latitude] alors que Leaflet attend
+                [latitude, longitude] — ordre inversé ci-dessous, piège
+                classique sinon. */}
+            {item.localisation?.coordinates?.length === 2 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
+                  <MapPin size={15} className="text-maliOrange" /> Localisation
+                </h3>
+                <div className="rounded-xl overflow-hidden border border-gray-200 h-64">
+                  <MapContainer
+                    center={[item.localisation.coordinates[1], item.localisation.coordinates[0]]}
+                    zoom={15}
+                    scrollWheelZoom={false}
+                    style={{ height: "100%", width: "100%" }}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[item.localisation.coordinates[1], item.localisation.coordinates[0]]}>
+                      <Popup>{typeLabel} — {lieu}</Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -258,13 +448,29 @@ export default function ProprieteDetailPage() {
             <a href={`tel:${telephoneSite}`} className="mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition text-sm font-semibold">
               <Phone className="w-4 h-4" /> {telephoneSite}
             </a>
+
+            {/* AJOUT : bouton Demander une visite — enregistre la demande
+                côté plateforme (contrairement à WhatsApp ci-dessus, qui ne
+                laisse aucune trace). Base nécessaire pour qu'un jour le
+                frais de visite prévu dans les CGU puisse être appliqué. */}
+            <button
+              onClick={() => { setVisiteOpen(true); setVisiteEnvoyee(false); }}
+              className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-maliOrange/10 text-maliOrange rounded-xl hover:bg-maliOrange/20 transition text-sm font-semibold"
+            >
+              <CalendarClock className="w-4 h-4" /> Demander une visite
+            </button>
           </div>
 
-          {/* AJOUT : contact public de l'agence propriétaire du bien —
-              champs telephonePublic/emailPublic ajoutés au modèle Agence
-              il y a plusieurs tours, jamais affichés nulle part jusqu'ici. */}
-          {(item.agence?.nom_agence || item.agence?.telephonePublic || item.agence?.emailPublic) && (
+          {/* CORRIGÉ : le contact public de l'agence n'est plus visible que
+              par un administrateur connecté — avant, n'importe quel
+              visiteur pouvait le voir, alors que le point de contact
+              affiché au public doit toujours être le numéro central du site
+              (WhatsApp/Appel ci-dessus). */}
+          {isAdmin && (item.agence?.nom_agence || item.agence?.telephonePublic || item.agence?.emailPublic) && (
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 space-y-2">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                <Building2 className="w-3 h-3" /> Visible uniquement par l'administrateur
+              </p>
               {item.agence?.nom_agence && (
                 <div className="flex items-center gap-2 text-gray-700 font-semibold text-sm pb-2 border-b border-gray-50">
                   <Building2 className="w-4 h-4 text-gray-400" /> {item.agence.nom_agence}
@@ -282,8 +488,164 @@ export default function ProprieteDetailPage() {
               )}
             </div>
           )}
+
+          {/* AJOUT : signaler une annonce — discret, volontairement pas mis
+              en avant visuellement (peu utilisé en usage normal, mais doit
+              rester accessible). */}
+          <button
+            onClick={() => { setSignalementOpen(true); setSignalementEnvoye(false); }}
+            className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-500 hover:text-red-500 transition-colors py-2"
+          >
+            <Flag size={13} /> Signaler cette annonce
+          </button>
         </div>
       </div>
+
+      {/* AJOUT : modal de demande de visite */}
+      {visiteOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setVisiteOpen(false); }}
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-900">Demander une visite</h3>
+              <button onClick={() => setVisiteOpen(false)} aria-label="Fermer" className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-black transition-colors">
+                <XIcon size={20} />
+              </button>
+            </div>
+
+            {visiteEnvoyee ? (
+              <div className="p-8 text-center">
+                <div className="w-14 h-14 rounded-full bg-maliGreen/10 flex items-center justify-center mx-auto mb-4">
+                  <CalendarClock className="text-maliGreen" size={26} />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-1">Demande envoyée !</h4>
+                <p className="text-sm text-gray-500">L'agence a reçu votre demande et vous contactera pour organiser la visite.</p>
+                <button onClick={() => setVisiteOpen(false)} className="mt-6 text-sm font-semibold text-maliGreen hover:underline">Fermer</button>
+              </div>
+            ) : (
+              <form onSubmit={handleDemandeVisite} className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 ml-0.5">Nom complet</label>
+                  <div className="relative mt-1.5">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="text" required autoFocus
+                      value={visiteForm.nomClient}
+                      onChange={(e) => setVisiteForm((f) => ({ ...f, nomClient: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:border-maliOrange outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 ml-0.5">Téléphone</label>
+                  <div className="relative mt-1.5">
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="tel" required
+                      value={visiteForm.telephoneClient}
+                      onChange={(e) => setVisiteForm((f) => ({ ...f, telephoneClient: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:border-maliOrange outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 ml-0.5">Date souhaitée <span className="text-gray-400 font-normal">(optionnel)</span></label>
+                  <input
+                    type="date"
+                    value={visiteForm.dateSouhaitee}
+                    onChange={(e) => setVisiteForm((f) => ({ ...f, dateSouhaitee: e.target.value }))}
+                    className="w-full mt-1.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:border-maliOrange outline-none transition-colors"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={visiteEnvoi}
+                  className="w-full py-3 bg-maliOrange hover:bg-maliOcre text-white rounded-xl font-semibold text-sm shadow-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {visiteEnvoi ? <><Loader2 className="animate-spin" size={18} /> Envoi...</> : "Envoyer la demande"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* AJOUT : modal de signalement d'annonce */}
+      {signalementOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setSignalementOpen(false); }}
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Flag size={18} className="text-red-500" /> Signaler cette annonce
+              </h3>
+              <button onClick={() => setSignalementOpen(false)} aria-label="Fermer" className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-black transition-colors">
+                <XIcon size={20} />
+              </button>
+            </div>
+
+            {signalementEnvoye ? (
+              <div className="p-8 text-center">
+                <div className="w-14 h-14 rounded-full bg-maliGreen/10 flex items-center justify-center mx-auto mb-4">
+                  <Flag className="text-maliGreen" size={24} />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-1">Signalement transmis</h4>
+                <p className="text-sm text-gray-500">Merci, notre équipe va l'examiner rapidement.</p>
+                <button onClick={() => setSignalementOpen(false)} className="mt-6 text-sm font-semibold text-maliGreen hover:underline">Fermer</button>
+              </div>
+            ) : (
+              <form onSubmit={handleSignalement} className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 ml-0.5">Motif</label>
+                  <select
+                    value={signalementForm.motif}
+                    required
+                    onChange={(e) => setSignalementForm((f) => ({ ...f, motif: e.target.value }))}
+                    className="w-full mt-1.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:border-maliOrange outline-none transition-colors"
+                  >
+                    <option value="" disabled>Sélectionnez un motif</option>
+                    <option value="fraude">Annonce frauduleuse</option>
+                    <option value="deja_indisponible">Bien déjà loué/vendu</option>
+                    <option value="informations_incorrectes">Informations incorrectes</option>
+                    <option value="autre">Autre</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 ml-0.5">Détails</label>
+                  <textarea
+                    value={signalementForm.message}
+                    required
+                    onChange={(e) => setSignalementForm((f) => ({ ...f, message: e.target.value }))}
+                    rows={3}
+                    placeholder="Expliquez ce qui vous a amené à signaler cette annonce..."
+                    className="w-full mt-1.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:border-maliOrange outline-none transition-colors resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 ml-0.5">Votre contact <span className="text-gray-400 font-normal">(optionnel, pour vous recontacter)</span></label>
+                  <input
+                    type="text"
+                    value={signalementForm.contactSignaleur}
+                    onChange={(e) => setSignalementForm((f) => ({ ...f, contactSignaleur: e.target.value }))}
+                    className="w-full mt-1.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:border-maliOrange outline-none transition-colors"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={signalementEnvoi}
+                  className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold text-sm shadow-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {signalementEnvoi ? <><Loader2 className="animate-spin" size={18} /> Envoi...</> : "Envoyer le signalement"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

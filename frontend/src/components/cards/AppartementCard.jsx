@@ -11,9 +11,12 @@ import toast from "react-hot-toast"; // CORRIGÉ : Toaster retiré d'ici, un seu
 import ModifAppartementModal from "../propriete/ModifAppartementModal";
 import ConfirmSuppression from "../ui/ConfirmSuppression";
 import API from "../../api/API";
+import { useFavori } from "../../utils/useFavoris";
+import { Heart } from "lucide-react";
 
 export default function AppartementCard({ appartement, onUpdate, typePaiementAppart = "journalier" }) {
   const [currentImage, setCurrentImage] = useState(0);
+  const [favori, toggleFavori] = useFavori(appartement._id);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
@@ -138,6 +141,16 @@ export default function AppartementCard({ appartement, onUpdate, typePaiementApp
             alt={`Vue ${currentImage + 1} de l'appartement à ${appartement.quartier?.nom}`}
             className="w-full h-full object-cover transition-all duration-700 ease-in-out"
           />
+
+          {/* AJOUT : favori — stocké côté navigateur, pas de compte requis. */}
+          <button
+            onClick={toggleFavori}
+            aria-label={favori ? "Retirer des favoris" : "Ajouter aux favoris"}
+            aria-pressed={favori}
+            className="absolute bottom-3 right-3 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm hover:scale-110 transition-transform"
+          >
+            <Heart size={18} className={favori ? "fill-red-500 text-red-500" : "text-gray-400"} />
+          </button>
 
           {appartement.images.length > 1 && (
             <>

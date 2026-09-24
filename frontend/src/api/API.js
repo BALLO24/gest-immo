@@ -48,6 +48,25 @@ export default {
     }
   },
 
+  // AJOUT : demande de lien de réinitialisation + finalisation du changement.
+  async forgotPassword(nomUtilisateur) {
+    const response = await request("/auth/forgot-password", { method: "POST", body: { nomUtilisateur }, auth: false });
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result.message || "Erreur lors de la demande de réinitialisation" };
+    }
+    return { success: true, message: result.message };
+  },
+
+  async resetPassword(token, nouveauMotDePasse) {
+    const response = await request(`/auth/reset-password/${token}`, { method: "POST", body: { nouveauMotDePasse }, auth: false });
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result.message || "Erreur lors de la réinitialisation du mot de passe" };
+    }
+    return { success: true, message: result.message };
+  },
+
   async register(agenceData) {
     // CORRIGÉ : retiré le délai artificiel de 800ms (reliquat de maquette),
     // qui ralentissait inutilement chaque inscription en production.
@@ -344,5 +363,75 @@ export default {
     const response = await request("/stats");
     if (response.ok) return await response.json();
     return null;
+  },
+
+  // AJOUT : demandes de visite — jusqu'ici, une demande de visite se faisait
+  // uniquement via WhatsApp, sans aucune trace côté plateforme.
+  async creerDemandeVisite(payload) {
+    const response = await request("/demandes-visite", { method: "POST", body: payload, auth: false });
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result.message || "Erreur lors de l'envoi de votre demande." };
+    }
+    return { success: true, message: result.message };
+  },
+
+  async getDemandesVisite() {
+    const response = await request("/demandes-visite");
+    if (response.ok) {
+      const data = await response.json();
+      return data.demandes;
+    }
+    return [];
+  },
+
+  async updateStatutDemandeVisite(id, statut) {
+    const response = await request(`/demandes-visite/${id}/statut`, { method: "PUT", body: { statut } });
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result.message || "Erreur lors de la mise à jour." };
+    }
+    return { success: true, demande: result.demande };
+  },
+
+  // AJOUT : favoris — récupère les biens correspondant aux IDs sauvegardés
+  // côté navigateur.
+  async getProprietesParIds(ids) {
+    if (!ids.length) return [];
+    const response = await request(`/proprietes/favoris?ids=${ids.join(",")}`, { auth: false });
+    if (response.ok) {
+      const data = await response.json();
+      return data.proprietes;
+    }
+    return [];
+  },
+
+  // AJOUT : signalement d'annonce — jusqu'ici, aucun moyen de signaler une
+  // annonce frauduleuse ou trompeuse autrement que par contact direct.
+  async creerSignalement(payload) {
+    const response = await request("/signalements", { method: "POST", body: payload, auth: false });
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result.message || "Erreur lors de l'envoi de votre signalement." };
+    }
+    return { success: true, message: result.message };
+  },
+
+  async getSignalements() {
+    const response = await request("/signalements");
+    if (response.ok) {
+      const data = await response.json();
+      return data.signalements;
+    }
+    return [];
+  },
+
+  async updateStatutSignalement(id, statut) {
+    const response = await request(`/signalements/${id}/statut`, { method: "PUT", body: { statut } });
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result.message || "Erreur lors de la mise à jour." };
+    }
+    return { success: true, signalement: result.signalement };
   },
 };

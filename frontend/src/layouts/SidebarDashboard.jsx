@@ -12,6 +12,8 @@ import {
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
+  CalendarClock,
+  Flag,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -136,6 +138,8 @@ const SidebarDashboard = () => {
               Administration
             </p>
             <SidebarItem icon={<Users size={19} />} text="Utilisateurs" to="/dashboard/utilisateurs" />
+            <SidebarItem icon={<CalendarClock size={19} />} text="Demandes de visite" to="/dashboard/demandes-visite" />
+            <SidebarItem icon={<Flag size={19} />} text="Signalements" to="/dashboard/signalements" />
             <SidebarItem icon={<Settings size={19} />} text="Mon profil" to="/agence/profil" />
           </nav>
         </div>

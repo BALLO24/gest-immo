@@ -14,6 +14,8 @@ router.get("/admin/corbeille", authenticateToken, authorizeRoles('admin'), propr
 // consommé par le middleware Vercel du frontend et directement par les
 // robots d'indexation, sans authentification).
 router.get("/sitemap-data", proprieteController.getSitemapData);
+// AJOUT : idem, avant "/:id" — publique (favoris sans compte, côté navigateur).
+router.get("/favoris", proprieteController.getProprietesParIds);
 router.get("/:id", proprieteController.getProprieteById); // AJOUT : détail d'un bien, public
 router.get("/agence/:agenceId", proprieteController.getProprietesByAgence);
 

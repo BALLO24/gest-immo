@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -82,9 +83,9 @@ const Footer = () => {
       <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
         <p>&copy; {currentYear} Abdoul W. Tous droits réservés.</p>
         <div className="mt-2 space-x-4">
-          <a href="#" className="hover:underline">Mentions légales</a>
+          <Link to="/cgu" className="hover:underline">Conditions d'utilisation</Link>
           <span>|</span>
-          <a href="#" className="hover:underline">Confidentialité</a>
+          <Link to="/confidentialite" className="hover:underline">Confidentialité</Link>
         </div>
       </div>
     </footer>

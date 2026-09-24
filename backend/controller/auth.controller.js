@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const Agence = require('../model/agence.model');
 const User = require('../model/user.model');
 const bcrypt = require('bcryptjs');
@@ -7,10 +8,19 @@ const sendMail = require('../utils/sendMail');
 const { emailTemplate, FRONTEND_URL } = require('../utils/emailTemplate');
 const { capitalizeWords, slugify } = require('../utils/formatText');
 
+// AJOUT : durée de validité du lien de réinitialisation de mot de passe.
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 heure
+
 // CORRIGÉ : auto-inscription publique d'une agence -> crée Agence + User liés.
 // Différence volontaire avec agence.controller.addAgence (créé par un admin) :
 // ici l'agence démarre avec statut 'inactive', en attente de validation par un
 // admin, puisque n'importe qui peut soumettre ce formulaire publiquement.
+// AJOUT : version des CGU/Politique de Confidentialité en vigueur au moment
+// de l'inscription — sert de référence datée en cas de litige. À incrémenter
+// manuellement (et mettre à jour la date affichée sur /cgu et /confidentialite
+// en même temps) à chaque modification substantielle de ces documents.
+const CGU_VERSION = "1.0";
+
 module.exports.registerAgence = async (req, res) => {
     const { nom_agence, nom_proprietaire, numero_telephone, email, password } = req.body;
     if (!nom_agence || !nom_proprietaire || !numero_telephone || !password) {
@@ -36,6 +46,12 @@ module.exports.registerAgence = async (req, res) => {
                     nom_proprietaire,
                     slug: slugify(nomAgenceFormate),
                     statut: 'inactive', // en attente de validation par un admin
+                    // AJOUT : la case à cocher côté frontend bloque déjà la
+                    // soumission sans acceptation — on enregistre ici la
+                    // preuve elle-même (version + horodatage serveur, pas
+                    // une valeur envoyée par le client, pour éviter toute
+                    // falsification de la date).
+                    cguAcceptees: { version: CGU_VERSION, dateAcceptation: new Date() },
                 },
             ],
             { session }
@@ -78,6 +94,9 @@ module.exports.registerAgence = async (req, res) => {
         // fourni (il reste optionnel à l'inscription, l'identifiant principal
         // ici est le numéro de téléphone).
         if (email) {
+            const dateAcceptation = newAgence.cguAcceptees.dateAcceptation.toLocaleDateString('fr-FR', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+            });
             sendMail(
                 "Votre inscription sur Gest-Immo",
                 emailTemplate({
@@ -85,6 +104,12 @@ module.exports.registerAgence = async (req, res) => {
                     bodyHtml: `<p>Bonjour ${nom_proprietaire},</p>
                         <p>Votre agence <strong>${nomAgenceFormate}</strong> a bien été enregistrée sur Gest-Immo.</p>
                         <p>Elle est actuellement <strong>en attente de validation</strong> par un administrateur. Vous recevrez un email dès que votre compte sera activé et que vous pourrez vous connecter.</p>
+                        <p style="margin-top:20px; padding-top:16px; border-top:1px solid #eee; font-size:13px; color:#6b7280;">
+                            En vous inscrivant, vous avez accepté nos
+                            <a href="${FRONTEND_URL}/cgu">Conditions Générales d'Utilisation</a> et notre
+                            <a href="${FRONTEND_URL}/confidentialite">Politique de Confidentialité</a>
+                            (version ${CGU_VERSION}, le ${dateAcceptation}). Conservez cet email comme preuve de cette acceptation.
+                        </p>
                         <p>Merci de votre confiance.</p>`,
                 }),
                 email
@@ -188,7 +213,8 @@ module.exports.updateProfile = async (req, res) => {
         if (nom) user.nom = nom; // CORRIGÉ : oublié initialement, seul le téléphone/email du User était modifiable
         if (numero_telephone) user.numero_telephone = numero_telephone;
         if (email) user.email = email;
-        await user.save();
+        // CORRIGÉ : validateModifiedOnly — voir commentaire dans changePassword.
+        await user.save({ validateModifiedOnly: true });
 
         if (user.role === 'agence' && user.agence) {
             const agenceUpdates = {};
@@ -238,7 +264,13 @@ module.exports.changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Ancien mot de passe incorrect !" });
         }
         user.password = await bcrypt.hash(nouveauMotDePasse, 10);
-        await user.save();
+        // CORRIGÉ : validateModifiedOnly évite de revalider tout le document
+        // (role/agence...) alors que seul le mot de passe change ici — un
+        // compte admin issu d'une promotion manuelle en base (role='admin'
+        // mais champ "agence" resté renseigné) faisait échouer ce save() à
+        // cause du hook pre('validate') global, sur un champ qu'on ne touche
+        // même pas.
+        await user.save({ validateModifiedOnly: true });
 
         // AJOUT : notification de sécurité standard — prévenir la personne
         // qu'un changement a eu lieu, pour qu'elle puisse réagir si ce n'était
@@ -263,6 +295,103 @@ module.exports.changePassword = async (req, res) => {
     } catch (err) {
         console.error("Erreur lors du changement de mot de passe :", err);
         res.status(500).json({ success: false, message: "Erreur serveur lors du changement de mot de passe !" });
+    }
+};
+
+// AJOUT : demande de réinitialisation de mot de passe — jusqu'ici, une agence
+// qui oubliait son mot de passe n'avait aucun moyen de le récupérer elle-même,
+// il fallait qu'un admin intervienne manuellement.
+// Répond toujours avec le même message générique, que le compte existe ou
+// non et qu'il ait un email ou non, pour ne jamais révéler si un identifiant
+// donné correspond à un compte existant (énumération de comptes).
+module.exports.forgotPassword = async (req, res) => {
+    try {
+        const { nomUtilisateur } = req.body;
+        if (!nomUtilisateur) {
+            return res.status(400).json({ success: false, message: "Numéro de téléphone ou email requis !" });
+        }
+
+        const genericMessage = "Si un compte associé à ces informations existe et possède un email, un lien de réinitialisation vient de lui être envoyé.";
+
+        const user = await User.findOne({
+            $or: [{ numero_telephone: nomUtilisateur }, { email: nomUtilisateur }],
+        });
+
+        if (user && user.email) {
+            const rawToken = crypto.randomBytes(32).toString('hex');
+            user.resetPasswordToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+            user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+            // CORRIGÉ : validateModifiedOnly — voir commentaire dans changePassword.
+            await user.save({ validateModifiedOnly: true });
+
+            sendMail(
+                "Réinitialisation de votre mot de passe",
+                emailTemplate({
+                    title: "Réinitialisation de mot de passe",
+                    bodyHtml: `<p>Bonjour ${user.nom},</p>
+                        <p>Vous avez demandé la réinitialisation du mot de passe de votre compte Gest-Immo. Ce lien est valable 1 heure.</p>
+                        <p>Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email — votre mot de passe actuel reste inchangé.</p>`,
+                    ctaText: "Réinitialiser mon mot de passe",
+                    ctaUrl: `${FRONTEND_URL}/reset-password/${rawToken}`,
+                }),
+                user.email
+            ).catch((mailErr) => console.error("Erreur d'envoi d'email de réinitialisation (non bloquante) :", mailErr));
+        }
+
+        res.status(200).json({ success: true, message: genericMessage });
+    } catch (err) {
+        console.error("Erreur lors de la demande de réinitialisation :", err);
+        res.status(500).json({ success: false, message: "Erreur serveur lors de la demande de réinitialisation !" });
+    }
+};
+
+// AJOUT : finalise la réinitialisation à partir du token reçu par email.
+module.exports.resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { nouveauMotDePasse } = req.body;
+        if (!token || !nouveauMotDePasse) {
+            return res.status(400).json({ success: false, message: "Token et nouveau mot de passe requis !" });
+        }
+        if (nouveauMotDePasse.length < 8) {
+            return res.status(400).json({ success: false, message: "Le nouveau mot de passe doit contenir au moins 8 caractères." });
+        }
+
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: new Date() },
+        }).select('+resetPasswordToken +resetPasswordExpires');
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Ce lien de réinitialisation est invalide ou a expiré." });
+        }
+
+        user.password = await bcrypt.hash(nouveauMotDePasse, 10);
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
+        // CORRIGÉ : validateModifiedOnly — voir commentaire dans changePassword.
+        await user.save({ validateModifiedOnly: true });
+
+        if (user.email) {
+            sendMail(
+                "Votre mot de passe a été réinitialisé",
+                emailTemplate({
+                    title: "Mot de passe réinitialisé",
+                    bodyHtml: `<p>Bonjour ${user.nom},</p>
+                        <p>Le mot de passe de votre compte Gest-Immo vient d'être réinitialisé.</p>
+                        <p>Si vous n'êtes pas à l'origine de ce changement, contactez-nous immédiatement.</p>`,
+                    ctaText: "Se connecter",
+                    ctaUrl: `${FRONTEND_URL}/login`,
+                }),
+                user.email
+            ).catch((mailErr) => console.error("Erreur d'envoi d'email de confirmation (non bloquante) :", mailErr));
+        }
+
+        res.status(200).json({ success: true, message: "Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter." });
+    } catch (err) {
+        console.error("Erreur lors de la réinitialisation du mot de passe :", err);
+        res.status(500).json({ success: false, message: "Erreur serveur lors de la réinitialisation du mot de passe !" });
     }
 };
 

@@ -130,15 +130,20 @@ export default function LoginPage() {
             {errors.password && <p className="text-xs text-red-600 mt-1 ml-0.5">{errors.password}</p>}
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none pt-1">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-maliOrange focus:ring-maliOrange/40"
-            />
-            Se souvenir de moi
-          </label>
+          <div className="flex items-center justify-between pt-1">
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-maliOrange focus:ring-maliOrange/40"
+              />
+              Se souvenir de moi
+            </label>
+            <Link to="/forgot-password" className="text-sm font-semibold text-maliGreen hover:underline">
+              Mot de passe oublié ?
+            </Link>
+          </div>
 
           <button
             type="submit"

@@ -11,6 +11,8 @@ import toast from "react-hot-toast"; // CORRIGÉ : Toaster retiré d'ici, un seu
 import ModifHouseModal from "../propriete/ModifHouseModal";
 import ConfirmSuppression from "../ui/ConfirmSuppression";
 import API from "../../api/API";
+import { useFavori } from "../../utils/useFavoris";
+import { Heart } from "lucide-react";
 
 export default function MaisonCard({ maison, onUpdate }) {
   const [showEdit, setShowEdit] = useState(false);
@@ -18,6 +20,7 @@ export default function MaisonCard({ maison, onUpdate }) {
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [isSuppressionModalOpen, setIsSuppressionModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [favori, toggleFavori] = useFavori(maison._id);
 
   const token = localStorage.getItem("authToken");
   let canEditStatus = false;
@@ -119,6 +122,16 @@ export default function MaisonCard({ maison, onUpdate }) {
               className="w-full h-full object-cover transition-all duration-700 ease-in-out" 
             />
           </div>
+
+          {/* AJOUT : favori — stocké côté navigateur, pas de compte requis. */}
+          <button
+            onClick={toggleFavori}
+            aria-label={favori ? "Retirer des favoris" : "Ajouter aux favoris"}
+            aria-pressed={favori}
+            className="absolute bottom-3 right-3 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm hover:scale-110 transition-transform"
+          >
+            <Heart size={18} className={favori ? "fill-red-500 text-red-500" : "text-gray-400"} />
+          </button>
 
           {maison.images.length > 1 && (
             <>

@@ -33,6 +33,8 @@ const authRoutes = require("./route/auth.route");
 const contactRoutes = require("./route/contact.route"); // AJOUT : remplace l'ancienne route /api/send-mail
 const userRoutes = require("./route/user.route"); // AJOUT : gestion des comptes (dashboard admin)
 const statsRoutes = require("./route/stats.route"); // AJOUT : statistiques du dashboard admin
+const demandeVisiteRoutes = require("./route/demandeVisite.route"); // AJOUT : demandes de visite
+const signalementRoutes = require("./route/signalementAnnonce.route"); // AJOUT : signalement d'annonces
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -89,6 +91,8 @@ app.use("/api/quartiers", quartierRoutes);
 app.use("/api/proprietes", proprieteRoutes);
 app.use("/api/agences", agencesRoutes);
 app.use("/api/villes", villeRoutes);
+app.use("/api/demandes-visite", demandeVisiteRoutes); // AJOUT
+app.use("/api/signalements", signalementRoutes); // AJOUT
 
 // AJOUT :404 explicite pour toute route non trouvée (avant, une route
 // inexistante tombait dans le vide sans réponse JSON exploitable côté client)

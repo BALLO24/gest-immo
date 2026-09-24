@@ -59,6 +59,15 @@ const AgenceSchema = new Schema(
             enum: ['active', 'inactive', 'suspendue'],
             default: 'active',
         },
+        // AJOUT : preuve d'acceptation des CGU/Politique de Confidentialité —
+        // sans ça, en cas de litige, rien ne prouve qu'une agence a
+        // effectivement accepté une version donnée à une date donnée. La
+        // case à cocher côté frontend bloquait déjà la soumission du
+        // formulaire, mais ne laissait aucune trace persistante.
+        cguAcceptees: {
+            version: { type: String, default: null },
+            dateAcceptation: { type: Date, default: null },
+        },
     },
     { timestamps: true }
 );

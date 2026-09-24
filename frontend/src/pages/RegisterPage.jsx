@@ -203,7 +203,7 @@ export default function RegisterPage() {
               <label className="flex items-start gap-2.5 text-sm pt-1 cursor-pointer">
                 <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 w-4 h-4 rounded border-gray-300 text-maliOrange focus:ring-maliOrange/40" />
                 <span className="text-gray-600 text-xs leading-relaxed">
-                  J'accepte les <a href="#" className="text-maliGreen font-semibold hover:underline">conditions d'utilisation</a>
+                  J'accepte les <Link to="/cgu" target="_blank" className="text-maliGreen font-semibold hover:underline">conditions d'utilisation</Link> et la <Link to="/confidentialite" target="_blank" className="text-maliGreen font-semibold hover:underline">politique de confidentialité</Link>
                 </span>
               </label>
               {errors.terms && <p className="text-xs text-red-600 ml-0.5">{errors.terms}</p>}

@@ -18,10 +18,17 @@ const HomePage = lazy(() => import("./pages/HomePage"));
 const LocationPage = lazy(() => import("./pages/LocationPage"));
 const VentePage = lazy(() => import("./pages/VentePage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ChangePasswordPage = lazy(() => import("./components/ChangePassword"));
 const MonProfilPage = lazy(() => import("./pages/MonProfilPage"));
+const DemandesVisitePage = lazy(() => import("./pages/DemandesVisitePage"));
+const SignalementsPage = lazy(() => import("./pages/SignalementsPage"));
 const ProprieteDetailPage = lazy(() => import("./pages/ProprieteDetailPage"));
+const FavorisPage = lazy(() => import("./pages/FavorisPage"));
+const CGUPage = lazy(() => import("./pages/CGUPage"));
+const PolitiqueConfidentialitePage = lazy(() => import("./pages/PolitiqueConfidentialitePage"));
 const HomeDashboard = lazy(() => import("./pages/HomeDashboard"));
 const HabitationsDashboard = lazy(() => import("./pages/HabitationsDashboard"));
 const HabitationsAgence = lazy(() => import("./pages/HabitationsAgence"));
@@ -176,6 +183,9 @@ function App() {
               est géré directement dans ProprieteDetailPage (titre/description/
               image dynamiques selon le bien affiché), pas ici. */}
           <Route path="bien/:slug" element={<ProprieteDetailPage />} />
+          <Route path="cgu" element={<CGUPage />} />
+          <Route path="confidentialite" element={<PolitiqueConfidentialitePage />} />
+          <Route path="favoris" element={<FavorisPage />} />
         </Route>
 
         {/* --- AUTH & DASHBOARD (SEO moins critique ici, mais présent) --- */}
@@ -192,7 +202,19 @@ function App() {
               <RegisterPage />
             </>
           } />
-        </Route>          
+          <Route path="forgot-password" element={
+            <>
+              <SEO title="Mot de passe oublié" url="/forgot-password" />
+              <ForgotPasswordPage />
+            </>
+          } />
+          <Route path="reset-password/:token" element={
+            <>
+              <SEO title="Réinitialiser le mot de passe" url="/reset-password" />
+              <ResetPasswordPage />
+            </>
+          } />
+        </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/dashboard" element={<Dashboard />}>
@@ -202,12 +224,15 @@ function App() {
             <Route path="quartiers" element={<QuartiersPage />} />
             <Route path="agences" element={<AgencesDashboardPage />} />
             <Route path="utilisateurs" element={<UtilisateursPage />} />
+            <Route path="demandes-visite" element={<DemandesVisitePage />} />
+            <Route path="signalements" element={<SignalementsPage />} />
           </Route>
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["admin", "agence"]} />}>
           <Route path="/agence" element={<HabitationsAgence />} />
           <Route path="/agence/profil" element={<MonProfilPage />} />
+          <Route path="/agence/demandes-visite" element={<DemandesVisitePage />} />
           <Route path="change" element={<ChangePasswordPage />} />
         </Route>
 

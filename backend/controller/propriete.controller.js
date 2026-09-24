@@ -542,3 +542,30 @@ module.exports.getSitemapData = async (req, res) => {
         res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
 };
+
+// AJOUT : récupère plusieurs biens par leurs IDs — utilisé par la page
+// "Mes favoris" (favoris stockés côté navigateur, juste une liste d'IDs).
+// Public : les favoris n'exigent pas de compte, cet endpoint ne fait
+// qu'exposer des données déjà publiques (mêmes biens que la recherche).
+// Les biens supprimés ou introuvables sont simplement absents du résultat,
+// sans erreur — la personne peut avoir un favori sur un bien retiré depuis.
+module.exports.getProprietesParIds = async (req, res) => {
+    try {
+        const ids = (req.query.ids || "").split(",").map((s) => s.trim()).filter(Boolean);
+        if (ids.length === 0) {
+            return res.status(200).json({ success: true, proprietes: [] });
+        }
+
+        const proprietes = await Propriete.find({ _id: { $in: ids }, deletedAt: null })
+            .populate([
+                { path: "quartier", populate: { path: "ville" } },
+                { path: "agence" },
+            ])
+            .lean();
+
+        res.status(200).json({ success: true, proprietes: proprietes.map((p) => withImageUrls(p)) });
+    } catch (error) {
+        console.error("Erreur récupération biens par IDs:", error);
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};

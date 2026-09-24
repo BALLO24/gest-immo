@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { 
   Search, Plus, Home, Building2, Map as MapIcon, 
   Store, LayoutGrid, LogOut, UserCircle, Trash2, RotateCcw,
-  Loader2, ImageOff,
+  Loader2, ImageOff, CalendarClock,
 } from "lucide-react";
 
 // Components & API
@@ -194,6 +194,15 @@ export default function HabitationsAgence() {
                 </div>
               )}
             </div>
+
+            <button
+              onClick={() => navigate("/agence/demandes-visite")}
+              className="flex items-center gap-2 bg-white hover:bg-orange-50 text-gray-600 hover:text-orange-600 px-5 py-2.5 rounded-xl border border-gray-200 transition-all font-semibold"
+              title="Demandes de visite"
+            >
+              <CalendarClock size={20} />
+              <span className="hidden sm:inline">Visites</span>
+            </button>
 
             <button
               onClick={() => navigate("/agence/profil")}
