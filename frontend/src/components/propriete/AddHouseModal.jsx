@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useId, useRef, useCallback } from "react";
+import React, { useEffect, useState, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   Home, Banknote,
@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import API from "../../api/API";
 
-const MAX_IMAGES = 3;
+const MAX_IMAGES = 6;
 const MAX_IMAGE_SIZE_MB = 5;
 
 const TABS = [
@@ -98,7 +98,16 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess, agenceId = n
 
   const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
-  const addFiles = useCallback((fileList) => {
+  // CORRIGÉ (bug) : setPreviewImages était appelé À L'INTÉRIEUR de la
+  // fonction de mise à jour de setForm — React ne garantit PAS qu'une
+  // fonction d'updater ne soit invoquée qu'une seule fois (c'est même le
+  // comportement volontaire du Mode Strict en développement, pour détecter
+  // exactement ce genre d'effet de bord caché). Résultat : les photos
+  // étaient ajoutées deux fois. Les deux mises à jour d'état sont
+  // maintenant séparées et appelées une seule fois chacune, avec le nombre
+  // de places restantes lu directement depuis "form" plutôt que via
+  // useCallback à dépendances vides (qui aurait gardé une valeur périmée).
+  const addFiles = (fileList) => {
     setImageError(null);
     const incoming = Array.from(fileList);
     const rejected = [];
@@ -114,18 +123,17 @@ export default function AddHouseModal({ isOpen, onClose, onSuccess, agenceId = n
       return true;
     });
 
-    setForm((prev) => {
-      const placesRestantes = MAX_IMAGES - prev.images.length;
-      const accepted = valid.slice(0, placesRestantes);
-      if (valid.length > accepted.length) {
-        rejected.push(`Limite de ${MAX_IMAGES} photos atteinte`);
-      }
-      if (rejected.length > 0) setImageError(rejected.join(" · "));
-      if (accepted.length === 0) return prev;
-      setPreviewImages((prevPreviews) => [...prevPreviews, ...accepted.map((f) => URL.createObjectURL(f))]);
-      return { ...prev, images: [...prev.images, ...accepted] };
-    });
-  }, []);
+    const placesRestantes = Math.max(0, MAX_IMAGES - form.images.length);
+    const accepted = valid.slice(0, placesRestantes);
+    if (valid.length > accepted.length) {
+      rejected.push(`Limite de ${MAX_IMAGES} photos atteinte`);
+    }
+    if (rejected.length > 0) setImageError(rejected.join(" · "));
+    if (accepted.length === 0) return;
+
+    setPreviewImages((prevPreviews) => [...prevPreviews, ...accepted.map((f) => URL.createObjectURL(f))]);
+    setForm((prev) => ({ ...prev, images: [...prev.images, ...accepted] }));
+  };
 
   const handleImages = (e) => {
     addFiles(e.target.files);

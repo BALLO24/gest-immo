@@ -64,7 +64,7 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
   const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleImages = (e) => {
-    const files = Array.from(e.target.files).slice(0, 3);
+    const files = Array.from(e.target.files).slice(0, 6);
     setForm(prev => ({ ...prev, images: files }));
     setPreviewImages(files.map(file => URL.createObjectURL(file)));
   };
@@ -251,7 +251,7 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
             <div className="animate-in fade-in duration-150">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-700">Photos vitrine</h3>
-                <span className="text-xs font-medium text-gray-400">{previewImages.length}/3 photos</span>
+                <span className="text-xs font-medium text-gray-400">{previewImages.length}/6 photos</span>
               </div>
               <div className="flex flex-wrap gap-4">
                 {previewImages.length < 3 && (
@@ -270,7 +270,7 @@ export default function AddMagasinModal({ isOpen, onClose, onSuccess, agenceId =
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-gray-400">Glissez-déposez ou cliquez pour choisir, 3 photos maximum.</p>
+              <p className="mt-3 text-xs text-gray-400">Glissez-déposez ou cliquez pour choisir, 6 photos maximum.</p>
             </div>
           )}
         </form>

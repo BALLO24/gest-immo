@@ -26,6 +26,17 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
+// AJOUT : les miniatures de la galerie (96×56px affichés) chargeaient la
+// même image pleine résolution (1200px, format ?tr=w-1200,q-80,f-auto sur
+// ImageKit) que la photo principale en grand — un vrai gaspillage,
+// multiplié par jusqu'à 6 photos désormais. ImageKit expose ses
+// transformations directement dans l'URL (query string), donc on peut
+// générer une vraie petite variante juste en changeant la largeur demandée,
+// sans second appel au backend.
+function urlMiniature(url) {
+  return url.replace(/w-\d+/, "w-160");
+}
+
 // AJOUT : cette page n'existait pas — chaque bien n'était consultable qu'en
 // modal (state React local), sans URL propre. Conséquences : aucune annonce
 // individuelle n'était indexable par Google, ni partageable en lien direct,
@@ -367,13 +378,22 @@ export default function ProprieteDetailPage() {
           {/* SLIDER */}
           {images.length > 0 ? (
             <div className="relative">
-              <img src={images[currentImage]} className="w-full h-80 sm:h-[28rem] object-cover" alt={`${typeLabel} ${offreLabel} à ${lieu} - photo ${currentImage + 1}`} />
+              {/* AJOUT : fetchpriority="high" — c'est le plus gros élément
+                  visible au chargement (LCP) de cette page, il doit être
+                  priorisé, pas mis en concurrence avec le reste. */}
+              <img
+                src={images[currentImage]}
+                fetchpriority={currentImage === 0 ? "high" : "auto"}
+                className="w-full h-80 sm:h-[28rem] object-cover"
+                alt={`${typeLabel} ${offreLabel} à ${lieu} - photo ${currentImage + 1}`}
+              />
               {images.length > 1 && (
                 <div className="flex gap-2 justify-center p-3 bg-white/80">
                   {images.map((img, index) => (
                     <img
                       key={index}
-                      src={img}
+                      src={urlMiniature(img)}
+                      loading="lazy"
                       alt=""
                       onClick={() => setCurrentImage(index)}
                       className={`h-14 w-24 rounded object-cover cursor-pointer border-2 transition ${currentImage === index ? "border-maliOrange scale-105" : "border-gray-300"}`}
@@ -504,11 +524,17 @@ export default function ProprieteDetailPage() {
       {/* AJOUT : modal de demande de visite */}
       {visiteOpen && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-start sm:items-center justify-center z-[100] p-4 overflow-y-auto"
           onMouseDown={(e) => { if (e.target === e.currentTarget) setVisiteOpen(false); }}
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          {/* CORRIGÉ (clavier mobile) : le modal était centré verticalement
+              dans la hauteur TOTALE de l'écran — sur mobile, le clavier ne
+              réduit pas cette référence, donc il cachait le bas du
+              formulaire (jusqu'au bouton d'envoi). Ancré en haut sur mobile
+              (my-8 = marge au lieu de centrage), avec défilement interne si
+              le contenu dépasse la hauteur visible restante. */}
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md border border-gray-100 my-8 sm:my-0 max-h-[85vh] flex flex-col overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0">
               <h3 className="text-lg font-bold text-gray-900">Demander une visite</h3>
               <button onClick={() => setVisiteOpen(false)} aria-label="Fermer" className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-black transition-colors">
                 <XIcon size={20} />
@@ -516,7 +542,7 @@ export default function ProprieteDetailPage() {
             </div>
 
             {visiteEnvoyee ? (
-              <div className="p-8 text-center">
+              <div className="p-8 text-center overflow-y-auto">
                 <div className="w-14 h-14 rounded-full bg-maliGreen/10 flex items-center justify-center mx-auto mb-4">
                   <CalendarClock className="text-maliGreen" size={26} />
                 </div>
@@ -525,7 +551,7 @@ export default function ProprieteDetailPage() {
                 <button onClick={() => setVisiteOpen(false)} className="mt-6 text-sm font-semibold text-maliGreen hover:underline">Fermer</button>
               </div>
             ) : (
-              <form onSubmit={handleDemandeVisite} className="p-6 space-y-4">
+              <form onSubmit={handleDemandeVisite} className="p-6 space-y-4 overflow-y-auto">
                 <div>
                   <label className="text-sm font-semibold text-gray-700 ml-0.5">Nom complet</label>
                   <div className="relative mt-1.5">
@@ -575,11 +601,11 @@ export default function ProprieteDetailPage() {
       {/* AJOUT : modal de signalement d'annonce */}
       {signalementOpen && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-start sm:items-center justify-center z-[100] p-4 overflow-y-auto"
           onMouseDown={(e) => { if (e.target === e.currentTarget) setSignalementOpen(false); }}
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md border border-gray-100 my-8 sm:my-0 max-h-[85vh] flex flex-col overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0">
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <Flag size={18} className="text-red-500" /> Signaler cette annonce
               </h3>
@@ -589,7 +615,7 @@ export default function ProprieteDetailPage() {
             </div>
 
             {signalementEnvoye ? (
-              <div className="p-8 text-center">
+              <div className="p-8 text-center overflow-y-auto">
                 <div className="w-14 h-14 rounded-full bg-maliGreen/10 flex items-center justify-center mx-auto mb-4">
                   <Flag className="text-maliGreen" size={24} />
                 </div>
@@ -598,7 +624,7 @@ export default function ProprieteDetailPage() {
                 <button onClick={() => setSignalementOpen(false)} className="mt-6 text-sm font-semibold text-maliGreen hover:underline">Fermer</button>
               </div>
             ) : (
-              <form onSubmit={handleSignalement} className="p-6 space-y-4">
+              <form onSubmit={handleSignalement} className="p-6 space-y-4 overflow-y-auto">
                 <div>
                   <label className="text-sm font-semibold text-gray-700 ml-0.5">Motif</label>
                   <select

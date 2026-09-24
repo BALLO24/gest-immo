@@ -177,7 +177,7 @@ export default function ModifTerrainModal({ isOpen, onClose, terrain, onSuccess 
           <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
             <h3 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Photos rattachées (Lecture seule)</h3>
             <div className="flex gap-4">
-              {terrain?.images?.slice(0, 3).map((img, i) => (
+              {terrain?.images?.slice(0, 6).map((img, i) => (
                 <div key={i} className="relative w-32 h-24 rounded-2xl overflow-hidden border-2 border-white shadow-sm">
                   <img src={img} className="w-full h-full object-cover grayscale-[0.5]" alt="terrain" />
                 </div>

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import API from "../../api/API";
 
-const MAX_IMAGES = 3;
+const MAX_IMAGES = 6;
 
 const TABS = [
   { id: "general", label: "Général", icon: LayoutGrid },

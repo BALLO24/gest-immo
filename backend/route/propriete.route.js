@@ -27,7 +27,7 @@ router.post(
     authenticateToken,
     authorizeRoles('agence'),
     upload.fields([
-        { name: 'images', maxCount: 3 },
+        { name: 'images', maxCount: 6 },
         { name: 'video', maxCount: 1 },
     ]),
     proprieteController.addPropriete
@@ -36,7 +36,7 @@ router.put(
     "/update/:id",
     authenticateToken,
     authorizeRoles('agence', 'admin'),
-    upload.fields([{ name: 'images', maxCount: 3 }]),
+    upload.fields([{ name: 'images', maxCount: 6 }]),
     proprieteController.updatePropriete
 );
 router.delete("/delete/:id", authenticateToken, authorizeRoles('agence', 'admin'), proprieteController.deletePropriete);
