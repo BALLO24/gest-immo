@@ -388,7 +388,12 @@ export default function ProprieteDetailPage() {
                 alt={`${typeLabel} ${offreLabel} à ${lieu} - photo ${currentImage + 1}`}
               />
               {images.length > 1 && (
-                <div className="flex gap-2 justify-center p-3 bg-white/80">
+                // CORRIGÉ : avec jusqu'à 6 miniatures désormais (contre 3
+                // avant), la rangée dépassait la largeur de l'écran sur
+                // mobile — aucun retour à la ligne ni défilement n'était
+                // prévu. Défilement horizontal ajouté, chaque miniature
+                // fixée à sa taille (shrink-0) pour ne pas se comprimer.
+                <div className="flex gap-2 justify-start sm:justify-center p-3 bg-white/80 overflow-x-auto">
                   {images.map((img, index) => (
                     <img
                       key={index}
@@ -396,7 +401,7 @@ export default function ProprieteDetailPage() {
                       loading="lazy"
                       alt=""
                       onClick={() => setCurrentImage(index)}
-                      className={`h-14 w-24 rounded object-cover cursor-pointer border-2 transition ${currentImage === index ? "border-maliOrange scale-105" : "border-gray-300"}`}
+                      className={`h-14 w-24 shrink-0 rounded object-cover cursor-pointer border-2 transition ${currentImage === index ? "border-maliOrange scale-105" : "border-gray-300"}`}
                     />
                   ))}
                 </div>
@@ -430,7 +435,15 @@ export default function ProprieteDetailPage() {
                 <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
                   <MapPin size={15} className="text-maliOrange" /> Localisation
                 </h3>
-                <div className="rounded-xl overflow-hidden border border-gray-200 h-64">
+                {/* CORRIGÉ (z-index) : les contrôles internes de Leaflet
+                    (zoom, attribution) ont un z-index élevé par défaut
+                    (jusqu'à 1000) qui pouvait passer au-dessus des modals
+                    et autres éléments de la page au défilement. "relative
+                    z-0" crée un contexte d'empilement propre à ce
+                    conteneur : les z-index internes de Leaflet restent
+                    confinés à l'intérieur, sans jamais dépasser le reste
+                    de la page. */}
+                <div className="rounded-xl overflow-hidden border border-gray-200 h-64 relative z-0">
                   <MapContainer
                     center={[item.localisation.coordinates[1], item.localisation.coordinates[0]]}
                     zoom={15}
