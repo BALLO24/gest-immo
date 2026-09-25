@@ -51,7 +51,7 @@ module.exports.creerSignalement = async (req, res) => {
                 ctaText: "Voir les signalements",
                 ctaUrl: `${FRONTEND_URL}/dashboard/signalements`,
             }),
-            "b2techno.manager@gmail.com"
+            "immomali223@gmail.com"
         ).catch((mailErr) => console.error("Erreur d'envoi d'email de signalement (non bloquante) :", mailErr));
 
         res.status(201).json({ success: true, message: "Merci, votre signalement a bien été transmis." });

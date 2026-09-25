@@ -78,14 +78,14 @@ module.exports.registerAgence = async (req, res) => {
         // panne, etc.) — l'inscription en base a déjà réussi et ne doit pas être
         // remise en cause pour un souci de notification.
         sendMail(
-            "Bienvenue chez Gest-Immo !",
+            "Bienvenue chez ImmoMali !",
             emailTemplate({
                 title: "Nouvelle inscription d'agence",
                 bodyHtml: `<p>L'agence <strong>${nomAgenceFormate}</strong>, de propriétaire "${nom_proprietaire}" (numéro de téléphone ${numero_telephone}), vient de s'inscrire et est en attente de validation.</p>`,
                 ctaText: "Voir les agences en attente",
                 ctaUrl: `${FRONTEND_URL}/dashboard/agences`,
             }),
-            "b2techno.manager@gmail.com"
+            "immomali223@gmail.com"
         ).catch((mailErr) => console.error("Erreur d'envoi d'email (non bloquante) :", mailErr));
 
         // AJOUT : avant, seul l'admin était notifié de la nouvelle inscription —
@@ -98,11 +98,11 @@ module.exports.registerAgence = async (req, res) => {
                 day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
             });
             sendMail(
-                "Votre inscription sur Gest-Immo",
+                "Votre inscription sur ImmoMali",
                 emailTemplate({
                     title: "Inscription reçue",
                     bodyHtml: `<p>Bonjour ${nom_proprietaire},</p>
-                        <p>Votre agence <strong>${nomAgenceFormate}</strong> a bien été enregistrée sur Gest-Immo.</p>
+                        <p>Votre agence <strong>${nomAgenceFormate}</strong> a bien été enregistrée sur ImmoMali.</p>
                         <p>Elle est actuellement <strong>en attente de validation</strong> par un administrateur. Vous recevrez un email dès que votre compte sera activé et que vous pourrez vous connecter.</p>
                         <p style="margin-top:20px; padding-top:16px; border-top:1px solid #eee; font-size:13px; color:#6b7280;">
                             En vous inscrivant, vous avez accepté nos
@@ -282,7 +282,7 @@ module.exports.changePassword = async (req, res) => {
                 emailTemplate({
                     title: "Mot de passe modifié",
                     bodyHtml: `<p>Bonjour ${user.nom},</p>
-                        <p>Le mot de passe de votre compte Gest-Immo vient d'être modifié.</p>
+                        <p>Le mot de passe de votre compte ImmoMali vient d'être modifié.</p>
                         <p>Si vous n'êtes pas à l'origine de ce changement, contactez-nous immédiatement.</p>`,
                     ctaText: "Se connecter",
                     ctaUrl: `${FRONTEND_URL}/login`,
@@ -329,7 +329,7 @@ module.exports.forgotPassword = async (req, res) => {
                 emailTemplate({
                     title: "Réinitialisation de mot de passe",
                     bodyHtml: `<p>Bonjour ${user.nom},</p>
-                        <p>Vous avez demandé la réinitialisation du mot de passe de votre compte Gest-Immo. Ce lien est valable 1 heure.</p>
+                        <p>Vous avez demandé la réinitialisation du mot de passe de votre compte ImmoMali. Ce lien est valable 1 heure.</p>
                         <p>Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email — votre mot de passe actuel reste inchangé.</p>`,
                     ctaText: "Réinitialiser mon mot de passe",
                     ctaUrl: `${FRONTEND_URL}/reset-password/${rawToken}`,
@@ -379,7 +379,7 @@ module.exports.resetPassword = async (req, res) => {
                 emailTemplate({
                     title: "Mot de passe réinitialisé",
                     bodyHtml: `<p>Bonjour ${user.nom},</p>
-                        <p>Le mot de passe de votre compte Gest-Immo vient d'être réinitialisé.</p>
+                        <p>Le mot de passe de votre compte ImmoMali vient d'être réinitialisé.</p>
                         <p>Si vous n'êtes pas à l'origine de ce changement, contactez-nous immédiatement.</p>`,
                     ctaText: "Se connecter",
                     ctaUrl: `${FRONTEND_URL}/login`,

@@ -20,7 +20,7 @@ const Footer = () => {
           </p>
           <div className="mt-4 flex flex-col gap-2 text-sm text-gray-400">
              <span className="flex items-center gap-2">
-               <Mail size={16} className="text-maliGreen" /> balloabdoul64@gmail.com
+               <Mail size={16} className="text-maliGreen" /> immomali223@gmail.com
              </span>
              <span className="flex items-center gap-2">
                <Phone size={16} className="text-maliGreen" /> +223 64 60 00 36
@@ -33,23 +33,37 @@ const Footer = () => {
           <h3 id="footer-links" className="text-xl font-bold mb-4">Liens utiles</h3>
           <ul className="space-y-3">
             <li>
-              <a href="/" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
+              <Link to="/" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
                 Accueil
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/biens" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
-                Nos Biens
-              </a>
+              <Link to="/location" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
+                Louer un bien
+              </Link>
             </li>
             <li>
-              <a href="/services" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
-                Services
-              </a>
+              <Link to="/vente" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
+                Acheter un bien
+              </Link>
             </li>
             <li>
-              <a href="/contact" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
-                Contact
+              <Link to="/favoris" className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit">
+                Mes favoris
+              </Link>
+            </li>
+            <li>
+              {/* AJOUT : pas de page "Contact" dédiée sur le site — le vrai
+                  canal de contact de la plateforme est WhatsApp (même
+                  numéro que les fiches de bien), donc c'est vers là que ce
+                  lien pointe plutôt que vers une page qui n'existe pas. */}
+              <a
+                href={`https://wa.me/${(import.meta.env.VITE_NUMERO_WHATSAPP || "").replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-maliOrange transition-colors duration-300 block w-fit"
+              >
+                Contact (WhatsApp)
               </a>
             </li>
           </ul>

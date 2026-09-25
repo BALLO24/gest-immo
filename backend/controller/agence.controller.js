@@ -209,7 +209,7 @@ module.exports.updateAgence = async (req, res) => {
             const compteUser = await User.findOne({ agence: agenceId });
             if (compteUser?.email) {
                 sendMail(
-                    "Votre compte Gest-Immo est activé !",
+                    "Votre compte ImmoMali est activé !",
                     emailTemplate({
                         title: "Compte activé 🎉",
                         bodyHtml: `<p>Bonjour ${compteUser.nom},</p>

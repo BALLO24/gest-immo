@@ -1,25 +1,39 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { User, Loader2, ArrowRight, MailCheck } from "lucide-react";
+import { Phone, Mail, Loader2, ArrowRight, MailCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import API from "../api/API";
 
+const INDICATIF = "+223";
+
 export default function ForgotPasswordPage() {
-  const [nomUtilisateur, setNomUtilisateur] = useState("");
+  // AJOUT : même bascule que sur la page de connexion, pour les mêmes
+  // raisons — un préfixe +223 visuel fixe ne peut pas cohabiter avec la
+  // saisie d'un email dans le même champ.
+  const [mode, setMode] = useState("telephone");
+  const [telephone, setTelephone] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
+  const chiffresTelephone = telephone.replace(/\D/g, "");
+  const identifiantEnvoye = mode === "telephone" ? `${INDICATIF}${chiffresTelephone}` : email.trim();
+
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!nomUtilisateur.trim()) {
-      setError("Numéro de téléphone ou email requis.");
+    if (mode === "telephone" && !chiffresTelephone) {
+      setError("Numéro de téléphone requis.");
+      return;
+    }
+    if (mode === "email" && !email.trim()) {
+      setError("Email requis.");
       return;
     }
     setError("");
     setLoading(true);
 
-    const response = await API.forgotPassword(nomUtilisateur.trim().replace(/\s+/g, ""));
+    const response = await API.forgotPassword(identifiantEnvoye);
     setLoading(false);
 
     if (response.success) {
@@ -39,7 +53,7 @@ export default function ForgotPasswordPage() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Vérifiez vos emails</h2>
             <p className="text-sm text-gray-500 mt-2">
-              Si un compte associé à <strong>{nomUtilisateur}</strong> existe et possède un email, un lien de
+              Si un compte associé à <strong>{identifiantEnvoye}</strong> existe et possède un email, un lien de
               réinitialisation valable 1 heure vient de lui être envoyé.
             </p>
             <p className="text-xs text-gray-400 mt-4">
@@ -61,18 +75,45 @@ export default function ForgotPasswordPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div>
-                <label className="text-sm font-semibold text-gray-700 ml-0.5">Numéro de téléphone ou email</label>
-                <div className="relative mt-1.5">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} aria-hidden="true" />
-                  <input
-                    type="text"
-                    value={nomUtilisateur}
-                    onChange={(e) => setNomUtilisateur(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange/40 focus:border-maliOrange transition-colors"
-                    placeholder="Numéro de téléphone ou email"
-                    autoComplete="username"
-                  />
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-gray-700 ml-0.5">
+                    {mode === "telephone" ? "Numéro de téléphone" : "Email"}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setMode(mode === "telephone" ? "email" : "telephone")}
+                    className="text-xs font-semibold text-maliGreen hover:underline"
+                  >
+                    {mode === "telephone" ? "Utiliser un email" : "Utiliser un numéro"}
+                  </button>
                 </div>
+
+                {mode === "telephone" ? (
+                  <div className="relative mt-1.5 flex items-center">
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 z-10" size={18} aria-hidden="true" />
+                    <span className="absolute left-10 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400 pr-2 border-r border-gray-200">{INDICATIF}</span>
+                    <input
+                      type="tel"
+                      value={telephone}
+                      onChange={(e) => setTelephone(e.target.value)}
+                      className="w-full pl-[4.75rem] pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange/40 focus:border-maliOrange transition-colors"
+                      placeholder="77 00 00 00"
+                      autoComplete="username"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative mt-1.5">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} aria-hidden="true" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange/40 focus:border-maliOrange transition-colors"
+                      placeholder="contact@monagence.com"
+                      autoComplete="username"
+                    />
+                  </div>
+                )}
                 {error && <p className="text-xs text-red-600 mt-1 ml-0.5">{error}</p>}
               </div>
 

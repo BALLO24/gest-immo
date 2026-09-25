@@ -10,7 +10,7 @@ const Agence = require('../model/agence.model');
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 
-// Un visiteur contacte le support Gest-Immo (ex: formulaire "Nous contacter")
+// Un visiteur contacte le support ImmoMali (ex: formulaire "Nous contacter")
 module.exports.contacterSupport = async (req, res) => {
     try {
         const { nom, email, message } = req.body;
@@ -32,7 +32,7 @@ module.exports.contacterSupport = async (req, res) => {
                 ctaText: `Répondre à ${nom}`,
                 ctaUrl: `mailto:${email}`,
             }),
-            process.env.SUPPORT_EMAIL || "b2techno.manager@gmail.com" // destinataire fixe, jamais fourni par le client
+            process.env.SUPPORT_EMAIL || "immomali223@gmail.com" // destinataire fixe, jamais fourni par le client
         );
 
         res.status(200).json({ success: true, message: "Message envoyé avec succès." });
@@ -65,9 +65,9 @@ module.exports.contacterAgence = async (req, res) => {
         }
 
         await sendMail(
-            `Nouveau message via Gest-Immo de ${nom}`,
+            `Nouveau message via ImmoMali de ${nom}`,
             emailTemplate({
-                title: "Nouveau message via Gest-Immo",
+                title: "Nouveau message via ImmoMali",
                 bodyHtml: `<p><strong>De :</strong> ${nom} (${email})</p><p style="white-space: pre-wrap;">${message}</p>`,
                 ctaText: `Répondre à ${nom}`,
                 ctaUrl: `mailto:${email}`,

@@ -15,7 +15,7 @@
 // PAS si FRONTEND_URL pointe vers localhost, une adresse non déployée, ou
 // une adresse où le fichier logo.png n'existe pas réellement (à vérifier en
 // ouvrant l'URL directement dans un navigateur avant de retester).
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://gest-immo-three.vercel.app';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://immomali.net';
 const LOGO_SRC = `${FRONTEND_URL}/logo.png`;
 
 // Mêmes couleurs que tailwind.config.js côté frontend, pour rester cohérent
@@ -43,7 +43,7 @@ function emailTemplate({ preheader = '', title = '', bodyHtml, ctaText, ctaUrl }
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${title || 'Gest-Immo'}</title>
+<title>${title || 'ImmoMali'}</title>
 </head>
 <body style="margin:0; padding:0; background-color:${COLORS.sand}; font-family: Arial, Helvetica, sans-serif;">
   ${preheader ? `<div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">${preheader}</div>` : ''}
@@ -54,8 +54,8 @@ function emailTemplate({ preheader = '', title = '', bodyHtml, ctaText, ctaUrl }
           <!-- EN-TÊTE -->
           <tr>
             <td align="center" style="background-color:${COLORS.green}; padding: 28px 24px;">
-              <img src="${LOGO_SRC}" alt="Gest-Immo" width="48" height="48" style="display:block; border-radius:8px; margin: 0 auto;" />
-              <p style="margin: 12px 0 0; color:#ffffff; font-size:18px; font-weight:bold; letter-spacing:0.5px; font-family: Arial, Helvetica, sans-serif;">Gest-Immo</p>
+              <img src="${LOGO_SRC}" alt="ImmoMali" width="48" height="48" style="display:block; border-radius:8px; margin: 0 auto;" />
+              <p style="margin: 12px 0 0; color:#ffffff; font-size:18px; font-weight:bold; letter-spacing:0.5px; font-family: Arial, Helvetica, sans-serif;">ImmoMali</p>
             </td>
           </tr>
           <!-- CORPS -->
@@ -76,8 +76,8 @@ function emailTemplate({ preheader = '', title = '', bodyHtml, ctaText, ctaUrl }
           <!-- PIED DE PAGE -->
           <tr>
             <td align="center" style="background-color:${COLORS.sand}; padding: 20px 24px; color:${COLORS.muted}; font-size:12px; font-family: Arial, Helvetica, sans-serif;">
-              <p style="margin:0;">Cet email a été envoyé automatiquement par Gest-Immo. Merci de ne pas y répondre directement.</p>
-              <p style="margin:8px 0 0;">© ${new Date().getFullYear()} Gest-Immo — L'immobilier au Mali, simplifié.</p>
+              <p style="margin:0;">Cet email a été envoyé automatiquement par ImmoMali. Merci de ne pas y répondre directement.</p>
+              <p style="margin:8px 0 0;">© ${new Date().getFullYear()} ImmoMali — L'immobilier au Mali, simplifié.</p>
             </td>
           </tr>
         </table>

@@ -47,7 +47,7 @@ const transporter = nodemailer.createTransport({
 async function sendMail(objet, message, destinataire) {
 	try {
 		const info = await transporter.sendMail({
-			from: `"Gest-Immo" <${process.env.EMAIL_USER}>`,
+			from: `"ImmoMali" <${process.env.EMAIL_USER}>`,
 			to: destinataire,
 			subject: objet,
 			html: message,

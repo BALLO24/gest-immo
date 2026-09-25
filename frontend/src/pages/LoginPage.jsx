@@ -1,13 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { User, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import { Phone, Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import API from "../api/API";
 
+const INDICATIF = "+223";
+
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [nomUtilisateur, setNomUtilisateur] = useState("");
+  // AJOUT : bascule téléphone/email — avant, un seul champ texte essayait
+  // d'accepter les deux, ce qui empêchait tout habillage visuel clair
+  // (un préfixe +223 fixe aurait cassé la saisie d'un email). Deux champs
+  // distincts maintenant, un seul affiché à la fois.
+  const [mode, setMode] = useState("telephone");
+  const [telephone, setTelephone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -15,9 +23,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("rememberedUser");
-    if (savedUser) {
-      setNomUtilisateur(savedUser);
+    const savedMode = localStorage.getItem("rememberedMode");
+    const savedValue = localStorage.getItem("rememberedUser");
+    if (savedValue) {
+      if (savedMode === "email") {
+        setMode("email");
+        setEmail(savedValue);
+      } else {
+        setMode("telephone");
+        setTelephone(savedValue);
+      }
       setRemember(true);
     }
   }, []);
@@ -37,9 +52,12 @@ export default function LoginPage() {
     }
   }, [navigate]);
 
+  const chiffresTelephone = telephone.replace(/\D/g, "");
+
   function validate() {
     const e = {};
-    if (!nomUtilisateur.trim()) e.nomUtilisateur = "Nom d'utilisateur requis.";
+    if (mode === "telephone" && !chiffresTelephone) e.identifiant = "Numéro de téléphone requis.";
+    if (mode === "email" && !email.trim()) e.identifiant = "Email requis.";
     if (!password) e.password = "Mot de passe requis.";
     else if (password.length < 6) e.password = "6 caractères min.";
     setErrors(e);
@@ -51,16 +69,21 @@ export default function LoginPage() {
     if (!validate()) return;
     setLoading(true);
 
+    const nomUtilisateur = mode === "telephone" ? `${INDICATIF}${chiffresTelephone}` : email.trim();
+    const valeurAMemoriser = mode === "telephone" ? chiffresTelephone : email.trim();
+
     try {
-      const response = await API.login({ nomUtilisateur: nomUtilisateur.trim().replace(/\s+/g, ""), password });
+      const response = await API.login({ nomUtilisateur, password });
 
       if (response.success) {
         const { token } = response.data;
 
         if (remember) {
-          localStorage.setItem("rememberedUser", nomUtilisateur);
+          localStorage.setItem("rememberedUser", valeurAMemoriser);
+          localStorage.setItem("rememberedMode", mode);
         } else {
           localStorage.removeItem("rememberedUser");
+          localStorage.removeItem("rememberedMode");
         }
 
         localStorage.setItem("authToken", token);
@@ -91,19 +114,46 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="text-sm font-semibold text-gray-700 ml-0.5">Nom d'utilisateur</label>
-            <div className="relative mt-1.5">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} aria-hidden="true" />
-              <input
-                type="text"
-                value={nomUtilisateur}
-                onChange={(e) => setNomUtilisateur(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange/40 focus:border-maliOrange transition-colors"
-                placeholder="Numéro de téléphone ou email"
-                autoComplete="username"
-              />
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-semibold text-gray-700 ml-0.5">
+                {mode === "telephone" ? "Numéro de téléphone" : "Email"}
+              </label>
+              <button
+                type="button"
+                onClick={() => setMode(mode === "telephone" ? "email" : "telephone")}
+                className="text-xs font-semibold text-maliGreen hover:underline"
+              >
+                {mode === "telephone" ? "Utiliser un email" : "Utiliser un numéro"}
+              </button>
             </div>
-            {errors.nomUtilisateur && <p className="text-xs text-red-600 mt-1 ml-0.5">{errors.nomUtilisateur}</p>}
+
+            {mode === "telephone" ? (
+              <div className="relative mt-1.5 flex items-center">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 z-10" size={18} aria-hidden="true" />
+                <span className="absolute left-10 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400 pr-2 border-r border-gray-200">{INDICATIF}</span>
+                <input
+                  type="tel"
+                  value={telephone}
+                  onChange={(e) => setTelephone(e.target.value)}
+                  className="w-full pl-[4.75rem] pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange/40 focus:border-maliOrange transition-colors"
+                  placeholder="77 00 00 00"
+                  autoComplete="username"
+                />
+              </div>
+            ) : (
+              <div className="relative mt-1.5">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} aria-hidden="true" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-maliOrange/40 focus:border-maliOrange transition-colors"
+                  placeholder="contact@monagence.com"
+                  autoComplete="username"
+                />
+              </div>
+            )}
+            {errors.identifiant && <p className="text-xs text-red-600 mt-1 ml-0.5">{errors.identifiant}</p>}
           </div>
 
           <div>
